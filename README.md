@@ -1,13 +1,13 @@
 # python-doc-pdf-zh
 
 把 **CPython 官方文档** 与 **python-docs-zh-cn 中文译文** 编译成中文分册 PDF 的仓库。
-**平时不需要你做什么**：GitHub Actions 每天北京时间 12:00 自动构建，产物直接写进对应版本分支。
+**平时不需要你做什么**：GitHub Actions 每天北京时间 12:00 自动构建，产物发布到 **Releases**。
 
 | | |
 |-|-|
 | 触发器 | 每天 `cron "0 4 * * *"`（UTC）= 北京时间 **12:00**；也可手动 Run workflow |
 | 产物 | 3.13 → 37 册 / 3.14 → 38 册 / 3.15 → 39 册 PDF + 合并本 + 验收报告 |
-| 落点 | `v<完整版本>` 分支，例如 `v3.15.1`（同一小版本只保留最新一次） |
+| 落点 | **Releases**，tag = `v<完整版本>`（例如 `v3.15.2`），同版本重跑原地更新 |
 | 入口 | 一个脚本：`ci/linux/pdf_builder_linux.py` |
 | 运行环境 | `ubuntu-22.04`，TeX Live + 中文字体由 workflow 现装 |
 
@@ -32,7 +32,7 @@ GitHub Actions（03:00 UTC → 北京 12:00）
    │ 4 selftest.py  入口脚本自检（不需要联网）            │
    │ 5 构建：ci/linux/pdf_builder_linux.py --versions X  │
    │ 6 上传 artifact（保留 7 天）                        │
-   │ 7 推 v<完整版本> 分支（孤儿提交 + 强推）             │
+   │ 7 发布到 Releases（含 RAR 包；旧补丁版归档到 old）    │
    └────────────────────────────────────────────────────┘
 ```
 
@@ -86,7 +86,7 @@ python3 ci/linux/pdf_builder_linux.py --versions 3.15 --print-config
 | `on.schedule` | `0 4 * * *` | GitHub cron 一律按 **UTC**，减 8 小时才是北京 12:00 |
 | `on.workflow_dispatch` | 5 个输入 | `versions` / `jobs` / `merge` / `clean` / `push_branch` |
 | `runs-on` | `ubuntu-22.04` | 需要系统 TeX Live；Ubuntu 上 sphinx 的 `-j` 才真正生效 |
-| `permissions` | `contents: write` | 要往仓库推 `v*` 分支 |
+| `permissions` | `contents: write` | 要建 Release、上传附件、维护 `old` 分支 |
 | `concurrency` | `build-pdf-linux-<ref>` | 上一轮没跑完时排队，不并行堆叠 |
 | `timeout-minutes` | 360 | 三个 job 各自计时 |
 
@@ -94,27 +94,38 @@ python3 ci/linux/pdf_builder_linux.py --versions 3.15 --print-config
 `Actions → 构建 Python 中文文档 PDF（Linux）→ Run workflow → versions 填 3.15 → Run`
 
 > 定时触发下 `github.event.inputs.*` 全是空串，所以 workflow 里所有输入都写了兜底
-> （`|| '4'`、`|| 'none'`、`!= 'false'`）。这不是洁癖：漏一处就会「每天跑完但不推分支」。
+> （`|| '4'`、`|| 'none'`、`!= 'false'`）。这不是洁癖：漏一处就会「每天跑完但不发布」。
 
 ---
 
-## 四、产物：分支模型
+## 四、产物：Releases 模型
 
 ```
-main       ← 只有代码（2 MB 左右）
-v3.13.18   ← 3.13.18 的成品
-v3.14.10
-v3.15.1
+Releases
+├── v3.15.2    39 册 + 合并册 + 验收报告 + RAR   ← 同版本重跑原地更新
+├── v3.14.10   38 册 + …
+└── v3.13.18   37 册 + …
+old 分支        ← 被新补丁版顶下来的旧版本，按 tag 建目录存档
 ```
 
 | 情况 | 结果 |
 |-|-|
-| 3.15.1 连跑两天 | `v3.15.1` 里只剩最新那天的产物，旧的自动消失 |
-| 3.15.1 与 3.15.2 都跑过 | 各占一个分支，都保留 |
-| 跑一年 | 仓库体积 ≈ 版本数 × 85 MB，**不随天数增长** |
+| 3.15.2 连跑两天 | `v3.15.2` 这个 release **原地更新**（附件 `--clobber` 覆盖），不会多出来一个 |
+| 3.15.2 → 3.15.3 | 先把 `v3.15.2` 的全部附件搬进 `old` 分支，**推成功之后**才删它的 release ⇒ 每条线永远只有一个 release |
+| 跑一年 | Releases 数量 = 版本线条数（3 个），体积不随天数增长 |
 
-实现方式是「临时目录 + 孤儿提交 + `git push --force`」，所以每个分支永远只有一个提交。
-点进分支 → `Code → Download ZIP`，或用 GitHub Desktop / `git clone -b v3.15.1` 拉下来。
+几个要点：
+
+- **tag 不带日期**：`v<完整版本>`（如 `v3.15.2`）。日期写在 release 标题
+  「Python 3.15.2 文档（20261102）」、正文和 RAR 文件名里 —— 这样既"带日期"，
+  又不会一天一个 release。
+- **附件**：39 个分册 PDF + 合并册 + `验收报告.md` + `Python 3.15.2 文档 20261102.rar`。
+- 每次发布后会自动清掉本轮没有的附件（例如昨天那个带日期的 `.rar`），
+  保证"release 里的东西 == 这一次的产物"。
+- **下载**：进 Releases → 选版本 → 要单册就点文件名；要一次全拿走就下 RAR。
+- **`old` 分支只存历史**：`old/v3.15.2/...`。它不会自动瘦身，嫌大可以手动删目录。
+- RAR 由 Ubuntu multiverse 里的 `rar`（RARLAB 免费 CLI）生成，压缩包注释里会有一行
+  `evaluation copy`，不影响解压；装不上时那一轮只发 PDF，不会挡住发布。
 
 ---
 
@@ -126,7 +137,7 @@ cd python-doc-pdf-zh
 # main 已在，什么都不用改；要改构建参数就编辑 workflow 的 defaults 或手动触发的输入
 ```
 
-想加/减版本，改两处即可：workflow 的 `versions` 默认值，以及是否要新增分支。
+想加/减版本，改一处即可：workflow 里 `versions` 的默认值（Releases 会按版本自动多一个）。
 
 如果所在网络打不开 `github.com`（常见：`api.github.com` 通、主站不通），
 推送与授权都会失败，走 SSH 443 通道，步骤见 [`ci/linux/README.md`](ci/linux/README.md) 第 7 节。
@@ -139,10 +150,10 @@ cd python-doc-pdf-zh
 <summary><b>某个版本红了，另外两个还绿，正常吗？</b></summary>
 
 正常，这是刻意的（`fail-fast: false`）。每个版本独立 job，一个失败不影响别人，
-失败的产物不会推分支 —— 所以「有没有新分支」就是最干净的判据：
+失败的产物不会发布 —— 所以「有没有对应 Release」就是最干净的判据：
 
 ```bash
-git ls-remote --heads origin      # 出现 refs/heads/v3.15.1 = 成功
+gh release list                   # 看到 v3.15.2 = 成功
 ```
 </details>
 
@@ -158,7 +169,7 @@ workflow 里有一段「失败诊断」（`if: failure()`），会把 `pip.log`�
 </details>
 
 <details>
-<summary><b>产物分支里的 PDF 是半成品 / 没有索引</b></summary>
+<summary><b>Release 里的 PDF 是半成品 / 没有索引</b></summary>
 
 看验收报告里的「每步耗时」：如果步骤 7 用时异常短，多半是 `makeindex` 没跑成。
 另外「构建全绿」不等于「内容齐全」，可以用项目的检查工具复核：
