@@ -499,8 +499,8 @@ jobs:
           # ---------- 1) 打 RAR ----------
           shopt -s nullglob
           ASSETS=( "$ROOT"/*.pdf )
+          NPDF=${#ASSETS[@]}                              # 只数 PDF（分册 + 合并册）
           [ -f "$ROOT/验收报告.md" ] && ASSETS+=( "$ROOT/验收报告.md" )
-          NPDF=${#ASSETS[@]}
           if [ "$NPDF" -eq 0 ]; then echo "没有产出 PDF，不发布"; exit 1; fi
           if command -v rar >/dev/null 2>&1; then
             # 在构建根里按**纯文件名**打包（${arr##*/}），避免把绝对路径写进压缩包
@@ -578,10 +578,10 @@ jobs:
             if [ -f "$ROOT/验收报告.md" ]; then
               sed -n 's/^- /- /p' "$ROOT/验收报告.md" | sed -n '2,8p'
             fi
-            echo "- 分册 PDF：**$NPDF** 个（另含合并册与逐册明细）"
+            echo "- 分册 PDF：**$NPDF** 个 + 合并册 1 个"
             if [ -f "$RAR" ]; then echo "- 一键下载：**$(basename "$RAR")**（全部 PDF + 验收报告）"; fi
             echo
-            echo "> 同一版本重跑会**原地更新**本 release（旧附件自动替换），不会一天一个。"
+            echo "> 同一版本重跑会**原地更新**本 release（同名附件自动替换），不会一天一个。"
             echo "> 补丁版本升级时，旧版本会整体归档到 [\`old\`](../../tree/old) 分支再删除其 release。"
           } > "$NOTES"
 
@@ -589,23 +589,51 @@ jobs:
           if gh release view "$TAG" >/dev/null 2>&1; then
             echo "release $TAG 已存在 → 原地更新"
             gh release edit "$TAG" --title "$TITLE" --notes-file "$NOTES"
-            gh release upload "$TAG" "${ASSETS[@]}" --clobber
           else
-            gh release create "$TAG" --title "$TITLE" --notes-file "$NOTES" "${ASSETS[@]}"
+            echo "release $TAG 不存在 → 新建"
+            gh release create "$TAG" --title "$TITLE" --notes-file "$NOTES"
           fi
 
-          # ---------- 5) 清掉本轮没有的旧附件（例如昨天那个带日期的 .rar）----------
-          KEEP="$(printf '%s\n' "${ASSETS[@]}" | while IFS= read -r f; do basename "$f"; done)"
+          # 上传（--clobber：同名附件直接覆盖，这就是「原地更新」）
+          gh release upload "$TAG" --clobber "${ASSETS[@]}"
+
+          # ---------- 5) 只清「本轮没有的 .rar」----------
+          # ★ 2026-11-02 的坑（第一版把 41 个附件全删光了）：原来写的是「凡是不在
+          #   本轮名单里的附件全删」，判据是 `basename` 与 `gh release view --json
+          #   assets` 里的名字**逐字相等**。实测这俩对不上（GitHub 会把附件名里的
+          #   空格等字符换成点），于是 grep 一个都没匹配上 → 41 个附件全被删掉，
+          #   而步骤本身还报成功（删也是成功）。
+          #   现在只处理**命名规则确定会变**的那一个：带日期的 .rar。其余一律不动，
+          #   同名的由 --clobber 覆盖，不同名的不影响使用。
+          CUR_RAR="$(basename "$RAR")"
           while IFS= read -r a; do
             [ -n "$a" ] || continue
-            if ! grep -qxF -- "$a" <<<"$KEEP"; then
-              gh release delete-asset "$TAG" "$a" --yes && echo "  清掉过期附件：$a"
-            fi
+            case "$a" in
+              *.rar)
+                if [ "$a" != "$CUR_RAR" ]; then
+                  gh release delete-asset "$TAG" "$a" --yes && echo "  清掉旧压缩包：$a"
+                fi
+                ;;
+            esac
           done < <(gh release view "$TAG" --json assets --jq '.assets[].name')
 
+          # ---------- 6) 核对附件数（写进正文，不登录也能核对）----------
+          ACT="$(gh release view "$TAG" --json assets --jq '.assets|length')"
+          echo "本次附件：$ACT 个（期望 ${#ASSETS[@]} 个）"
+          { cat "$NOTES"
+            echo
+            echo "- 附件数：**$ACT** 个"
+            echo
+            echo "<!-- 调试：$(gh release view "$TAG" --json assets --jq '[.assets[].name][0:2] | join(" | ")') -->"
+          } > "$NOTES.final"
+          gh release edit "$TAG" --notes-file "$NOTES.final"
+          if [ "$ACT" -lt 2 ]; then
+            echo "::error::发布后附件只有 $ACT 个（期望 ${#ASSETS[@]} 个），上传失败了"
+            gh release view "$TAG" --json assets --jq '.assets[].name' | head -5 || true
+            exit 1
+          fi
+
           echo "✔ https://github.com/${GITHUB_REPOSITORY}/releases/tag/$TAG"
-          gh release view "$TAG" --json name,tagName,assets \
-            --jq '"  附件 " + ( .assets | length | tostring ) + " 个：" + ( [ .assets[].name ] | join(" / ") )'
 
       - name: 汇总
         if: always()
