@@ -175,3 +175,38 @@ git push -u origin main
 2. **`--root` 只能配单版本**：多版本必须各占一个目录，否则互相覆盖（已拦）。
 3. **`python` 别名只影响本程序的子进程**（`<根>/.pyshim/`），不动系统。
 4. 判据仍只看 ASCII 标记（`MISSING n` / `UNPRODUCED n` / `OK`），别匹配中文。
+
+## 7. `github.com` 打不开时怎么推代码
+
+2026-11-02 在用户机器上实测（国内网络）：
+
+| 端点 | 结果 |
+|-|-|
+| `https://github.com` | **TCP 443 全不通**（140.82.112.3 / .113.3 / .114.3 / 20.200.245.247 / 4.237.22.38 全超时） |
+| `https://github.com/login/oauth/*` | 不通 → **WorkBuddy 的 GitHub 连接器必然授权失败**（跟账号设置无关） |
+| `https://api.github.com` | 200，0.6 s ✔ |
+| `https://codeload.github.com` | 301，1.0 s ✔ |
+| `ssh.github.com:443` | SSH 握手成功 ✔ |
+
+所以有一条**完全绕开 github.com 主站**的备用通道：
+
+```powershell
+# 1) 生成 SSH key（私钥留本机，不发给任何人）
+ssh-keygen -t ed25519 -C "pdfbuild" -f $HOME/.ssh/id_ed25519 -N '""'
+
+# 2) 在能上 github.com 的网络（手机热点即可）建一个 PAT：
+#    Fine-grained → Contents: Read and write，Workflows: Read and write
+#    （少了 Workflows 推不进 .github/workflows/）
+
+# 3) 一条命令：建仓库 + 传公钥（都走 api.github.com）
+#    + 写 ~/.ssh/config（github.com → ssh.github.com:443）+ push
+$env:GH_TOKEN = "github_pat_xxx"
+.\ci\linux\setup-github.ps1 -UploadKey -DryRun   # 先看计划，不动任何东西
+.\ci\linux\setup-github.ps1 -UploadKey           # 真跑
+```
+
+`setup-github.ps1` 的约束：token **只从 `$env:GH_TOKEN` 读、只在内存里用**，
+不写进 `.git/config`、不落盘；仓库已存在则跳过创建；公钥已注册则跳过上传；
+`~/.ssh/config` 用 `# >>> pdfbuild` 标记包裹，重复跑不会叠加；
+`-DryRun` 连 token 都不需要，只打印计划和连通性自查。
+
