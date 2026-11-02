@@ -41,8 +41,16 @@ def check(name: str, fn) -> None:
             traceback.print_exc()
 
 
-def make_pipe(root: Path, ver: str = "3.13"):
-    """造一个最小可用的 Pipeline（不联网、不建 venv）。"""
+def make_pipe(root: Path, ver: str | None = None):
+    """造一个最小可用的 Pipeline（不联网、不建 venv）。
+
+    ★ 版本号必须取**当前解释器**的，不能写死：这套自检会跑在
+      「3.13 / 3.14 / 3.15 三个各自独立的 job」里，写死 3.13 的话
+      3.15 的 job 上 `find_interpreter("3.13")` 会正确地退回 sys.executable(3.15)，
+      于是断言必挂 —— 2026-11-02 的第一次 CI 就是这么红的（54 秒、构建根都没建）。
+    """
+    if ver is None:
+        ver = f"{sys.version_info[0]}.{sys.version_info[1]}"
     cfg = L.M.Config()
     cfg.version = ver
     cfg.versions = [ver]
@@ -84,14 +92,15 @@ def main() -> int:
 
     # 2) 解释器探测：拿到的必须真是那个 major.minor
     def interp():
-        py = L.find_interpreter("3.13")
+        want = f"{sys.version_info[0]}.{sys.version_info[1]}"
+        py = L.find_interpreter(want)
         got = L.interpreter_version(py)
         if not got:
-            raise AssertionError(f"3.13 解释器不可用：{py}")
-        if L._ver_tuple(got) != (3, 13):
-            raise AssertionError(f"拿到 {got}（{py}），不是 3.13.x")
+            raise AssertionError(f"{want} 解释器不可用：{py}")
+        if L._ver_tuple(got) != L._ver_tuple(want):
+            raise AssertionError(f"拿到 {got}（{py}），不是 {want}.x")
         return f"{py} → {got}"
-    check("解释器探测 3.13", interp)
+    check("解释器探测（跟随当前解释器）", interp)
 
     def interp_fallback():
         py = L.find_interpreter("9.9")
