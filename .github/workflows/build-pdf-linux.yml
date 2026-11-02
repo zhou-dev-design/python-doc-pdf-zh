@@ -54,9 +54,10 @@ jobs:
       - id: m
         name: 解析版本列表 → matrix
         env:
-          # push（= 改流水线自我验证）时只跑 3.15 一版，省时间；
+          # 3.15 已经在 v3.15.2 分支上全绿（2026-11-02），这一轮换成三版全跑，
+          # 把 3.13 / 3.14 也验一遍（它们各有版本差异：3.13 少 0925/0929 两册）。
           # 定时/手动触发照旧走 event.inputs（为空则下面兜底成三版）。
-          VERSIONS: ${{ github.event_name == 'push' && '3.15' || github.event.inputs.versions }}
+          VERSIONS: ${{ github.event_name == 'push' && '3.13,3.14,3.15' || github.event.inputs.versions }}
         run: |
           python3 - <<'PY'
           import json, os
