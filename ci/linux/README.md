@@ -114,17 +114,16 @@ sudo apt-get install -y \
 
 `.github/workflows/build-pdf-linux.yml`（仓库里**唯一**的流水线）：
 
-- 手动触发，`versions` 拆成 matrix，每个版本一个 job（Ubuntu 上 4 核/job）；
+- **每天 UTC 19:00（北京次日 03:00）自动跑**，也可在 Actions 页面手动触发；
+- `versions` 拆成 matrix，每个版本一个 job（Ubuntu 上 4 核/job）；
 - 每步：装依赖 → `--preflight` → `selftest.py` → 构建 → 上传 artifact → 推 `v<完整版本>` 分支；
 - 分支仍是「孤儿提交 + 强推」，只留最新日期；不同补丁版各占一个分支。
-
-⚠️ 定时触发默认是注释掉的（先手动验一轮再开）。打开时把下面的 `#` 去掉即可：
 
 ```yaml
 on:
   schedule:
     - cron: "0 19 * * *"        # UTC 19:00 = 北京时间次日 03:00
-  workflow_dispatch:
+  workflow_dispatch:            # 手动触发（可改 versions / jobs / merge / clean）
 ```
 
 托管 runner 装 TeX Live 约 3~5 分钟，整轮单版本大约 25~35 分钟；
@@ -162,9 +161,12 @@ git push -u origin main
 
 成功的标志：Branches 里出现 `v3.15.2`，点进去只有一个提交、根目录就是 39 册 PDF + 验收报告。
 
-⚠️ **私有仓库的分钟数**：2000 分钟/月，Ubuntu 按 1 倍计。单版本约 30 分钟 ×
-3 版本 × 每天 = 2700 分钟/月，会超。三个选择：改公开仓库（免费不限）、
-改成每周跑、或上自托管 runner（不耗分钟数）。
+✅ **本仓库是公开仓库** ⇒ Actions 分钟数不限（公开仓库免费、无额度上限），
+每天三个版本也随便跑。
+
+（若哪天改成私有：额度 2000 分钟/月、Ubuntu 按 1 倍计，而单版本约 30 分钟 ×
+3 版本 × 每天 = 2700 分钟/月，会超。那时三个选择：改回公开、改成每周跑、
+或上自托管 runner。）
 
 
 ## 6. 已知限制
