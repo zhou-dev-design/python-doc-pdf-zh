@@ -1,0 +1,12 @@
+# 让这几类文件**永远以 LF 存进仓库**（Windows 上 checkout 时也不转成 CRLF）。
+#
+# 为什么只列这几个路径、不写 `* text=auto`：
+#   `*` 会让整个仓库的换行策略一起变，历史文件可能被"重新规范化"，
+#   产生一堆与内容无关的 diff。这里只保证**要在 Linux / GitHub Actions 里
+#   被 bash 执行的文件**是 LF —— CRLF 的 shell 脚本会报 `$'\r': command not found`。
+#
+#   `core.autocrlf=true` 的机器上提交时本来就会转成 LF，但别人 clone 时如果
+#   没开 autocrlf，就会原样拿到 CRLF。所以显式钉死更稳。
+
+.github/workflows/build-pdf-linux.yml text eol=lf
+ci/linux/** text eol=lf
