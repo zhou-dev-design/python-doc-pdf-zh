@@ -77,12 +77,17 @@ jobs:
 
       - name: 装系统依赖（TeX Live + 中文字体 + poppler + cairo）
         run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq --no-install-recommends \
-            git curl ca-certificates \
-            latexmk texlive-xetex texlive-latex-extra texlive-binaries \
-            texlive-lang-chinese fonts-noto-cjk \
-            poppler-utils libcairo2
+          set -x
+          sudo apt-get update || { echo "apt-get update 失败，5 秒后重试"; sleep 5; sudo apt-get update; }
+          PKGS="git curl ca-certificates latexmk texlive-xetex texlive-latex-extra texlive-binaries texlive-lang-chinese fonts-noto-cjk poppler-utils libcairo2"
+          if ! sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends $PKGS; then
+            # 一次性装失败时逐包重试：这样日志里能直接看出是哪个包的问题
+            echo "::error::批量安装失败，改为逐包定位"
+            for p in $PKGS; do
+              sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends "$p" \
+                || echo "::warning::包 $p 装不上"
+            done
+          fi
           echo "--- 关键工具 ---"
           for t in latexmk xelatex makeindex pdfinfo pdffonts git; do
             printf '%-10s %s\n' "$t" "$(command -v $t || echo MISSING)"
@@ -128,6 +133,26 @@ jobs:
           echo "root=$ROOT" >> "$GITHUB_OUTPUT"
           echo "=== 产物（$ROOT）==="
           ls -la "$ROOT" | head -20
+
+      - name: 失败诊断（把关键日志打出来，省得点进每一步翻）
+        if: failure()
+        run: |
+          echo "=== 环境 ==="
+          python -V || true
+          uname -a || true
+          echo "=== 构建根 ==="
+          ls -la "$RUNNER_TEMP/build" 2>/dev/null || echo "(构建根不存在：说明步骤 1 之前就失败了)"
+          echo "=== 关键日志（各末 60 行）==="
+          for f in "$RUNNER_TEMP"/build/*/pip.log \
+                   "$RUNNER_TEMP"/build/*/clone.log \
+                   "$RUNNER_TEMP"/build/*/latex-build.log \
+                   "$RUNNER_TEMP"/build/*/gui-build.log; do
+            [ -f "$f" ] || continue
+            echo "----- $f -----"
+            tail -60 "$f"
+          done
+          echo "=== 目录（2 层）==="
+          find "$RUNNER_TEMP/build" -maxdepth 2 -type d 2>/dev/null | head -40 || true
 
       - name: 上传产物（artifact，保留 7 天）
         if: always()
