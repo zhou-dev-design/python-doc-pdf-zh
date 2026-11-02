@@ -173,6 +173,37 @@ def main() -> int:
         return "--only 7 → 行 8；--from 6 → 行 6 起"
     check("步骤号解析（复用主程序）", steps_ok)
 
+    # 5) 取源策略：github = 单一直连、绝不落到镜像站
+    def source_direct():
+        cfg = L.DirectSourceConfig()
+        cfg.gh = "https://github.com"
+        for repo in ("python/cpython", "python/python-docs-zh-cn"):
+            urls = cfg.git_urls(repo, "")
+            if len(urls) != 1:
+                raise AssertionError(f"{repo} 给了 {len(urls)} 个候选：{urls}")
+            if not urls[0][1].startswith("https://github.com/"):
+                raise AssertionError(f"{repo} 没走直连：{urls[0]}")
+        return cfg.git_urls("python/cpython", "")[0][1]
+    check("取源只走 github 直连（无镜像）", source_direct)
+
+    def source_auto():
+        cfg = L.M.Config()
+        cfg.gh = ""
+        urls = cfg.git_urls("python/cpython", "")
+        if len(urls) < 2:
+            raise AssertionError(f"--source auto 应有镜像回退，实际 {len(urls)} 个")
+        return f"auto 模式 {len(urls)} 个候选（含镜像）"
+    check("--source auto 仍保留镜像回退", source_auto)
+
+    def source_explicit():
+        cfg = L.DirectSourceConfig()
+        cfg.gh = "https://github.com"
+        got = cfg.git_urls("python/cpython", "https://example.com/x.git")[0][1]
+        if got != "https://example.com/x.git":
+            raise AssertionError(f"显式地址被忽略：{got}")
+        return "显式地址优先"
+    check("显式仓库地址优先", source_explicit)
+
     # 5) 配置派生：多版本时每个版本必须各自一个根
     def cfg_ok():
         cfg = pipe.cfg

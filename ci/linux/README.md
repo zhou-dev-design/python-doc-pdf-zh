@@ -89,9 +89,29 @@ python3 ci/linux/pdf_builder_linux.py --versions 3.15 --print-config
 |-|-|
 | `--jobs` | **同时**是步骤 6 的 sphinx `-j` 与步骤 7 的册级并发数（主程序就一个 `jobs` 字段） |
 | `--python-map 3.13=/path` | 指定某版本用哪个解释器；不指定就找 `python3.13`。**完整版本号（3.13.18）取自解释器**，找不到会退成 `3.13.0` |
-| `--gh` | 留空 = 内置 7 个镜像自动回退（国内）；CI 建议填 `https://github.com` 直连，省掉 6 次超时 |
+| `--source` | `github`（默认）= **只从 github.com 直连**抓源码与译文，绝不落到镜像站；`auto` = 主程序那套 7 个镜像自动回退（国内本地直连不通时才用） |
+| `--gh` | 只在 `--source auto` 下有意义；`github` 模式下固定走 `https://github.com` |
+| `--pip-index` | 默认 `https://pypi.org/simple`（不用国内镜像）；本地如需加速可传清华源 |
 | `--only` / `--from` | 复用主程序的步骤号解析（`--only 7` = 编译 PDF = 行 8） |
 | `--clean` | 步骤 10 的清理范围，默认 `none`（留着日志，验收报告的「每步耗时」才有数据） |
+
+### 3.1 取源：一律直连 GitHub，不用镜像站
+
+这套流程跑在 GitHub 自己的 runner 上，到 `github.com` 走机房内网——比任何第三方
+加速镜像都快，而且**内容最可信**（镜像可能滞后、极端情况下可能被篡改）。
+
+所以 `--source github`（默认）会把主程序的 `GH_MIRRORS` 整张表**绕过**，
+`git_urls()` 只返回一条 `https://github.com/...`：
+
+| | `--source github`（CI 默认） | `--source auto`（国内本地） |
+|-|-|-|
+| 克隆 CPython / 译文 | 直连，一次成功 | 7 个镜像按序回退，每次失败等 300 s 看门狗 |
+| pip | `https://pypi.org/simple` | 默认清华源 |
+| 适用 | GitHub Actions / 境外机器 | 国内工作站（直连 github.com 不通时） |
+
+实测依据：2026-11-02 在用户机器上 `github.com:443` 全 IP 超时，而 GitHub runner
+是内网直连——所以「CI 里配镜像」纯属给自己加超时。
+
 
 ## 4. 系统依赖（Ubuntu / Debian）
 
@@ -114,7 +134,7 @@ sudo apt-get install -y \
 
 `.github/workflows/build-pdf-linux.yml`（仓库里**唯一**的流水线）：
 
-- **每天 UTC 19:00（北京次日 03:00）自动跑**，也可在 Actions 页面手动触发；
+- **每天 UTC 04:00（北京时间 12:00）自动跑**，也可在 Actions 页面手动触发；
 - `versions` 拆成 matrix，每个版本一个 job（Ubuntu 上 4 核/job）；
 - 每步：装依赖 → `--preflight` → `selftest.py` → 构建 → 上传 artifact → 推 `v<完整版本>` 分支；
 - 分支仍是「孤儿提交 + 强推」，只留最新日期；不同补丁版各占一个分支。
@@ -122,7 +142,7 @@ sudo apt-get install -y \
 ```yaml
 on:
   schedule:
-    - cron: "0 19 * * *"        # UTC 19:00 = 北京时间次日 03:00
+    - cron: "0 4 * * *"         # UTC 04:00 = 北京时间 12:00（UTC+8）
   workflow_dispatch:            # 手动触发（可改 versions / jobs / merge / clean）
 ```
 

@@ -4,7 +4,7 @@ name: 构建 Python 中文文档 PDF（Linux）
 #   仓库是公开的 ⇒ Actions 分钟数不限，每天跑三个版本也没有额度问题。
 on:
   schedule:
-    - cron: "0 19 * * *"        # UTC 19:00 = 北京时间次日 03:00
+    - cron: "0 4 * * *"         # UTC 04:00 = 北京时间 12:00（UTC+8）
   workflow_dispatch:
     inputs:
       versions:
@@ -119,8 +119,8 @@ jobs:
             --base "$BASE" \
             --jobs "${{ github.event.inputs.jobs || '4' }}" \
             --clean "${{ github.event.inputs.clean || 'none' }}" \
+            --source github \
             --pip-index "https://pypi.org/simple" \
-            --gh "https://github.com" \
             --python-map "${{ matrix.version }}=$PY" \
             $MERGE_FLAG
           # ★ 用 find 而不是 ls：构建根名字里有空格和中文，ls 在 set -e 下会误杀
