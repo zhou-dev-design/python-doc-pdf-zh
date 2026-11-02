@@ -270,9 +270,15 @@ jobs:
           echo
           echo "=== ① .tex 体积：最小 3 册 / 最大 3 册 ==="
           echo "   （判据：1 页的册子如果 .tex 只有几 KB，说明步骤 6 只写了壳，不是编译问题）"
-          ls -S "$LATEX"/*.tex 2>/dev/null | tail -3 | xargs -r wc -c
-          ls -S "$LATEX"/*.tex 2>/dev/null | head -3 | xargs -r wc -c
+          # ★ 路径里有空格（Python 3.15.2 PDF 文档 …），不能用 `ls | xargs wc -c`
+          #   —— 会被拆成 4 个不存在的文件名（第一版就踩了）。改成 while read。
+          { ls -S "$LATEX"/*.tex 2>/dev/null | tail -3
+            ls -S "$LATEX"/*.tex 2>/dev/null | head -3; } \
+            | while IFS= read -r f; do wc -c "$f"; done
           echo "   .tex 总数: $(ls "$LATEX"/*.tex 2>/dev/null | wc -l)"
+          echo "=== ①b 索引修复脚本（2026-11-02 的真根因就在这一行）==="
+          head -8 "$LATEX/makeindex-fix.py" 2>/dev/null
+          grep -n "CREATE_NO_WINDOW" "$LATEX/makeindex-fix.py" 2>/dev/null | head -4
 
           echo
           echo "=== ② 每册 .log 行数 / '!' 行数 / PDF 页数（按 ! 行数降序）==="

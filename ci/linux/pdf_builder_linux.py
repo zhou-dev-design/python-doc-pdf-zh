@@ -295,6 +295,71 @@ class LinuxPipeline(M.Pipeline):
 
 
 # ---------------------------------------------------------------------------
+# 三·五、POSIX 修补：makeindex-fix.py 里写死的 Windows 专属参数
+# ---------------------------------------------------------------------------
+# ★★ 2026-11-02 查到的真根因（CI 上「每册都失败」的真凶，查了一整天才挖出来）★★
+#
+#   现象（第 7 步）：每册 `latexmk 退出码 12`、PDF 里没有索引、`.ind` 一个都没有，
+#   而 `<册>.log` 里**一条 LaTeX 错误都没有** —— 典型的「静默失败」，判据全绿。
+#
+#   真话在 latexmk 的转录里（`python` 跑 makeindex-fix.py 时崩了）：
+#       Run number 1 of rule 'makeindex <册>.idx'
+#       Running 'python makeindex-fix.py -s python.ist -o "<册>.ind" "<册>.idx"'
+#       Traceback (most recent call last):
+#         File ".../makeindex-fix.py", line 550, in fidx_main
+#           rc = subprocess.run(cmd, creationflags=CREATE_NO_WINDOW).returncode
+#       ValueError: creationflags is only supported on Windows platforms
+#       Collected error summary:
+#         makeindex <册>.idx: Command for 'makeindex <册>.idx' gave return code 256
+#       Latexmk: Errors, so I did not complete making targets
+#
+#   因果链：主程序 `_emit_makeindex_fix()` 释放的自包含脚本，文件头写死了
+#       CREATE_NO_WINDOW = 0x08000000
+#   → fix-index 段里 `subprocess.run(cmd, creationflags=CREATE_NO_WINDOW)` 在 POSIX
+#     上直接抛 ValueError → python 退出码 1（latexmk 记成 256）→ latexmk 在
+#     「第 2 遍之前的 makeindex 规则」上中止 → **只留下第 1 遍的 PDF**：
+#     目录空白、满屏 ??、没有索引，但页面内容和 `.log` 看着都正常。
+#   ⇒ 所以之前「没有 TeX 错误」的结论不是漏看，而是**根本没出错**：xelatex 单独跑
+#     退出码是 0、PDF 页数也对（howto-argparse 13 页）。坏的是索引这一步。
+#
+#   ⚠️ 主程序里同名常量的定义本身是对的：
+#        CREATE_NO_WINDOW = getattr(subprocess, "CREATE_NO_WINDOW", 0) if IS_WIN else 0
+#      只是**释放出去那份脚本**把值写死了。项目约定不改 pdf_builder_multi.py，
+#      所以在这里把它换成本平台的正确值（Windows 上行为一字不变，根本不会走到这里）。
+#      上游若把那一行改成 f"CREATE_NO_WINDOW = {CREATE_NO_WINDOW}"，本函数自动失效。
+def _patch_emitted_makeindex_fix(dest) -> None:
+    """把释放出来的 makeindex-fix.py 里那行 Windows 常量改成本平台的值。"""
+    try:
+        txt = dest.read_text(encoding="utf-8")
+    except OSError:
+        return
+    marker = "CREATE_NO_WINDOW = 0x08000000"
+    if marker not in txt:
+        return          # 已经是平台相关写法（上游改过了）→ 什么都不做，保持幂等
+    out = []
+    for ln in txt.splitlines(keepends=True):
+        if ln.startswith(marker):
+            ln = ("CREATE_NO_WINDOW = 0                  "
+                  "# POSIX：该参数只对 Windows 有意义\n")
+        out.append(ln)
+    dest.write_text("".join(out), encoding="utf-8")
+    say("[fix] makeindex-fix.py：CREATE_NO_WINDOW 0x08000000 → 0"
+        "（Windows 专属参数，POSIX 上传给 subprocess 会抛 ValueError）")
+
+
+if IS_POSIX:
+    _orig_emit_makeindex_fix = M._emit_makeindex_fix
+
+    def _emit_makeindex_fix_posix(dest) -> None:
+        # step7 里是 `_emit_makeindex_fix(...)` 的**模块全局**调用，所以这里换掉
+        # 模块属性即可生效，不用碰主程序一行代码。
+        _orig_emit_makeindex_fix(dest)
+        _patch_emitted_makeindex_fix(dest)
+
+    M._emit_makeindex_fix = _emit_makeindex_fix_posix
+
+
+# ---------------------------------------------------------------------------
 # 四、配置：把 Windows 默认值换成本机真实路径
 # ---------------------------------------------------------------------------
 class DirectSourceConfig(M.Config):
