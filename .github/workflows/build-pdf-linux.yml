@@ -75,25 +75,51 @@ jobs:
         with:
           fetch-depth: 1
 
+      - name: 恢复 apt 缓存（省掉每轮约 250 MB 下载）
+        # ★ 为什么需要：runner 每次都是全新机器，TeX Live + 字体约 250 MB / 41 个包，
+        #   实测有一轮光下载就花了 9 分钟（fonts-noto-cjk 单个 61 MB，带宽只有几百 KB/s）。
+        #   把 .deb 缓存起来，命中后 apt 直接从本地装，不用再下。
+        #   key 里带 workflow 的哈希：改了包列表就自动换一份缓存。
+        uses: actions/cache@v4
+        with:
+          path: ~/apt-cache
+          key: apt-${{ runner.os }}-${{ hashFiles('.github/workflows/build-pdf-linux.yml') }}
+          restore-keys: |
+            apt-${{ runner.os }}-
+
       - name: 装系统依赖（TeX Live + 字体 + poppler + cairo）
         run: |
           set -x
-          sudo apt-get update || { echo "apt-get update 失败，5 秒后重试"; sleep 5; sudo apt-get update; }
-          # ★ 字体是必须的，别省：
-          #   python-docs-theme 的 LaTeX 部分直接写死 FreeSerif / FreeSans / FreeMono
-          #   （GNU FreeFont），Sphinx 默认还要 Latin Modern。Ubuntu 镜像里这些都**没有**，
-          #   于是 xelatex 拿不到字体 → nullfont → 每册 1.8 秒退出（latexmk 返回 12），
-          #   只剩一页占位 PDF、索引也一个都生成不了（.ind=0）。
-          #   2026-11-02 首次 CI 就是这么红的。
+          # 1) 把上次缓存的 .deb 放回 apt 的归档目录（命中时 apt 会直接跳过下载）
+          mkdir -p "$HOME/apt-cache"
+          sudo mkdir -p /var/cache/apt/archives/partial
+          if ls "$HOME"/apt-cache/*.deb >/dev/null 2>&1; then
+            n=$(ls "$HOME"/apt-cache/*.deb | wc -l)
+            echo "命中 apt 缓存：$n 个 .deb"
+            sudo cp -n "$HOME"/apt-cache/*.deb /var/cache/apt/archives/ || true
+          else
+            echo "首次运行，没有 apt 缓存（这一轮会比较慢，下一轮起就快了）"
+          fi
+          # 2) 抓索引（带重试）
+          sudo apt-get update -o Acquire::Retries=3 \
+            || { echo "apt-get update 失败，5 秒后重试"; sleep 5; sudo apt-get update -o Acquire::Retries=3; }
+          # 字体包：项目自己的日志检查里出现过 `... in font [FreeSansBold.otf]` 的字形告警，
+          # 说明文档链上会用到 FreeSerif/FreeSans/FreeMono 这几族；Ubuntu 镜像默认不装，先备着。
+          # ⚠️ 但 2026-11-02 实测：装上这些字体之后，xelatex 的 nullfont 警告**依旧出现**，
+          #   所以「缺字体」不是那次失败的根因（真正原因见 canary 步骤的结论）。
           PKGS="git curl ca-certificates latexmk texlive-xetex texlive-latex-extra texlive-binaries texlive-fonts-recommended texlive-lang-chinese lmodern fonts-freefont-otf fonts-dejavu fonts-liberation fonts-texgyre fonts-noto-cjk poppler-utils libcairo2"
-          if ! sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends $PKGS; then
+          APTOPTS="-o Acquire::Retries=3 -o Acquire::http::Pipeline-Depth=10"
+          if ! sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends $APTOPTS $PKGS; then
             # 一次性装失败时逐包重试：这样日志里能直接看出是哪个包的问题
             echo "::error::批量安装失败，改为逐包定位"
             for p in $PKGS; do
-              sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends "$p" \
+              sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends $APTOPTS "$p" \
                 || echo "::warning::包 $p 装不上"
             done
           fi
+          # 3) 把这一轮下到的 .deb 存进缓存目录，下一轮直接用
+          sudo cp -n /var/cache/apt/archives/*.deb "$HOME/apt-cache/" 2>/dev/null || true
+          echo "本次缓存的 .deb：$(ls "$HOME"/apt-cache/*.deb 2>/dev/null | wc -l) 个，共 $(du -sh "$HOME/apt-cache" 2>/dev/null | cut -f1)"
           echo "--- 关键工具 ---"
           for t in latexmk xelatex makeindex pdfinfo pdffonts git fc-list; do
             printf '%-10s %s\n' "$t" "$(command -v $t || echo MISSING)"
