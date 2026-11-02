@@ -48,6 +48,17 @@ Sphinx 的并行只在 POSIX 上有效：
     # 4) 只想看解析出来的配置
     python3 ci/linux/pdf_builder_linux.py --versions 3.15 --print-config
 
+    # 5) 国内本机、直连 github.com 不通时（改用镜像回退 + 清华 pip 源）
+    python3 ci/linux/pdf_builder_linux.py --versions 3.15 --source auto \
+        --pip-index https://pypi.tuna.tsinghua.edu.cn/simple
+
+取源约定（`--source`）
+----------------------
+`github`（默认）= **只从 github.com 直连**，绝不试镜像站。这是为 CI 定的：
+GitHub 的 runner 到 github.com 走机房内网，比任何第三方加速都快、也更可信；
+主程序那套 `GH_MIRRORS` 是给「国内机器直连不通」准备的，在 runner 上只会白等超时。
+国内本地跑请显式加 `--source auto`。
+
 约定
 ----
 * 产物落在 `--base` 下的 `Python <完整版本> PDF 文档 <YYYYMMDD>/`，与 Windows 版一致
@@ -286,8 +297,28 @@ class LinuxPipeline(M.Pipeline):
 # ---------------------------------------------------------------------------
 # 四、配置：把 Windows 默认值换成本机真实路径
 # ---------------------------------------------------------------------------
+class DirectSourceConfig(M.Config):
+    """所有源码/译文**只从 github.com 直连抓**，不试任何镜像站。
+
+    为什么要在 CI 里这么做（用户 2026-11-02 要求）：
+      · 这套流程现在跑在 GitHub 自己的 runner 上 —— 它到 github.com 走机房内网，
+        比任何第三方加速镜像都快，而且**内容最可信**（镜像可能滞后几天，甚至被篡改）；
+      · 主程序里的 `GH_MIRRORS`（ghproxy / gh-proxy / ghfast / xget …）是给
+        「本机在国内、直连不通」的场景准备的：每条失败都要等 300 秒看门狗，
+        在 runner 上纯属白等。
+      · 想恢复「自动回退镜像」的行为：`--source auto`（本地 WSL 在国内时用）。
+    """
+
+    def git_urls(self, repo: str, explicit: str = "") -> list[tuple[str, str]]:
+        url = (explicit or "").strip()
+        if not url:
+            gh = (self.gh or "").strip().rstrip("/") or "https://github.com"
+            url = f"{gh}/{repo}"
+        return [("github 直连", url)]
+
+
 def build_config(args, base_dir: str) -> "M.Config":
-    cfg = M.Config()
+    cfg = (DirectSourceConfig() if args.source == "github" else M.Config())
     cfg.versions = list(args.versions)
     cfg.version = args.versions[0]
     cfg.base_dir = base_dir
@@ -303,9 +334,17 @@ def build_config(args, base_dir: str) -> "M.Config":
 
     # TeX Live：Linux 上通常就在 PATH 里；显式给了才设（主程序会优先用它）
     cfg.texlive_bin = (args.texlive_bin or "").strip()
-    # 镜像：CI 直连 github 最快；本地留空 = 走内置 7 个镜像自动回退
-    cfg.gh = (args.gh or "").strip()
-    cfg.pip_index = args.pip_index or cfg.pip_index
+
+    # 取源地址：github = **只用直连**（CI 默认）／auto = 沿主程序的镜像回退表
+    if args.source == "github":
+        cfg.gh = (args.gh or "https://github.com").strip()
+        cfg.cpython_url = ""          # 空 = <gh>/python/cpython.git
+        cfg.zh_url = ""
+    else:
+        cfg.gh = (args.gh or "").strip()
+
+    # pip 源：不设镜像站（CI 直连 PyPI 最快）；国内本地可 --pip-index 清华源
+    cfg.pip_index = (args.pip_index or "https://pypi.org/simple").strip()
     cfg.lang = args.lang
     cfg.jobs = args.jobs
 
@@ -495,6 +534,7 @@ def fan_out(args, base_dir: str) -> int:
             cmd += ["--pip-index", args.pip_index]
         if args.gh:
             cmd += ["--gh", args.gh]
+        cmd += ["--source", args.source]
         for spec in (args.python_map or []):
             cmd += ["--python-map", spec]
         if args.verbose:
@@ -567,7 +607,10 @@ def main(argv: list[str] | None = None) -> int:
                     help="指定某版本用哪个解释器，可重复：--python-map 3.13=/opt/py313/bin/python")
     ap.add_argument("--pip-index", default="", help="pip 源（CI 建议 https://pypi.org/simple）")
     ap.add_argument("--gh", default="",
-                    help="GitHub 前缀（留空 = 内置 7 个镜像自动回退；CI 建议 https://github.com）")
+                    help="GitHub 前缀（--source github 时默认 https://github.com）")
+    ap.add_argument("--source", default="github", choices=["github", "auto"],
+                    help="源码/译文从哪取：github=只走 github.com 直连（CI 用，默认）；"
+                         "auto=主程序那套镜像自动回退（国内本地直连不通时用）")
     ap.add_argument("--i18n-extra-url", default=None, help="补充译文地址（默认不打补丁）")
     ap.add_argument("--clean", default="none", choices=["none", "build", "all"],
                     help="步骤 10 清理范围（默认 none：CI 要留日志给验收报告）")
