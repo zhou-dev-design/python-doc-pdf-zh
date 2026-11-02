@@ -293,6 +293,58 @@ class LinuxPipeline(M.Pipeline):
             self.env = self._make_env()
             self._apply_python_alias()
 
+    # ---------------------------------------------------------------- 覆盖点 3
+    def _register_venv_pypdf(self) -> None:
+        """把构建 venv 的 site-packages 登记成 pypdf 的**备用搜索目录**。
+
+        ★★ 2026-11-02 第二个「只在 Linux 上犯」的病 ★★
+          主程序 `need_venv()` 里只登记了 `venv/Lib/site-packages`（Windows 布局），
+          而 POSIX 的 venv 是 `venv/lib/python3.X/site-packages` —— 一个都登记不上。
+          结果：步骤 8 的验收报告、步骤 9 的合并同时报
+            「本工具需要 pypdf，但当前解释器里没有：/opt/hostedtoolcache/python/3.15.2/…」
+          那个解释器是 CI 里 setup-python 的位置，本来就不该有 pypdf；步骤 4 装进
+          venv 的那份才是正主（实测 pypdf-6.21.4），而 pypdf 是纯 Python，跨小版本
+          直接 import 没问题 —— 主程序为此早就准备了 `_import_pypdf()` 的目录回退，
+          只是这次没人往它里面塞目录。
+        """
+        if not IS_POSIX:
+            return
+        vp = self.vp
+        if not vp:
+            try:
+                vp = self.resolve_venv()
+            except Exception:                    # noqa: BLE001  解析失败就当没有
+                return
+        if not vp:
+            return
+        try:
+            cands = sorted((Path(vp).parent.parent / "lib").glob("python*/site-packages"))
+        except OSError:
+            return
+        ann = self.__dict__.setdefault("_pypdf_announced", set())
+        for sp in cands:
+            if not sp.is_dir():
+                continue
+            M._register_pypdf_dir(sp)            # 主程序的公开登记口（幂等）
+            if sp not in ann:
+                ann.add(sp)
+                self.rep.log(f"      pypdf 备用目录：{sp}", level="meta")
+
+    def need_venv(self):
+        vp = super().need_venv()
+        self._register_venv_pypdf()
+        return vp
+
+    # ★ 步骤 8/9 不经过 need_venv（直接调内联工具），所以这两个也要补一刀，
+    #   否则 `--only 9` 单跑合并时仍然会撞「没有 pypdf」。
+    def step8(self) -> str:
+        self._register_venv_pypdf()
+        return super().step8()
+
+    def step9(self) -> str:
+        self._register_venv_pypdf()
+        return super().step9()
+
 
 # ---------------------------------------------------------------------------
 # 三·五、POSIX 修补：makeindex-fix.py 里写死的 Windows 专属参数
