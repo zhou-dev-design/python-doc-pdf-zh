@@ -5,6 +5,14 @@ name: 构建 Python 中文文档 PDF（Linux）
 on:
   schedule:
     - cron: "0 4 * * *"         # UTC 04:00 = 北京时间 12:00（UTC+8）
+  # ★ 临时调试触发器：只改「流水线自己」时才跑，且只跑 3.15（见 prepare 里的 VERSIONS）。
+  #   目的：改一版诊断代码 → push → 立刻得到一轮带证据的运行，不用手点 Run workflow。
+  #   排错结束后可整段删掉（删了也不影响定时与手动触发）。
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/build-pdf-linux.yml"
+      - "ci/linux/**"
   workflow_dispatch:
     inputs:
       versions:
@@ -46,7 +54,9 @@ jobs:
       - id: m
         name: 解析版本列表 → matrix
         env:
-          VERSIONS: ${{ github.event.inputs.versions }}
+          # push（= 改流水线自我验证）时只跑 3.15 一版，省时间；
+          # 定时/手动触发照旧走 event.inputs（为空则下面兜底成三版）。
+          VERSIONS: ${{ github.event_name == 'push' && '3.15' || github.event.inputs.versions }}
         run: |
           python3 - <<'PY'
           import json, os
@@ -231,6 +241,90 @@ jobs:
           echo "root=$ROOT" >> "$GITHUB_OUTPUT"
           echo "=== 产物（$ROOT）==="
           ls -la "$ROOT" | head -20
+
+      # ★★ 2026-11-02 新增：上一轮「.log 里没有任何 ! 」+「每册 PDF 只有 1 页」+
+      #   「ind=0」三条互相矛盾 —— 光 grep `^! ` 定不了位。这一段专门只回答一个问题：
+      #   **一册到底死在哪儿**。判据从上到下越来越硬：
+      #     ① .tex 体积    → 极小 = 步骤 6 只写了个壳（那就不是 xelatex 的锅）
+      #     ② .log 尾部    → xelatex 最后一句是什么（`No pages of output` / 半行截断 = 进程被杀）
+      #     ③ latexmk 原话 → 它是「第 1 遍就失败」还是「第 1 遍成功、makeindex 卡住」
+      #     ④ 手工复跑     → 绕过 latexmk，直接看 xelatex 的退出码与真话
+      - name: 🔬 显微镜：一册到底怎么死的（.tex 体积 / .log 尾部 / latexmk 原话 / 手工复跑）
+        if: failure()
+        run: |
+          set +e
+          ROOT="$(find "$RUNNER_TEMP/build" -maxdepth 1 -type d -name 'Python * PDF 文档 *' | sort | tail -1)"
+          LATEX="$ROOT/cpython/Doc/build/latex"
+          echo "ROOT=$ROOT"
+          if [ ! -d "$LATEX" ]; then echo "(没有 build/latex —— 步骤 6 就没产出，跳过显微镜)"; exit 0; fi
+
+          echo "=== 工具版本（TeX Live 年份很关键：apt 里的是老版）==="
+          xelatex --version 2>&1 | head -2
+          latexmk -v 2>&1 | head -2
+          echo "xelatex 路径: $(command -v xelatex)"
+          echo "makeindex 路径: $(command -v makeindex)"
+
+          echo
+          echo "=== ① .tex 体积：最小 3 册 / 最大 3 册 ==="
+          echo "   （判据：1 页的册子如果 .tex 只有几 KB，说明步骤 6 只写了壳，不是编译问题）"
+          ls -S "$LATEX"/*.tex 2>/dev/null | tail -3 | xargs -r wc -c
+          ls -S "$LATEX"/*.tex 2>/dev/null | head -3 | xargs -r wc -c
+          echo "   .tex 总数: $(ls "$LATEX"/*.tex 2>/dev/null | wc -l)"
+
+          echo
+          echo "=== ② 每册 .log 行数 / '!' 行数 / PDF 页数（按 ! 行数降序）==="
+          for f in "$LATEX"/*.log; do
+            [ -f "$f" ] || continue
+            b="$(basename "$f")"; b="${b%.log}"
+            lines="$(wc -l <"$f")"
+            bangs="$(grep -c '^!' "$f")"
+            pages="$(pdfinfo "$LATEX/$b.pdf" 2>/dev/null | awk '/^Pages:/{print $2}')"
+            printf '%8s %4s %6s  %s\n' "$lines" "$bangs" "${pages:-无PDF}" "$b"
+          done | sort -k2,2nr | head -12
+
+          echo
+          SMALL="$(ls -S "$LATEX"/*.tex 2>/dev/null | tail -1)"
+          SMB="$(basename "${SMALL%.tex}")"
+          echo "=== ③ 拿最小册「$SMB」当样本 ==="
+          echo "--- $SMB.tex 头 25 行 ---"
+          head -25 "$SMALL"
+          echo "--- $SMB.tex 尾 15 行 ---"
+          tail -15 "$SMALL"
+          echo "--- $SMB.log 尾 70 行（xelatex 自己最后说的话）---"
+          tail -70 "$LATEX/$SMB.log"
+          echo "--- $SMB.log 里 '! ' / 'No pages' / 半行截断线索 ---"
+          grep -nE '^! |^l\.[0-9]+|No pages of output|Fatal error|Emergency stop|Missing character' "$LATEX/$SMB.log" | head -20
+          echo "--- latexmk 转录 pdf-build-parts/$SMB.log 头 50 行 ---"
+          head -50 "$ROOT/pdf-build-parts/$SMB.log" 2>/dev/null || echo "(没有转录文件)"
+          echo "--- 同上 尾 80 行（latexmk 的结论）---"
+          tail -80 "$ROOT/pdf-build-parts/$SMB.log" 2>/dev/null || true
+
+          echo
+          echo "=== ④ 手工复跑 xelatex（不经 latexmk；只看它自己的退出码与真话）==="
+          cd "$LATEX" || exit 0
+          export PATH="$ROOT/venv/bin:$PATH"
+          echo "python: $(command -v python)  $(python -V 2>&1)"
+          echo "makeindex-fix.py: $(ls -la makeindex-fix.py 2>/dev/null || echo 缺失)"
+          echo "python.ist: $(ls -la python.ist 2>/dev/null || echo 缺失)"
+          timeout 900 xelatex -interaction=nonstopmode -file-line-error "$SMB.tex" > /tmp/manual.out 2>&1
+          echo "xelatex 退出码 = $?"
+          grep -nE '^! |^l\.[0-9]+|Fatal|Emergency|No pages of output' /tmp/manual.out | head -20
+          echo "--- 末 50 行 ---"
+          tail -50 /tmp/manual.out
+          echo "--- 这次手工跑的 PDF ---"
+          pdfinfo "$SMB.pdf" 2>/dev/null | grep -E 'Pages|File size'
+
+          echo
+          echo "=== ⑤ 手工复跑 latexmk（原封不动照抄流水线的命令，看它返回什么）==="
+          timeout 900 latexmk -pdf -gg -file-line-error -r latexmkrc \
+            -e '$makeindex = q{python makeindex-fix.py %O -s python.ist -o %D %S};' \
+            "$SMB.tex" > /tmp/manual2.out 2>&1
+          echo "latexmk 退出码 = $?"
+          echo "--- 末 60 行 ---"
+          tail -60 /tmp/manual2.out
+          echo "--- 这次 latexmk 的 PDF / 索引 ---"
+          pdfinfo "$SMB.pdf" 2>/dev/null | grep -E 'Pages|File size'
+          ls -la "$SMB.ind" 2>/dev/null || echo "  （没有 $SMB.ind）"
 
       - name: 失败诊断（把关键日志打出来，省得点进每一步翻）
         if: failure()
