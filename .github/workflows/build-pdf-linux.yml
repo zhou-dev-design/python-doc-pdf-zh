@@ -109,6 +109,55 @@ jobs:
             fi
           done
 
+      - name: canary：xelatex 中文/字体冒烟（5 秒，失败不算作业失败）
+        # ★ 为什么要这一段：完整构建要 15 分钟，而「latexmk 退出码 12、每册 1.5 秒、
+        #   只有 1 页」这种失败，根因往往就是 xelatex 连第一页都排不出来。
+        #   这里用两个 6 行的最小文档把「xeCJK 有没有 CJK 字体」「FreeSerif/Sans/Mono
+        #   在不在」分别验一遍，几秒钟就能定位，不用等一整轮。
+        continue-on-error: true
+        run: |
+          set +e
+          cd "$RUNNER_TEMP"
+          echo "=== kpsewhich（CJK 宏包是否存在）==="
+          for f in xeCJK.sty ctex.sty fandol.sty fontspec.sty sphinx.sty; do
+            printf '%-14s %s\n' "$f" "$(kpsewhich "$f" || echo MISSING)"
+          done
+          echo "=== fc-match（fontconfig 实际会选哪个文件）==="
+          for f in "FreeSerif" "FreeSans" "FreeMono" "Noto Serif CJK SC"; do
+            printf '%-20s %s\n' "$f" "$(fc-match -f '%{family}|%{file}' "$f")"
+          done
+
+          echo "=== canary 1：xeCJK 排中文 ==="
+          cat > canary-cjk.tex <<'TEX'
+          \documentclass{article}
+          \usepackage{xeCJK}
+          \begin{document}
+          中文测试 Hello
+          \end{document}
+          TEX
+          xelatex -interaction=nonstopmode -halt-on-error canary-cjk.tex > canary-cjk.log 2>&1
+          echo "退出码: $?"
+          grep -nE '^! |Missing character|not a native platform|Font .* does not' canary-cjk.log | head -10
+
+          echo "=== canary 2：FreeSerif / FreeSans / FreeMono ==="
+          cat > canary-free.tex <<'TEX'
+          \documentclass{article}
+          \usepackage{fontspec}
+          \setmainfont{FreeSerif}
+          \setsansfont{FreeSans}
+          \setmonofont{FreeMono}
+          \begin{document}
+          Hello \textsf{World} \texttt{code}
+          \end{document}
+          TEX
+          xelatex -interaction=nonstopmode -halt-on-error canary-free.tex > canary-free.log 2>&1
+          echo "退出码: $?"
+          grep -nE '^! |Font .* does not|not a native platform' canary-free.log | head -10
+
+          echo "=== 结论判据 ==="
+          echo "  两个 canary 都是 0 → 环境没问题，失败在 .tex 内容/宏包组合上"
+          echo "  任一个非 0 → 就是它，看上面那几行 ! 开头的错误"
+
       - name: 装这个版本要用的 Python
         uses: actions/setup-python@v5
         with:
@@ -170,28 +219,57 @@ jobs:
             echo "----- $f -----"
             tail -60 "$f"
           done
-          echo "=== 每册编译日志里的 TeX 硬错误（有才是真原因）==="
+          echo "=== 每册 TeX 日志里的真错误（build/latex/<册>.log，这才是 xelatex 的原话）==="
+          # ★ 上一轮踩过：只 grep pdf-build-*.log（latexmk 的标准输出）什么也找不到，
+          #   真正的 `! ...` 在 TeX 自己写的 <册>.log 里。
           found=0
-          for f in "$RUNNER_TEMP"/build/*/pdf-build-*.log; do
+          for f in "$RUNNER_TEMP"/build/*/cpython/Doc/build/latex/*.log; do
             [ -f "$f" ] || continue
-            errs="$(grep -nE '^! |Font .* does not exist|! Package .* Error' "$f" 2>/dev/null | head -6 || true)"
+            errs="$(grep -nE '^! |^l\.[0-9]+ |Font .* does not|not a native platform' "$f" 2>/dev/null | head -8 || true)"
             if [ -z "$errs" ]; then
               continue
             fi
             found=$((found+1))
             echo "----- $(basename "$f") -----"
             echo "$errs"
-            echo "  … 该册末 25 行："
-            tail -25 "$f" || true
-            if [ "$found" -ge 5 ]; then
-              echo "(只列前 5 册，其余同理)"
+            if [ "$found" -ge 3 ]; then
+              echo "(只列前 3 册，其余同理)"
               break
             fi
           done
           if [ "$found" -eq 0 ]; then
-            echo "(没有任何 TeX 硬错误 —— 那就是字体/环境警告型失败，看上面的字体自查)"
+            echo "(没有 ! 错误 —— 说明 xelatex 自己没报错，问题在 latexmk 调用层，看下面的 latexmkrc)"
           fi
-          echo "=== 字体自查（nullfont 的根因通常在这里）==="
+          echo "=== 索引与 makeindex ==="
+          echo "makeindex: $(command -v makeindex || echo MISSING)"
+          ls "$RUNNER_TEMP"/build/*/cpython/Doc/build/latex/*.ind 2>/dev/null | wc -l | sed 's/^/  .ind 数量: /'
+          LATEXDIR="$(find "$RUNNER_TEMP/build" -maxdepth 4 -type d -name latex | head -1)"
+          if [ -n "$LATEXDIR" ]; then
+            echo "  latex 目录: $LATEXDIR"
+            [ -f "$LATEXDIR/makeindex-fix.py" ] && echo "  makeindex-fix.py 存在" || echo "  makeindex-fix.py 缺失"
+            [ -f "$LATEXDIR/latexmkrc" ] && { echo "  --- latexmkrc ---"; cat "$LATEXDIR/latexmkrc"; }
+            echo "  --- 一册 log 的头 30 行 ---"
+            head -30 "$(ls "$LATEXDIR"/*.log 2>/dev/null | head -1)" 2>/dev/null || true
+          fi
+          echo "=== 每册 latexmk 输出里的错误（pdf-build-*.log）==="
+          found2=0
+          for f in "$RUNNER_TEMP"/build/*/pdf-build-*.log; do
+            [ -f "$f" ] || continue
+            errs="$(grep -nE '^! |Font .* does not exist|! Package .* Error|gave return code' "$f" 2>/dev/null | head -6 || true)"
+            if [ -z "$errs" ]; then
+              continue
+            fi
+            found2=$((found2+1))
+            echo "----- $(basename "$f") -----"
+            echo "$errs"
+            echo "  … 该册末 20 行："
+            tail -20 "$f" || true
+            if [ "$found2" -ge 3 ]; then
+              echo "(只列前 3 册)"
+              break
+            fi
+          done
+          echo "=== 字体自查 ==="
           for f in "FreeSerif" "FreeSans" "FreeMono" "Noto Serif CJK SC" "Noto Sans CJK SC"; do
             n="$(fc-list "$f" 2>/dev/null | wc -l || true)"
             printf '%-20s %s\n' "$f" "$n"
