@@ -252,6 +252,9 @@ jobs:
       - name: 🔬 显微镜：一册到底怎么死的（.tex 体积 / .log 尾部 / latexmk 原话 / 手工复跑）
         if: failure()
         run: |
+          # ★ 把输出同时落一份到 $RUNNER_TEMP/probe.txt：后面那步会把它推到 ci-logs
+          #   分支 —— 公开仓库的 Actions 日志仍然要鉴权才能读，落到分支里才读得到。
+          exec > >(tee -a "$RUNNER_TEMP/probe.txt") 2>&1
           set +e
           ROOT="$(find "$RUNNER_TEMP/build" -maxdepth 1 -type d -name 'Python * PDF 文档 *' | sort | tail -1)"
           LATEX="$ROOT/cpython/Doc/build/latex"
@@ -412,6 +415,47 @@ jobs:
             ${{ runner.temp }}/build/Python * PDF 文档 */*.pdf
             ${{ runner.temp }}/build/Python * PDF 文档 */验收报告.md
             ${{ runner.temp }}/build/Python * PDF 文档 */*.log
+
+      # ★ 失败时把「显微镜」的证据推到 ci-logs 分支。
+      #   为什么非要多这一步：runner 上的日志要拿 token 才能读（公开仓库也一样），
+      #   而 raw.githubusercontent.com 谁都能读 —— 把证据落进一个孤儿分支，排错时
+      #   一条 curl 就能拿到原文，不用截图、不用登录。
+      #   体积控制：每份只留尾部 40 KB（TeX 日志动辄几 MB × 39 册会超仓库限制）。
+      - name: 把诊断日志推到 ci-logs 分支（不登录也能读）
+        if: failure()
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -uo pipefail
+          STAGE="$RUNNER_TEMP/cilogs"
+          rm -rf "$STAGE"; mkdir -p "$STAGE"
+          ROOT="$(find "$RUNNER_TEMP/build" -maxdepth 1 -type d -name 'Python * PDF 文档 *' | sort | tail -1)"
+          LATEX="$ROOT/cpython/Doc/build/latex"
+          cp "$RUNNER_TEMP/probe.txt" "$STAGE/probe.txt" 2>/dev/null || echo "(没有 probe.txt)" > "$STAGE/probe.txt"
+          for f in "$LATEX"/*.log; do
+            [ -f "$f" ] || continue
+            tail -c 40000 "$f" > "$STAGE/texlog-$(basename "$f")" 2>/dev/null || true
+          done
+          for f in "$ROOT"/pdf-build-parts/*.log; do
+            [ -f "$f" ] || continue
+            tail -c 40000 "$f" > "$STAGE/latexmk-$(basename "$f")" 2>/dev/null || true
+          done
+          [ -f "$ROOT/gui-build.log" ] && tail -c 300000 "$ROOT/gui-build.log" > "$STAGE/gui-build-tail.log"
+          [ -f "$ROOT/latex-build.log" ] && tail -c 300000 "$ROOT/latex-build.log" > "$STAGE/latex-build-tail.log"
+          SMALL="$(ls -S "$LATEX"/*.tex 2>/dev/null | tail -1)"
+          if [ -n "${SMALL:-}" ]; then
+            { echo "=== $(basename "$SMALL")：$(wc -c <"$SMALL") 字节 / $(wc -l <"$SMALL") 行 ==="
+              head -80 "$SMALL"; echo "……（中间略）……"; tail -40 "$SMALL"; } > "$STAGE/tex-sample.txt"
+          fi
+          echo "--- 打包清单 ---"; ls "$STAGE" | head -50; du -sh "$STAGE" || true
+          cd "$STAGE" || exit 0
+          git init -q
+          git config user.name "ci-bot"
+          git config user.email "ci-bot@users.noreply.github.com"
+          git add -A
+          git commit -q -m "ci 诊断：run ${{ github.run_id }} / ${{ matrix.version }}" || true
+          git push -q --force "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:ci-logs \
+            && echo "✔ 已推到 ci-logs 分支" || echo "✘ 推 ci-logs 失败（不影响其它步骤）"
 
       # ★ 定时触发时 github.event.inputs.push_branch 是空串，所以判据写成
       #   「不等于 false」而不是「等于 true」—— 否则每天自动跑完**不会推分支**，
