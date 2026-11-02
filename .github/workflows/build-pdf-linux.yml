@@ -1,0 +1,193 @@
+name: 构建 Python 中文文档 PDF（Linux）
+
+# ★ 这是**新增**的一条流水线，和 build-pdf.yml（自托管 Windows）互不影响。
+#   定时触发先注释掉：两条同日跑会重复构建、还抢同一个仓库的推送。
+#   验证通过后：把下面两行的 # 去掉，同时把 build-pdf.yml 的 schedule 关掉。
+#on:
+#  schedule:
+#    - cron: "0 19 * * *"        # UTC 19:00 = 北京时间次日 03:00
+on:
+  workflow_dispatch:
+    inputs:
+      versions:
+        description: "要构建的版本，逗号分隔（matrix 会拆成并行 job）"
+        default: "3.13,3.14,3.15"
+      jobs:
+        description: "并发数：步骤 6 的 sphinx -j 与步骤 7 的册级并发共用"
+        default: "4"
+      merge:
+        description: "是否生成合并册（步骤 9）"
+        type: choice
+        options: ["true", "false"]
+        default: "true"
+      clean:
+        description: "步骤 10 清理范围（默认 none：留着日志，验收报告的「每步耗时」和排错都要它）"
+        type: choice
+        options: ["none", "build", "all"]
+        default: "none"
+      push_branch:
+        description: "构建成功后推到 v<完整版本> 分支（每版本一个分支，只留最新日期）"
+        type: choice
+        options: ["true", "false"]
+        default: "true"
+
+permissions:
+  contents: write               # 要往仓库推分支
+
+concurrency:
+  group: build-pdf-linux-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  # ---------------------------------------------------------------- 拆版本
+  prepare:
+    runs-on: ubuntu-22.04
+    outputs:
+      matrix: ${{ steps.m.outputs.matrix }}
+    steps:
+      - id: m
+        name: 解析版本列表 → matrix
+        env:
+          VERSIONS: ${{ github.event.inputs.versions }}
+        run: |
+          python3 - <<'PY'
+          import json, os
+          raw = os.environ.get("VERSIONS") or "3.13,3.14,3.15"
+          vs = [v.strip() for v in raw.split(",") if v.strip()]
+          if not vs:
+              vs = ["3.13", "3.14", "3.15"]
+          m = json.dumps({"version": vs})
+          print("matrix =", m)
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as f:
+              f.write("matrix=" + m + "\n")
+          PY
+
+  # ---------------------------------------------------------------- 构建
+  build:
+    needs: prepare
+    runs-on: ubuntu-22.04
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.prepare.outputs.matrix) }}
+    name: build ${{ matrix.version }}
+    steps:
+      - name: 取代码
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: 装系统依赖（TeX Live + 中文字体 + poppler + cairo）
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends \
+            git curl ca-certificates \
+            latexmk texlive-xetex texlive-latex-extra texlive-binaries \
+            texlive-lang-chinese fonts-noto-cjk \
+            poppler-utils libcairo2
+          echo "--- 关键工具 ---"
+          for t in latexmk xelatex makeindex pdfinfo pdffonts git; do
+            printf '%-10s %s\n' "$t" "$(command -v $t || echo MISSING)"
+          done
+
+      - name: 装这个版本要用的 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.version }}
+
+      - name: 体检（不联网，先确认这台机器能跑）
+        run: |
+          PY="$(python -c 'import sys;print(sys.executable)')"
+          python ci/linux/pdf_builder_linux.py --preflight \
+            --versions "${{ matrix.version }}" \
+            --python-map "${{ matrix.version }}=$PY"
+
+      - name: 逻辑自检（平台胶水层，不联网）
+        run: python ci/linux/selftest.py
+
+      - name: 构建 Python ${{ matrix.version }}
+        id: build
+        env:
+          GIT_TERMINAL_PROMPT: "0"
+        run: |
+          set -euo pipefail
+          PY="$(python -c 'import sys;print(sys.executable)')"
+          BASE="$RUNNER_TEMP/build"
+          mkdir -p "$BASE"
+          MERGE_FLAG=""
+          if [ "${{ github.event.inputs.merge }}" = "false" ]; then MERGE_FLAG="--no-merge"; fi
+          python ci/linux/pdf_builder_linux.py \
+            --versions "${{ matrix.version }}" \
+            --base "$BASE" \
+            --jobs "${{ github.event.inputs.jobs || '4' }}" \
+            --clean "${{ github.event.inputs.clean }}" \
+            --pip-index "https://pypi.org/simple" \
+            --gh "https://github.com" \
+            --python-map "${{ matrix.version }}=$PY" \
+            $MERGE_FLAG
+          # ★ 用 find 而不是 ls：构建根名字里有空格和中文，ls 在 set -e 下会误杀
+          ROOT="$(find "$BASE" -maxdepth 1 -type d -name 'Python * PDF 文档 *' | sort | tail -1)"
+          echo "root=$ROOT" >> "$GITHUB_OUTPUT"
+          echo "=== 产物（$ROOT）==="
+          ls -la "$ROOT" | head -20
+
+      - name: 上传产物（artifact，保留 7 天）
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pdf-${{ matrix.version }}-${{ github.run_id }}
+          if-no-files-found: warn
+          retention-days: 7
+          path: |
+            ${{ runner.temp }}/build/Python * PDF 文档 */*.pdf
+            ${{ runner.temp }}/build/Python * PDF 文档 */验收报告.md
+            ${{ runner.temp }}/build/Python * PDF 文档 */*.log
+
+      - name: 推到 v<完整版本> 分支（孤儿提交 + 强推，只留最新日期）
+        if: success() && github.event.inputs.push_branch == 'true'
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          PY="$(python -c 'import sys;print(sys.executable)')"
+          FULL="$("$PY" -c 'import sys;print("%d.%d.%d" % sys.version_info[:3])')"
+          BRANCH="v$FULL"
+          ROOT="${{ steps.build.outputs.root }}"
+          if [ -z "$ROOT" ] || [ ! -d "$ROOT" ]; then echo "找不到构建根"; exit 1; fi
+
+          # CI 的 RUNNER_TEMP 每次都是干净的，所以根目录里的 PDF 全是本次产出，
+          # 不需要再按时间过滤（按时间过滤反而会误杀跑超过 3 小时的那几册）。
+          STAGE="$RUNNER_TEMP/stage-$FULL"
+          rm -rf "$STAGE"; mkdir -p "$STAGE"
+          N=0
+          for f in "$ROOT"/*.pdf; do
+            [ -f "$f" ] || continue
+            cp -f "$f" "$STAGE/"; N=$((N+1))
+          done
+          [ -f "$ROOT/验收报告.md" ] && cp -f "$ROOT/验收报告.md" "$STAGE/" || true
+          if [ "$N" -eq 0 ]; then echo "没有新产出 PDF，不推分支"; exit 1; fi
+
+          MB=$(du -sm "$STAGE" | cut -f1)
+          git -C "$STAGE" init -q
+          git -C "$STAGE" config user.name  "github-actions[bot]"
+          git -C "$STAGE" config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git -C "$STAGE" checkout -q -b "$BRANCH"
+          git -C "$STAGE" add -A
+          git -C "$STAGE" commit -q -m "build: Python $FULL  $N 个 PDF  ${MB} MB  $(date -u '+%Y-%m-%d %H:%M') UTC"
+          # --force：分支永远只有一个提交、只有最新日期的产物
+          git -C "$STAGE" -c credential.helper= push -q --force \
+            "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" \
+            "HEAD:refs/heads/$BRANCH"
+          echo "✔ Python $FULL → 分支 $BRANCH（$N 个 PDF，${MB} MB）"
+
+      - name: 汇总
+        if: always()
+        run: |
+          echo "### Python ${{ matrix.version }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          ROOT="${{ steps.build.outputs.root }}"
+          if [ -n "$ROOT" ] && [ -f "$ROOT/验收报告.md" ]; then
+            sed -n '/## 每步耗时/,$p' "$ROOT/验收报告.md" | head -30 >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "没有验收报告（构建可能提前失败，看上面的日志）" >> "$GITHUB_STEP_SUMMARY"
+          fi
