@@ -23,3 +23,6 @@ _*.log
 *.exe
 *.log
 !ci/*.log
+
+# GUI 运行时留下的临时配置
+sphinx-pdf/_tmp*.json
