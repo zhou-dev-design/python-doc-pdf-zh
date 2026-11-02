@@ -1,0 +1,25 @@
+# ── 构建产物（体积大，且每次都能重新生成）─────────────────────────────
+sphinx-pdf/gui/dist/
+sphinx-pdf/gui/build/
+sphinx-pdf/pdf/
+pdf-build/
+python-zh.pdf
+python.info
+python.texi
+
+# ── Python 缓存 / 备份 ────────────────────────────────────────────────
+__pycache__/
+*.pyc
+*.bak
+*_bak_*/
+_bak_*/
+pdf_builder_gui_3_颜色版.py
+
+# ── 本地调试日志（根部那几个 _*.log 是历史排障残留）────────────────────
+_*.log
+.workbuddy/
+
+# ── 运行时产物 ───────────────────────────────────────────────────────
+*.exe
+*.log
+!ci/*.log
