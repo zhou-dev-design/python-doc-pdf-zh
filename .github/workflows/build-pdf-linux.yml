@@ -1,12 +1,10 @@
 name: 构建 Python 中文文档 PDF（Linux）
 
-# ★ 这是**新增**的一条流水线，和 build-pdf.yml（自托管 Windows）互不影响。
-#   定时触发先注释掉：两条同日跑会重复构建、还抢同一个仓库的推送。
-#   验证通过后：把下面两行的 # 去掉，同时把 build-pdf.yml 的 schedule 关掉。
-#on:
-#  schedule:
-#    - cron: "0 19 * * *"        # UTC 19:00 = 北京时间次日 03:00
+# ★ 这是仓库里**唯一**的流水线（Windows 那条已于 2026-11-02 删除）。
+#   仓库是公开的 ⇒ Actions 分钟数不限，每天跑三个版本也没有额度问题。
 on:
+  schedule:
+    - cron: "0 19 * * *"        # UTC 19:00 = 北京时间次日 03:00
   workflow_dispatch:
     inputs:
       versions:
@@ -120,7 +118,7 @@ jobs:
             --versions "${{ matrix.version }}" \
             --base "$BASE" \
             --jobs "${{ github.event.inputs.jobs || '4' }}" \
-            --clean "${{ github.event.inputs.clean }}" \
+            --clean "${{ github.event.inputs.clean || 'none' }}" \
             --pip-index "https://pypi.org/simple" \
             --gh "https://github.com" \
             --python-map "${{ matrix.version }}=$PY" \
@@ -143,8 +141,11 @@ jobs:
             ${{ runner.temp }}/build/Python * PDF 文档 */验收报告.md
             ${{ runner.temp }}/build/Python * PDF 文档 */*.log
 
+      # ★ 定时触发时 github.event.inputs.push_branch 是空串，所以判据写成
+      #   「不等于 false」而不是「等于 true」—— 否则每天自动跑完**不会推分支**，
+      #   产物全烂在 runner 里（这是最容易静默失败的一处）。
       - name: 推到 v<完整版本> 分支（孤儿提交 + 强推，只留最新日期）
-        if: success() && github.event.inputs.push_branch == 'true'
+        if: success() && github.event.inputs.push_branch != 'false'
         env:
           TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
