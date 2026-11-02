@@ -335,11 +335,42 @@ class LinuxPipeline(M.Pipeline):
         self._register_venv_pypdf()
         return vp
 
+    # ---------------------------------------------------------------- 覆盖点 4
+    def _fix_report_texlive_year(self) -> None:
+        """把验收报告里那行「TeX Live 2025」改成**实测**年份。
+
+        ★ 主程序的报告模板把年份写死成 2025（作者本机是 TeX Live 2025），而 CI 用
+          apt 装的其实是 `TeX Live 2022/dev/Debian`（Ubuntu 22.04 那份 2021 树）。
+          报告是要存档、以后用来对数的，年份写错会让人以为两次构建用了同一套工具链
+          —— 而「同一份内容差 0~4 页」的差异恰恰就是工具链版本造成的，这行必须准。
+        """
+        if not IS_POSIX:
+            return
+        rep = Path(self.root) / "验收报告.md"
+        try:
+            txt = rep.read_text(encoding="utf-8")
+        except OSError:
+            return
+        if "TeX Live 2025" not in txt:
+            return                      # 模板改过 / 已经是实测值 → 什么都不做
+        rc, out = self.capture(["xelatex", "--version"])
+        m = re.search(r"TeX Live (\d{4})", out or "")
+        if rc != 0 or not m:
+            return
+        year = m.group(1)
+        if year == "2025":
+            return
+        rep.write_text(txt.replace("TeX Live 2025", f"TeX Live {year}"), encoding="utf-8")
+        self.rep.log(f"      验收报告：TeX Live 年份按实测写成 {year}"
+                     f"（主程序模板里写死的是 2025）", level="meta")
+
     # ★ 步骤 8/9 不经过 need_venv（直接调内联工具），所以这两个也要补一刀，
     #   否则 `--only 9` 单跑合并时仍然会撞「没有 pypdf」。
     def step8(self) -> str:
         self._register_venv_pypdf()
-        return super().step8()
+        msg = super().step8()
+        self._fix_report_texlive_year()
+        return msg
 
     def step9(self) -> str:
         self._register_venv_pypdf()

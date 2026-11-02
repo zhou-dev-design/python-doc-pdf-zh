@@ -5,14 +5,6 @@ name: 构建 Python 中文文档 PDF（Linux）
 on:
   schedule:
     - cron: "0 4 * * *"         # UTC 04:00 = 北京时间 12:00（UTC+8）
-  # ★ 临时调试触发器：只改「流水线自己」时才跑，且只跑 3.15（见 prepare 里的 VERSIONS）。
-  #   目的：改一版诊断代码 → push → 立刻得到一轮带证据的运行，不用手点 Run workflow。
-  #   排错结束后可整段删掉（删了也不影响定时与手动触发）。
-  push:
-    branches: [main]
-    paths:
-      - ".github/workflows/build-pdf-linux.yml"
-      - "ci/linux/**"
   workflow_dispatch:
     inputs:
       versions:
@@ -54,10 +46,8 @@ jobs:
       - id: m
         name: 解析版本列表 → matrix
         env:
-          # 3.15 已经在 v3.15.2 分支上全绿（2026-11-02），这一轮换成三版全跑，
-          # 把 3.13 / 3.14 也验一遍（它们各有版本差异：3.13 少 0925/0929 两册）。
-          # 定时/手动触发照旧走 event.inputs（为空则下面兜底成三版）。
-          VERSIONS: ${{ github.event_name == 'push' && '3.13,3.14,3.15' || github.event.inputs.versions }}
+          # 为空 → 下面的 Python 兜底成三版（3.13,3.14,3.15）。
+          VERSIONS: ${{ github.event.inputs.versions }}
         run: |
           python3 - <<'PY'
           import json, os
