@@ -75,11 +75,17 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: 装系统依赖（TeX Live + 中文字体 + poppler + cairo）
+      - name: 装系统依赖（TeX Live + 字体 + poppler + cairo）
         run: |
           set -x
           sudo apt-get update || { echo "apt-get update 失败，5 秒后重试"; sleep 5; sudo apt-get update; }
-          PKGS="git curl ca-certificates latexmk texlive-xetex texlive-latex-extra texlive-binaries texlive-lang-chinese fonts-noto-cjk poppler-utils libcairo2"
+          # ★ 字体是必须的，别省：
+          #   python-docs-theme 的 LaTeX 部分直接写死 FreeSerif / FreeSans / FreeMono
+          #   （GNU FreeFont），Sphinx 默认还要 Latin Modern。Ubuntu 镜像里这些都**没有**，
+          #   于是 xelatex 拿不到字体 → nullfont → 每册 1.8 秒退出（latexmk 返回 12），
+          #   只剩一页占位 PDF、索引也一个都生成不了（.ind=0）。
+          #   2026-11-02 首次 CI 就是这么红的。
+          PKGS="git curl ca-certificates latexmk texlive-xetex texlive-latex-extra texlive-binaries texlive-fonts-recommended texlive-lang-chinese lmodern fonts-freefont-otf fonts-dejavu fonts-liberation fonts-texgyre fonts-noto-cjk poppler-utils libcairo2"
           if ! sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends $PKGS; then
             # 一次性装失败时逐包重试：这样日志里能直接看出是哪个包的问题
             echo "::error::批量安装失败，改为逐包定位"
@@ -89,14 +95,27 @@ jobs:
             done
           fi
           echo "--- 关键工具 ---"
-          for t in latexmk xelatex makeindex pdfinfo pdffonts git; do
+          for t in latexmk xelatex makeindex pdfinfo pdffonts git fc-list; do
             printf '%-10s %s\n' "$t" "$(command -v $t || echo MISSING)"
+          done
+          echo "--- 主题要用的字体在不在（缺一个就会 nullfont）---"
+          for f in "FreeSerif" "FreeSans" "FreeMono" "DejaVu Sans" "DejaVu Serif" \
+                   "Noto Serif CJK SC" "Noto Sans CJK SC" "Latin Modern Roman"; do
+            n="$(fc-list "$f" 2>/dev/null | wc -l || true)"
+            if [ "$n" -gt 0 ]; then
+              printf '%-22s OK (%s)\n' "$f" "$n"
+            else
+              printf '%-22s MISSING\n' "$f"
+            fi
           done
 
       - name: 装这个版本要用的 Python
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.version }}
+          # ★ check-latest：不加这个会优先用 runner 预装的旧补丁版
+          #   （实测拿到 3.15.1，而最新是 3.15.2，产物名也就跟着写错）。
+          check-latest: true
 
       - name: 体检（不联网，先确认这台机器能跑）
         run: |
@@ -150,6 +169,32 @@ jobs:
             [ -f "$f" ] || continue
             echo "----- $f -----"
             tail -60 "$f"
+          done
+          echo "=== 每册编译日志里的 TeX 硬错误（有才是真原因）==="
+          found=0
+          for f in "$RUNNER_TEMP"/build/*/pdf-build-*.log; do
+            [ -f "$f" ] || continue
+            errs="$(grep -nE '^! |Font .* does not exist|! Package .* Error' "$f" 2>/dev/null | head -6 || true)"
+            if [ -z "$errs" ]; then
+              continue
+            fi
+            found=$((found+1))
+            echo "----- $(basename "$f") -----"
+            echo "$errs"
+            echo "  … 该册末 25 行："
+            tail -25 "$f" || true
+            if [ "$found" -ge 5 ]; then
+              echo "(只列前 5 册，其余同理)"
+              break
+            fi
+          done
+          if [ "$found" -eq 0 ]; then
+            echo "(没有任何 TeX 硬错误 —— 那就是字体/环境警告型失败，看上面的字体自查)"
+          fi
+          echo "=== 字体自查（nullfont 的根因通常在这里）==="
+          for f in "FreeSerif" "FreeSans" "FreeMono" "Noto Serif CJK SC" "Noto Sans CJK SC"; do
+            n="$(fc-list "$f" 2>/dev/null | wc -l || true)"
+            printf '%-20s %s\n' "$f" "$n"
           done
           echo "=== 目录（2 层）==="
           find "$RUNNER_TEMP/build" -maxdepth 2 -type d 2>/dev/null | head -40 || true
