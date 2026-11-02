@@ -89,7 +89,8 @@ mkdir C:\actions-runner; cd C:\actions-runner
 仓库 → Actions → 「构建 Python 中文文档 PDF」→ **Run workflow**
 （`versions` 可填 `3.15` 先只跑一个，`fresh` 填 `true` 做一次从零构建）。
 
-跑完检查：仓库的 Branches 里应该出现 `v3.15.2`，点进去只有一个提交、一个 `pdf/` 目录。
+跑完检查：仓库的 Branches 里应该出现 `v3.15.2`，点进去只有 **1 个提交**，
+根目录就是那一批 PDF（39 册 + 合并册）和 `验收报告.md`。
 
 ## 四、日常
 
