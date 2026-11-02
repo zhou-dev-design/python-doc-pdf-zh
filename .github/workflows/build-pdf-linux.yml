@@ -5,6 +5,13 @@ name: 构建 Python 中文文档 PDF（Linux）
 on:
   schedule:
     - cron: "0 4 * * *"         # UTC 04:00 = 北京时间 12:00（UTC+8）
+  # ★ 临时：验证「发布到 Releases」这一段（只跑 3.15，省时间）。验完就删，
+  #   恢复成「定时 + 手动」——和 2026-11-02 那次收尾一样。
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/build-pdf-linux.yml"
+      - "ci/linux/**"
   workflow_dispatch:
     inputs:
       versions:
@@ -24,7 +31,7 @@ on:
         options: ["none", "build", "all"]
         default: "none"
       push_branch:
-        description: "构建成功后推到 v<完整版本> 分支（每版本一个分支，只留最新日期）"
+        description: "构建成功后发布到 Releases（同版本原地更新，旧补丁版归档到 old 分支）"
         type: choice
         options: ["true", "false"]
         default: "true"
@@ -46,8 +53,8 @@ jobs:
       - id: m
         name: 解析版本列表 → matrix
         env:
-          # 为空 → 下面的 Python 兜底成三版（3.13,3.14,3.15）。
-          VERSIONS: ${{ github.event.inputs.versions }}
+          # 验证发布逻辑的临时改动：push 时只跑 3.15（验完恢复成只看 event.inputs）。
+          VERSIONS: ${{ github.event_name == 'push' && '3.15' || github.event.inputs.versions }}
         run: |
           python3 - <<'PY'
           import json, os
@@ -139,6 +146,21 @@ jobs:
               printf '%-22s MISSING\n' "$f"
             fi
           done
+
+      # ★ 发布时要打 RAR 包。Ubuntu 的 `rar` 在 multiverse 里（RARLAB 免费 CLI 版，
+      #   压缩包注释里会带一行「evaluation copy」，不影响使用）。
+      #   单独一步、装不上只警告：RAR 是**附加**产物，不能因为它挡掉整个发布。
+      - name: 装 rar（打压缩包用；失败只警告，不影响 PDF）
+        continue-on-error: true
+        run: |
+          set +e
+          if command -v rar >/dev/null 2>&1; then rar 2>/dev/null | head -2; exit 0; fi
+          sudo add-apt-repository -y multiverse >/dev/null 2>&1
+          sudo apt-get update -qq -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30
+          timeout 240 sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends rar
+          command -v rar >/dev/null 2>&1 \
+            && rar 2>/dev/null | head -2 \
+            || echo "::warning::装不上 rar —— 发布时会跳过 RAR 包（PDF 照发）"
 
       - name: canary：xelatex 中文/字体冒烟（5 秒，失败不算作业失败）
         # ★ 为什么要这一段：完整构建要 15 分钟，而「latexmk 退出码 12、每册 1.5 秒、
@@ -454,45 +476,136 @@ jobs:
           git push -q --force "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:ci-logs \
             && echo "✔ 已推到 ci-logs 分支" || echo "✘ 推 ci-logs 失败（不影响其它步骤）"
 
-      # ★ 定时触发时 github.event.inputs.push_branch 是空串，所以判据写成
-      #   「不等于 false」而不是「等于 true」—— 否则每天自动跑完**不会推分支**，
-      #   产物全烂在 runner 里（这是最容易静默失败的一处）。
-      - name: 推到 v<完整版本> 分支（孤儿提交 + 强推，只留最新日期）
+      - name: 发布到 Releases（同版本原地更新；旧补丁版归档到 old 分支）
         if: success() && github.event.inputs.push_branch != 'false'
         env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          PY="$(python -c 'import sys;print(sys.executable)')"
-          FULL="$("$PY" -c 'import sys;print("%d.%d.%d" % sys.version_info[:3])')"
-          BRANCH="v$FULL"
           ROOT="${{ steps.build.outputs.root }}"
-          if [ -z "$ROOT" ] || [ ! -d "$ROOT" ]; then echo "找不到构建根"; exit 1; fi
+          [ -d "$ROOT" ] || { echo "找不到构建根"; exit 1; }
 
-          # CI 的 RUNNER_TEMP 每次都是干净的，所以根目录里的 PDF 全是本次产出，
-          # 不需要再按时间过滤（按时间过滤反而会误杀跑超过 3 小时的那几册）。
-          STAGE="$RUNNER_TEMP/stage-$FULL"
-          rm -rf "$STAGE"; mkdir -p "$STAGE"
-          N=0
-          for f in "$ROOT"/*.pdf; do
-            [ -f "$f" ] || continue
-            cp -f "$f" "$STAGE/"; N=$((N+1))
-          done
-          [ -f "$ROOT/验收报告.md" ] && cp -f "$ROOT/验收报告.md" "$STAGE/" || true
-          if [ "$N" -eq 0 ]; then echo "没有新产出 PDF，不推分支"; exit 1; fi
+          # 版本号与日期都从**构建根名字**里取，保证和产物、tag、标题三处永远一致
+          BNAME="$(basename "$ROOT")"                     # Python 3.15.2 PDF 文档 20261102
+          FULL="$(sed -E 's/^Python ([0-9]+\.[0-9]+\.[0-9]+) .*/\1/' <<<"$BNAME")"
+          DATE="$(sed -E 's/.* ([0-9]{8})$/\1/' <<<"$BNAME")"
+          MINOR="${FULL%.*}"
+          TAG="v$FULL"                                    # 不带日期 → 一条线只有一个 release
+          TITLE="Python $FULL 文档（$DATE）"
+          RAR="$RUNNER_TEMP/Python $FULL 文档 $DATE.rar"
+          echo "版本=$FULL  日期=$DATE  小版本线=$MINOR  tag=$TAG"
 
-          MB=$(du -sm "$STAGE" | cut -f1)
-          git -C "$STAGE" init -q
-          git -C "$STAGE" config user.name  "github-actions[bot]"
-          git -C "$STAGE" config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git -C "$STAGE" checkout -q -b "$BRANCH"
-          git -C "$STAGE" add -A
-          git -C "$STAGE" commit -q -m "build: Python $FULL  $N 个 PDF  ${MB} MB  $(date -u '+%Y-%m-%d %H:%M') UTC"
-          # --force：分支永远只有一个提交、只有最新日期的产物
-          git -C "$STAGE" -c credential.helper= push -q --force \
-            "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" \
-            "HEAD:refs/heads/$BRANCH"
-          echo "✔ Python $FULL → 分支 $BRANCH（$N 个 PDF，${MB} MB）"
+          # ---------- 1) 打 RAR ----------
+          shopt -s nullglob
+          ASSETS=( "$ROOT"/*.pdf )
+          [ -f "$ROOT/验收报告.md" ] && ASSETS+=( "$ROOT/验收报告.md" )
+          NPDF=${#ASSETS[@]}
+          if [ "$NPDF" -eq 0 ]; then echo "没有产出 PDF，不发布"; exit 1; fi
+          if command -v rar >/dev/null 2>&1; then
+            # 在构建根里按**纯文件名**打包（${arr##*/}），避免把绝对路径写进压缩包
+            ( cd "$ROOT" && rar a -m1 -idq "$RAR" "${ASSETS[@]##*/}" ) \
+              && { ASSETS+=( "$RAR" ); echo "RAR: $(du -h "$RAR" | cut -f1)"; } \
+              || echo "::warning::打 RAR 失败，本次只发 PDF"
+          else
+            echo "::warning::没有 rar 命令（multiverse 装不上），本次只发 PDF"
+          fi
+
+          # ---------- 2) 归档旧补丁版到 old 分支 ----------
+          # 触发条件：同一条线（v3.15.*）里存在**别的** tag —— 说明补丁版本变了。
+          MINOR_RE="${MINOR//./\\.}"
+          STALE=()
+          while IFS= read -r t; do
+            [ -n "$t" ] || continue
+            [ "$t" = "$TAG" ] && continue
+            STALE+=( "$t" )
+          done < <(gh release list --limit 300 --json tagName --jq '.[].tagName' \
+                     | grep -E "^v${MINOR_RE}\.[0-9]+$" || true)
+
+          if [ "${#STALE[@]}" -gt 0 ]; then
+            echo "发现旧补丁版：${STALE[*]} → 归档到 old 分支后删除对应 release"
+            W="$RUNNER_TEMP/oldrepo"
+            rm -rf "$W"
+            if ! git clone -q --depth 1 --branch old \
+                 "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "$W" 2>/dev/null; then
+              mkdir -p "$W"; git -C "$W" init -q; git -C "$W" checkout -q -b old
+            fi
+            git -C "$W" config user.name  "github-actions[bot]"
+            git -C "$W" config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+            GOT=()
+            for t in "${STALE[@]}"; do
+              D="$RUNNER_TEMP/old-$t"; rm -rf "$D"; mkdir -p "$D"
+              if gh release download "$t" --dir "$D" --clobber 2>/dev/null \
+                 && [ -n "$(ls -A "$D" 2>/dev/null)" ]; then
+                mkdir -p "$W/$t"; cp -f "$D"/* "$W/$t"/
+                GOT+=( "$t" )
+                echo "  已下载 $t（$(du -sh "$D" | cut -f1)）"
+              else
+                echo "  ::warning::$t 下载失败或没有附件，保留它的 release 不删"
+              fi
+            done
+
+            if [ "${#GOT[@]}" -gt 0 ]; then
+              git -C "$W" add -A
+              git -C "$W" commit -q -m "old: 归档 ${GOT[*]}（$(date -u '+%Y-%m-%d %H:%M') UTC）" || true
+              PUSHED=0
+              for i in 1 2 3; do
+                if git -C "$W" push -q \
+                     "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" \
+                     HEAD:refs/heads/old; then PUSHED=1; break; fi
+                echo "  old 分支推送冲突，第 $i 次重试"
+                git -C "$W" pull -q --rebase --autostash \
+                  "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" old || true
+                sleep 5
+              done
+              if [ "$PUSHED" -eq 1 ]; then
+                for t in "${GOT[@]}"; do
+                  gh release delete "$t" --yes --cleanup-tag \
+                    && echo "  已删除旧 release $t（内容在 old 分支 $t/ 下）"
+                done
+              else
+                echo "::error::old 分支推送失败，旧 release 先留着（下轮再归档）"
+              fi
+            fi
+          fi
+
+          # ---------- 3) 生成发布说明 ----------
+          NOTES="$RUNNER_TEMP/release-notes.md"
+          {
+            echo "**Python $FULL 中文文档 · 构建日期 $DATE**"
+            echo
+            if [ -f "$ROOT/验收报告.md" ]; then
+              sed -n 's/^- /- /p' "$ROOT/验收报告.md" | sed -n '2,8p'
+            fi
+            echo "- 分册 PDF：**$NPDF** 个（另含合并册与逐册明细）"
+            if [ -f "$RAR" ]; then echo "- 一键下载：**$(basename "$RAR")**（全部 PDF + 验收报告）"; fi
+            echo
+            echo "> 同一版本重跑会**原地更新**本 release（旧附件自动替换），不会一天一个。"
+            echo "> 补丁版本升级时，旧版本会整体归档到 [\`old\`](../../tree/old) 分支再删除其 release。"
+          } > "$NOTES"
+
+          # ---------- 4) 建或改 release ----------
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "release $TAG 已存在 → 原地更新"
+            gh release edit "$TAG" --title "$TITLE" --notes-file "$NOTES"
+            gh release upload "$TAG" "${ASSETS[@]}" --clobber
+          else
+            gh release create "$TAG" --title "$TITLE" --notes-file "$NOTES" "${ASSETS[@]}"
+          fi
+
+          # ---------- 5) 清掉本轮没有的旧附件（例如昨天那个带日期的 .rar）----------
+          KEEP="$(printf '%s\n' "${ASSETS[@]}" | while IFS= read -r f; do basename "$f"; done)"
+          while IFS= read -r a; do
+            [ -n "$a" ] || continue
+            if ! grep -qxF -- "$a" <<<"$KEEP"; then
+              gh release delete-asset "$TAG" "$a" --yes && echo "  清掉过期附件：$a"
+            fi
+          done < <(gh release view "$TAG" --json assets --jq '.assets[].name')
+
+          echo "✔ https://github.com/${GITHUB_REPOSITORY}/releases/tag/$TAG"
+          gh release view "$TAG" --json name,tagName,assets \
+            --jq '"  附件 " + ( .assets | length | tostring ) + " 个：" + ( [ .assets[].name ] | join(" / ") )'
 
       - name: 汇总
         if: always()
