@@ -108,13 +108,17 @@ jobs:
           # ⚠️ 但 2026-11-02 实测：装上这些字体之后，xelatex 的 nullfont 警告**依旧出现**，
           #   所以「缺字体」不是那次失败的根因（真正原因见 canary 步骤的结论）。
           PKGS="git curl ca-certificates latexmk texlive-xetex texlive-latex-extra texlive-binaries texlive-fonts-recommended texlive-lang-chinese lmodern fonts-freefont-otf fonts-dejavu fonts-liberation fonts-texgyre fonts-noto-cjk poppler-utils libcairo2"
-          APTOPTS="-o Acquire::Retries=3 -o Acquire::http::Pipeline-Depth=10"
-          if ! sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends $APTOPTS $PKGS; then
+          # ★ 硬超时 + 单连接超时：
+          #   apt 默认**没有**下载超时，镜像限速/卡住时会无限等（实测卡在 61 MB 的
+          #   fonts-noto-cjk 上 9 分钟不动，最后只能手动取消整个 job）。
+          #   这里给整步 900 秒、单连接 30 秒的硬上限：宁可失败重跑，也不要干等。
+          APTOPTS="-o Acquire::Retries=3 -o Acquire::http::Pipeline-Depth=10 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30"
+          if ! timeout 900 sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends $APTOPTS $PKGS; then
             # 一次性装失败时逐包重试：这样日志里能直接看出是哪个包的问题
-            echo "::error::批量安装失败，改为逐包定位"
+            echo "::error::批量安装失败或超时，改为逐包定位（每个包 300 秒上限）"
             for p in $PKGS; do
-              sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends $APTOPTS "$p" \
-                || echo "::warning::包 $p 装不上"
+              timeout 300 sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends $APTOPTS "$p" \
+                || echo "::warning::包 $p 装不上（或超时）"
             done
           fi
           # 3) 把这一轮下到的 .deb 存进缓存目录，下一轮直接用
