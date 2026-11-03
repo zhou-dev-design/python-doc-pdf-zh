@@ -34,13 +34,13 @@ Sphinx 的并行只在 POSIX 上有效：
 用法
 ----
     # 0) 先体检（不动网络、不建目录），确认这台机器能不能跑
-    python3 ci/linux/pdf_builder_linux.py --preflight --versions 3.10,3.11,3.12,3.13,3.14,3.15
+    python3 ci/linux/pdf_builder_linux.py --preflight --versions 3.11,3.12,3.13,3.14,3.15
 
     # 1) 单版本，全套
     python3 ci/linux/pdf_builder_linux.py --versions 3.15 --base ~/python-doc-build
 
     # 2) 三版本并行（一条命令，内部按版本各起一个子进程）
-    python3 ci/linux/pdf_builder_linux.py --versions 3.10,3.11,3.12,3.13,3.14,3.15 --jobs 4 --merge
+    python3 ci/linux/pdf_builder_linux.py --versions 3.11,3.12,3.13,3.14,3.15 --jobs 4 --merge
 
     # 3) 只重跑步骤 6 之后（前面已有产物时）
     python3 ci/linux/pdf_builder_linux.py --versions 3.15 --only 6,6b,7,7b,8,9
@@ -736,7 +736,7 @@ def main(argv: list[str] | None = None) -> int:
         description="Python 中文文档分册 PDF 构建器 · Linux/WSL 入口"
                     "（不改动 pdf_builder_multi.py）")
     ap.add_argument("--versions", default="3.14",
-                    help="要构建的版本，逗号分隔，如 3.10,3.11,3.12,3.13,3.14,3.15（默认 3.14）")
+                    help="要构建的版本，逗号分隔，如 3.11,3.12,3.13,3.14,3.15（默认 3.14）")
     ap.add_argument("--base", default=None,
                     help=f"基准目录（默认 $PDFBUILD_BASE 或 {default_base()}）")
     ap.add_argument("--root", default=None, help="直接指定构建根（只允许单版本）")

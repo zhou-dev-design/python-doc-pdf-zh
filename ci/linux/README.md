@@ -62,7 +62,7 @@ context = multiprocessing.get_context('fork')      # Windows 没有 fork
 
 ```bash
 # ① 体检（不联网、不建大目录）
-python3 ci/linux/pdf_builder_linux.py --preflight --versions 3.10,3.11,3.12,3.13,3.14,3.15
+python3 ci/linux/pdf_builder_linux.py --preflight --versions 3.11,3.12,3.13,3.14,3.15
 
 # ② 物理自检（验证平台胶水层）
 python3 ci/linux/selftest.py
@@ -71,7 +71,7 @@ python3 ci/linux/selftest.py
 python3 ci/linux/pdf_builder_linux.py --versions 3.15 --jobs 4 --merge
 
 # ④ 六版本并行（按版本各起一个子进程，共用 --jobs 个核）
-python3 ci/linux/pdf_builder_linux.py --versions 3.10,3.11,3.12,3.13,3.14,3.15 --jobs 4 --merge
+python3 ci/linux/pdf_builder_linux.py --versions 3.11,3.12,3.13,3.14,3.15 --jobs 4 --merge
 
 # ⑤ 只重跑后半段（前面产物已在）
 python3 ci/linux/pdf_builder_linux.py --versions 3.15 --only 6,6b,7,7b,8,9
@@ -127,11 +127,11 @@ sudo apt-get install -y \
 - `poppler-utils`：`pdfinfo` / `pdffonts`（步骤 7b/8 的核对要用）
 - `libcairo2`：3.14 / 3.15 的 `.svg` 插图（cairosvg）
 
-需要 3.10 ~ 3.15 任意一个版本的解释器（Sphinx 用哪个版本编都行）。
+需要 3.11 ~ 3.15 任意一个版本的解释器（Sphinx 用哪个版本编都行）。
 **完整版本号不靠解释器**：口径是官方文档站标题（`docs.python.org/zh-cn/3.13/` 的 h1
 = `Python 3.13.18 文档`），存在 `sphinx-pdf/version-titles.json`，由
 `sphinx-pdf/gui/pdf_builder_multi.py --tool titles --write` 生成；解释器只在没有缓存时兜底。
-各版本册数不同（3.10 27 册 … 3.15 39 册），映射表见 `sphinx-pdf/volumes.json`。
+各版本册数不同（3.11 29 册 … 3.15 39 册），映射表见 `sphinx-pdf/volumes.json`。
 
 ## 5. CI
 
