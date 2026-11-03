@@ -8,8 +8,8 @@ on:
   workflow_dispatch:
     inputs:
       versions:
-        description: "要构建的版本，逗号分隔（3.10~3.16 都认；册数各不相同，见 volumes.json）"
-        default: "3.13,3.14,3.15"
+        description: "要构建的版本，逗号分隔（3.10~3.15 六个版本；册数各不相同，见 volumes.json）"
+        default: "3.10,3.11,3.12,3.13,3.14,3.15"
       jobs:
         description: "并发数：步骤 6 的 sphinx -j 与步骤 7 的册级并发共用"
         default: "4"
@@ -46,15 +46,16 @@ jobs:
       - id: m
         name: 解析版本列表 → matrix
         env:
-          # 验证发布逻辑的临时改动：push 时只跑 3.15（验完恢复成只看 event.inputs）。
+          # 定时触发时没有 inputs（为空）→ 用下面的六版本默认值；手动触发则按填的来。
           VERSIONS: ${{ github.event.inputs.versions }}
         run: |
           python3 - <<'PY'
           import json, os
-          raw = os.environ.get("VERSIONS") or "3.13,3.14,3.15"
+          DEFAULT = ["3.10", "3.11", "3.12", "3.13", "3.14", "3.15"]
+          raw = os.environ.get("VERSIONS") or ""
           vs = [v.strip() for v in raw.split(",") if v.strip()]
           if not vs:
-              vs = ["3.13", "3.14", "3.15"]
+              vs = DEFAULT
           m = json.dumps({"version": vs})
           print("matrix =", m)
           with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as f:
@@ -68,6 +69,10 @@ jobs:
     timeout-minutes: 360
     strategy:
       fail-fast: false
+      # ★ 六个版本（3.10~3.15）全部同时起跑：每个 job 一个独立 runner，
+      #   互不干扰；公开仓库 Actions 分钟数不限，唯一的瓶颈是并发额度
+      #   （免费/公开仓库通常允许 20 个，六个远够）。
+      max-parallel: 6
       matrix: ${{ fromJson(needs.prepare.outputs.matrix) }}
     name: build ${{ matrix.version }}
     steps:
@@ -221,6 +226,24 @@ jobs:
 
       - name: 逻辑自检（平台胶水层，不联网）
         run: python ci/linux/selftest.py
+
+      # ★ 命名口径自检：文件名里的完整版本号取自**官方文档站标题**
+      #   （docs.python.org/zh-cn/3.13/ 的 h1 = `Python 3.13.18 文档`），
+      #   缓存在 sphinx-pdf/version-titles.json。文档站一发新版，这一步就会
+      #   打出「缓存是 3.13.18 → 需更新」，提醒我们跑 `--tool titles --write`。
+      #   取不到网络只警告：命名继续用缓存，绝不因此挡掉整轮构建。
+      - name: 版本号口径对着官方文档站复核（联网，失败只警告）
+        continue-on-error: true
+        run: |
+          python sphinx-pdf/gui/pdf_builder_multi.py --tool titles \
+            --versions "${{ matrix.version }}" \
+            || echo "::warning::官方文档站取不到或版本号有变化 —— 本轮命名仍按 version-titles.json"
+
+      - name: 分册清单自检（不联网，核对每版册数与合并册大纲）
+        run: |
+          python sphinx-pdf/gui/pdf_builder_multi.py --tool name-map --check
+          python sphinx-pdf/gui/pdf_builder_multi.py --tool volumes \
+            --versions "${{ matrix.version }}"
 
       - name: 构建 Python ${{ matrix.version }}
         id: build
@@ -487,44 +510,49 @@ jobs:
           TAG="v$FULL"                                    # 不带日期 → 一条线只有一个 release
           TITLE="Python $FULL 文档（$DATE）"
           # ---------- 1) 摆一个「ASCII 名」的暂存目录 ----------
-          # ★ 2026-11-03 的坑：GitHub 的 release 附件名**只接受 ASCII**，
-          #   中文和空格会被服务端换成「.」——`01Python 3.15 有什么新变化.pdf`
-          #   变成 `01Python.3.15.pdf`，`0913如何利用 urllib 包获取网络资源.pdf`
-          #   变成 `0913.urllib.pdf`，`验收报告.md` 变成 `default.md`。这不是
-          #   rename 没跑（构建根里就是中文名），是上传时被改了名。
-          #   所以：单个附件统一用「册号-英文标识.pdf」（映射在 ci/linux/asset-names.tsv），
-          #   **中文文件名保留在压缩包内部**（压缩包是二进制，包内文件名不受此限）。
-          MAP="ci/linux/asset-names.tsv"
-          [ -f "$MAP" ] || { echo "::error::缺少 $MAP（册号→附件名映射）"; exit 1; }
-
+          # ★ 2026-11-03 起的发布模型：Release 里**只放两样**
+          #     · 合并册 PDF（英文名）
+          #     · 打包了全部分册（中文原名）+ 验收报告的 RAR
+          #   为什么：GitHub 附件名只接受 ASCII，39 个分册名全被服务端改成点号
+          #   （`01Python 3.15 有什么新变化.pdf` → `01Python.3.15.pdf`），
+          #   既要维护一张映射表、又占 40+ 个附件位。单册改为「从 RAR 里取」后，
+          #   附件固定 2 个、名字永远正确、不用同步映射表。
           STAGE="$RUNNER_TEMP/assets-$FULL"
           rm -rf "$STAGE"; mkdir -p "$STAGE"
           EXP=()                                  # 期望出现在 release 里的附件名
           shopt -s nullglob
-          for f in "$ROOT"/*.pdf; do
-            base="$(basename "$f" .pdf)"
-            if [[ "$base" =~ ^([0-9]+) ]]; then
-              num="${BASH_REMATCH[1]}"
-              stem="$(awk -F'\t' -v k="$num" '$1==k{print $2; exit}' "$MAP")"
-              [ -n "$stem" ] || { echo "::error::$MAP 里没有册号 $num（$base）→ 加一册就要同步映射表"; exit 1; }
-              name="$num-$stem.pdf"
-            else
-              name="00-Python-$FULL-docs-$DATE.pdf"          # 合并册（没有册号）
-            fi
-            cp -f "$f" "$STAGE/$name"
-            EXP+=( "$name" )
-          done
-          NPDF=${#EXP[@]}                          # 只数 PDF（分册 + 合并册）
-          [ "$NPDF" -gt 0 ] || { echo "::error::没有产出 PDF，不发布"; exit 1; }
-          if [ -f "$ROOT/验收报告.md" ]; then
-            cp -f "$ROOT/验收报告.md" "$STAGE/REPORT.md"; EXP+=( "REPORT.md" )
-          fi
-          echo "暂存：$NPDF 个 PDF + 报告 → $STAGE"
 
-          # ---------- 2) 压缩包（包内用中文原名） ----------
+          # 合并册 = 根目录里**没有册号前缀**的那一个（分册都是 `01…` `0901…`）
+          MERGED=()
+          ALLPDF=("$ROOT"/*.pdf)
+          for f in "${ALLPDF[@]}"; do
+            base="$(basename "$f" .pdf)"
+            # ★ 不要写成 `[[ ... ]] && continue`：条件为假时整条列表退出码是 1，
+            #   在 `set -e` 下会直接终止整个发布步骤（实测非常隐蔽）。
+            if [[ "$base" =~ ^[0-9] ]]; then continue; fi
+            MERGED+=( "$f" )
+          done
+          NB=${#ALLPDF[@]}
+          if [ "${#MERGED[@]}" -eq 0 ] && [ "${{ github.event.inputs.merge }}" = "false" ]; then
+            echo "本次 --no-merge，没有合并册 → 跳过发布（分册仍在 artifact 里）"
+            exit 0
+          fi
+          [ "${#MERGED[@]}" -eq 1 ] || {
+            echo "::error::合并册应当恰好 1 个，实际 ${#MERGED[@]} 个：$(printf '%s ' "${MERGED[@]##*/}")"
+            echo "         → 检查步骤 9 是否真的产出了合并册（或手动触发时 merge 被设成 false）"
+            exit 1
+          }
+          PDF_NAME="Python-$FULL-docs-$DATE.pdf"
+          cp -f "${MERGED[0]}" "$STAGE/$PDF_NAME"
+          EXP+=( "$PDF_NAME" )
+          echo "合并册：$PDF_NAME（构建根共 $NB 个 PDF，其中分册 $((NB - 1)) 个）"
+
+          # ---------- 2) 压缩包（包内用中文原名；单册只能从这里取） ----------
+          # ★ 压缩包现在是**唯一**能拿到单册的入口，所以它缺席 = 发布残缺。
+          #   以前是「失败就只发单个 PDF」，现在直接报错不发布（artifact 里还留着全部分册）。
           ARCFILES=()
-          for f in "$ROOT"/*.pdf; do ARCFILES+=( "$(basename "$f")" ); done
-          [ -f "$ROOT/验收报告.md" ] && ARCFILES+=( "验收报告.md" )
+          for f in "${ALLPDF[@]}"; do ARCFILES+=( "$(basename "$f")" ); done
+          if [ -f "$ROOT/验收报告.md" ]; then ARCFILES+=( "验收报告.md" ); fi
           ARCH=""
           if command -v rar >/dev/null 2>&1; then
             rm -f "$RUNNER_TEMP/pack.rar"
@@ -542,14 +570,16 @@ jobs:
               ARCH="Python-$FULL-docs-$DATE.zip"
               cp -f "$RUNNER_TEMP/pack.zip" "$STAGE/$ARCH"
             else
-              echo "::warning::zip 打包也失败，本次只发单个 PDF"
+              echo "::warning::zip 打包也失败"
             fi
           fi
-          if [ -n "$ARCH" ]; then
-            EXP+=( "$ARCH" ); echo "压缩包：$ARCH（$(du -h "$STAGE/$ARCH" | cut -f1)，内含中文文件名）"
-          else
-            echo "::warning::没有任何压缩工具（rar/zip）—— 本次只发单个 PDF"
+          if [ -z "$ARCH" ]; then
+            echo "::error::rar 和 zip 都没打出包 —— 单册将无处可取，本次不发布"
+            echo "         （全部分册仍在 artifact 里，7 天内可下载）"
+            exit 1
           fi
+          EXP+=( "$ARCH" )
+          echo "压缩包：$ARCH（$(du -h "$STAGE/$ARCH" | cut -f1)，内含 $NB 个 PDF + 报告的中文原名）"
 
           # 上传前先自检：期望的附件都得真的存在（否则后面「清旧附件」会误伤）
           for a in "${EXP[@]}"; do
@@ -623,15 +653,12 @@ jobs:
             if [ -f "$ROOT/验收报告.md" ]; then
               grep '^- ' "$ROOT/验收报告.md" | sed -n '2,8p'
             fi
-            echo "- 分册 PDF：**$NPDF** 个（含合并册）"
-            if [ -n "$ARCH" ]; then
-              echo "- 一键全下：**$ARCH**（包内是**中文文件名**，约 $(du -h "$STAGE/$ARCH" | cut -f1)）"
-            fi
+            echo "- 合并册：**$PDF_NAME**（单本，直接下载即看）"
+            echo "- 全部分册（$((NB - 1)) 册）+ 合并册 + 验收报告：**$ARCH**（约 $(du -h "$STAGE/$ARCH" | cut -f1)）"
             echo
-            echo "**附件命名说明**：GitHub 的 release 附件名只支持 ASCII，中文会被替换成 \`.\`"
-            echo "（例如 \`01Python 3.15 有什么新变化.pdf\` 会变成 \`01Python.3.15.pdf\`）。"
-            echo "所以单个附件统一用 \`册号-英文标识.pdf\`（\`01-whatsnew\`、\`05-library\`、\`0901-asyncio\` …），"
-            echo "**中文文件名在压缩包内部保持不变**。"
+            echo "**只要某一册？** 下载压缩包解压即可 —— 包里是 \`01Python 3.15 有什么新变化.pdf\`"
+            echo "这样的**中文原名**。Release 不再逐个挂分册：GitHub 的附件名只接受 ASCII，"
+            echo "中文会被服务端替换成 \`.\`（\`01Python.3.15.pdf\`），挂上去反而认不出是哪一册。"
             echo
             echo "> 同一版本重跑会**原地更新**本 release（同名附件自动替换），不会一天一个。"
             echo "> 补丁版本升级时，旧版本会整体归档到 [\`old\`](../../tree/old) 分支再删除其 release。"
@@ -661,22 +688,29 @@ jobs:
           # ---------- 7) 上传（--clobber：同名直接覆盖 = 原地更新） ----------
           gh release upload "$TAG" --clobber "$STAGE"/*
 
-          # ---------- 8) 核对：期望的附件是不是都在 ----------
+          # ---------- 8) 核对：附件必须**恰好**是「合并册 + 压缩包」 ----------
           gh release view "$TAG" --json assets --jq '.assets[].name' > "$RUNNER_TEMP/actual.txt"
-          ACT="$(wc -l < "$RUNNER_TEMP/actual.txt")"
-          MISSING=()
+          mapfile -t ACTUAL < "$RUNNER_TEMP/actual.txt" || true
+          ACT=${#ACTUAL[@]}
+          MISSING=(); EXTRA=()
           for a in "${EXP[@]}"; do
-            grep -Fxq -- "$a" "$RUNNER_TEMP/actual.txt" || MISSING+=( "$a" )
+            printf '%s\n' "${ACTUAL[@]}" | grep -Fxq -- "$a" || MISSING+=( "$a" )
           done
-          echo "本次附件：$ACT 个（期望 ${#EXP[@]} 个）"
+          # ★ 「多了」也要报：老 release 有 40+ 个分册附件，清理逻辑一旦漏一个，
+          #   下载页就又变回一堆点号名 —— 这正是「精简」要防的回归。
+          for a in "${ACTUAL[@]}"; do
+            [ -n "$a" ] || continue
+            printf '%s\n' "${EXP[@]}" | grep -Fxq -- "$a" || EXTRA+=( "$a" )
+          done
+          echo "本次附件：$ACT 个（期望 ${#EXP[@]} 个：合并册 PDF + 全部册压缩包）"
           { cat "$NOTES"
             echo
-            echo "- 附件数：**$ACT** 个（PDF $NPDF + 报告 + 压缩包）"
+            echo "- 附件：**$ACT** 个（合并册 PDF + 全部分册压缩包）"
           } > "$NOTES.final"
           gh release edit "$TAG" --notes-file "$NOTES.final"
-          if [ "${#MISSING[@]}" -gt 0 ]; then
-            echo "::error::有 ${#MISSING[@]} 个附件没传上去：${MISSING[*]}"
-            head -10 "$RUNNER_TEMP/actual.txt"
+          if [ "${#MISSING[@]}" -gt 0 ] || [ "${#EXTRA[@]}" -gt 0 ]; then
+            echo "::error::附件核对不通过 —— 缺：${MISSING[*]:-无}；多余：${EXTRA[*]:-无}"
+            printf '  实际附件：%s\n' "${ACTUAL[@]}"
             exit 1
           fi
 

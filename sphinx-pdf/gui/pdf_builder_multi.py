@@ -5,7 +5,7 @@
 ★★ 本文件是 `pdf_builder_gui.py` 的**多版本并行版**（2026-10-17 派生）★★
 
 与单版本版的差别只有外面这几层，**步骤 0~10 的流水线一行未改**：
-  · 版本可以多选（3.10 ~ 3.16，册数各不相同：27 / 29 / 32 / 37 / 38 / 39 / 39），选几个就跑几个；
+  · 版本可以多选（3.10 ~ 3.15，册数各不相同：27 / 29 / 32 / 37 / 38 / 39），选几个就跑几个；
   · 每个版本各用各的解释器（D:\\软件\\Python313 / 314 / 315），**各起一个子进程**并行跑
     —— 进程隔离，不会有 venv / 工作目录 / 环境变量互相踩的问题；
   · 点「开始处理」后弹出一个**多版本并行日志窗口**，每个版本一个独立日志面板
@@ -41,8 +41,7 @@
     7b         9              索引自检（分组标题「非字母/数字」+ 页码超链接 + 长条目断点）
     8          10             收集 / 验收 / 重命名
 
-★ 默认配置就能直接跑：版本默认 3.14（可选 3.10 ~ 3.16，两个仓库同步切分支；
-  3.16 还没切分支时自动用 main），源码与翻译源默认**从网站实时克隆/更新**，
+★ 默认配置就能直接跑：版本默认 3.14（可选 3.10 ~ 3.15，两个仓库同步切分支），源码与翻译源默认**从网站实时克隆/更新**，
   语言默认中文，构建目录按版本自动推算。
 ★ 分册表（每版几册、每册叫什么）在 `sphinx-pdf/volumes.json`，界面「分册配置…」
   可以可视化编辑；`--tool volumes --verify` 联网对着 CPython 官方复核。
@@ -808,13 +807,16 @@ def _guess_base_dir() -> str:
 
 #: 支持的版本 —— 两个仓库（cpython / python-docs-zh-cn）都有同名的 3.x 分支。
 #: ★ 册数**每个版本都不一样**（3.10 27 册 / 3.11 29 / 3.12 32 / 3.13 37 / 3.14 38 /
-#:   3.15 39 / 3.16 39），来源是各分支 `Doc/conf.py` 的 `latex_documents` 加上
+#:   3.15 39），来源是各分支 `Doc/conf.py` 的 `latex_documents` 加上
 #:   `Doc/howto/*.rst` 的文件数；`--tool volumes --verify` 会联网对着官方复核。
-KNOWN_VERSIONS = ["3.10", "3.11", "3.12", "3.13", "3.14", "3.15", "3.16"]
+#: ★ 3.16 **暂时不收录**：上游还没切出 `3.16` 分支（只有 main），中文译文也没有对应
+#:   分支，现在收进来只会编出「英文 + 版本号不确定」的东西。等分支出现再加一行即可
+#:   （同时给 volumes.json 里 3.16 新增的册子补 min 区间）。
+KNOWN_VERSIONS = ["3.10", "3.11", "3.12", "3.13", "3.14", "3.15"]
 
-#: ★ 还没切出独立分支的版本 → 借哪个分支。3.16 目前就是 main；
-#:   等 `3.16` 分支真的切出来后，把这里这一行删掉即可（界面里也能用「分支覆盖」）。
-BRANCH_ALIAS: dict[str, str] = {"3.16": "main"}
+#: ★ 还没切出独立分支的版本 → 借哪个分支（例如将来 3.16 尚未建分支时填 `{"3.16": "main"}`）。
+#:   目前六个版本都有自己的分支，所以是空的；机制留着，加版本时不用改 `Config.branch`。
+BRANCH_ALIAS: dict[str, str] = {}
 
 #: ★ 每个版本用哪个解释器 —— 三个分支各用各的，互不干扰（避免共用 venv / 依赖）。
 #: 界面上可以改（① 版本与目录 → 每个版本一行），改完存进 config.json 的
@@ -872,9 +874,82 @@ def interpreter_version(py: str) -> str:
     return ver
 
 
+#: 官方中文文档站的标题口径 —— 文件名/文件夹名/Release 标题里的**完整版本号认它**，
+#: 而不是「这台机器上碰巧装到的解释器」。来源是各版本首页 h1：
+#:   https://docs.python.org/zh-cn/3.10/  → `Python 3.10.22 文档`
+#: 缓存文件 `version-titles.json` 由 `--tool titles` 生成（见本文件下半部分）。
+VERSION_TITLES_FILENAME = 'version-titles.json'
+_OFFICIAL_TITLES: dict[str, dict[str, str]] | None = None
+
+
+def version_titles_candidates() -> list[Path]:
+    """`version-titles.json` 的查找顺序 —— 与 `volumes.json` 用同一套目录。"""
+    out: list[Path] = []
+    env = os.environ.get('PDFBUILDER_TITLES', '').strip()
+    if env:
+        out.append(Path(env))
+    for p in volumes_json_candidates():
+        out.append(p.with_name(VERSION_TITLES_FILENAME))
+    return out
+
+
+def official_titles(*, refresh: bool = False) -> dict[str, dict[str, str]]:
+    """读 `version-titles.json` → `{'3.10': {'full': '3.10.22', 'title': 'Python 3.10.22 文档'}}`。
+
+    ★ 读不到/读坏一律返回空字典（= 退回问解释器），绝不因为一个缓存文件让程序起不来。
+    """
+    global _OFFICIAL_TITLES
+    if _OFFICIAL_TITLES is not None and not refresh:
+        return _OFFICIAL_TITLES
+    data: dict[str, dict[str, str]] = {}
+    for p in version_titles_candidates():
+        if not p.is_file():
+            continue
+        try:
+            raw = json.loads(p.read_text(encoding='utf-8'))
+        except (OSError, ValueError):
+            continue
+        for k, v in (raw.get('titles') or {}).items():
+            if not isinstance(v, dict):
+                continue
+            full = str(v.get('full') or '').strip()
+            if full:
+                data[str(k).strip()] = {'full': full, 'title': str(v.get('title') or '').strip()}
+        break
+    _OFFICIAL_TITLES = data
+    return data
+
+
+def official_full_version(short: str) -> str:
+    """官方文档站标题里的完整版本号；没有/不匹配就返回空串。"""
+    short = (short or '').strip()
+    ent = official_titles().get(short) or {}
+    full = str(ent.get('full') or '')
+    return full if short and full.startswith(short + '.') else ''
+
+
+def official_title(short: str) -> str:
+    """官方文档站标题原文（`Python 3.10.22 文档`）；没有就返回空串。"""
+    return str((official_titles().get((short or '').strip()) or {}).get('title') or '')
+
+
 def resolve_full_version(short: str, py: str = "") -> str:
-    """`3.13` → `3.13.16`。**只认同 major.minor 的结果**，宁可退到 `.0` 也不张冠李戴。"""
+    """`3.13` → `3.13.18`。
+
+    ★ 优先级（为什么是这个顺序）：
+      1. `version-titles.json` —— **官方文档站 h1 的版本号**。用户点开
+         `docs.python.org/zh-cn/3.13/` 看到的就是 3.13.18，下载到的东西也该叫这个。
+         CI 上 `setup-python` 给的补丁版可能落后于文档站，跟着解释器走就会出现
+         「内容是新分支、文件名是老补丁版」的错位；本地换台机器也会变。
+      2. 问解释器 —— 本地手动跑、又没有缓存文件时最准。
+      3. 本进程 / `.0` 兜底。
+
+    **只认同 major.minor 的结果**，宁可退到 `.0` 也不张冠李戴。
+    """
     short = (short or "").strip() or "3.14"
+    off = official_full_version(short)
+    if off:
+        return off
     for cand in (py, DEFAULT_VERSION_PYTHONS.get(short, "")):
         v = interpreter_version(cand)
         if v.startswith(short + "."):
@@ -1005,9 +1080,9 @@ class Config:
     # ---------------------------------------------------------------- helpers
     @property
     def branch(self) -> str:
-        """两个仓库用的分支名：默认就是版本号（3.10…3.16）。
+        """两个仓库用的分支名：默认就是版本号（3.10…3.15）。
 
-        ★ 还没切出分支的版本走 `BRANCH_ALIAS`（3.16 → main）；界面上的
+        ★ 还没切出分支的版本走 `BRANCH_ALIAS`（如将来 `{"3.16": "main"}`）；界面上的
           「分支覆盖」永远优先，所以哪个版本切出来了都不用改代码。
         """
         explicit = (self.version_branch or "").strip()
@@ -1022,11 +1097,12 @@ class Config:
         return (self.date_tag or "").strip() or today_tag()
 
     def full_version(self) -> str:
-        """完整版本号：`3.13` → `3.13.16`（问解释器，拿不到才退 `.0`）。
+        """完整版本号：`3.13` → `3.13.18`。
 
-        ★ 问的是 **`python_for(版本)`**，不是 `self.python` —— 后者是「兜底解释器」
-          字段，可能指向别的小版本（实测 3.13 会拿到 3.13.14，而实际要 3.13.16）。
-          顺序：① 里这一行填的解释器 > 内置版本表 > 兜底字段。
+        ★ 口径是**官方文档站标题**（`docs.python.org/zh-cn/3.13/` 的 h1 写着
+          `Python 3.13.18 文档`），存在 `sphinx-pdf/version-titles.json` 里；
+          没有缓存时才去问解释器（`python_for(版本)`，不是兜底字段 `self.python`，
+          后者可能指向别的小版本）。见 `resolve_full_version()` 的优先级说明。
         """
         return resolve_full_version(self.version, self.python_for(self.version))
 
@@ -7484,10 +7560,30 @@ def _latex_slug_block(conf: str) -> str:
     return conf[i:]
 
 
-def official_volumes(branch: str) -> dict[str, list[str]]:
-    """官方某分支的册子清单 → `{'main': [...], 'howto': [...]}`（slug 形式）。
+def _howto_from_index(text: str) -> list[str]:
+    """从 `Doc/howto/index.rst` 的 toctree 里抠 slug（API 限流时的退路）。
 
-    ★ 用 GitHub 的 raw + contents 两个公开接口，不需要 token；两个都是只读。
+    toctree 条目就是「缩进 + 纯 slug」的行；`:doc:` 交叉引用不算。
+    ★ 只是**近似**：conf.py 用 `os.listdir('howto')` 数目录里所有 `.rst`，
+      index.rst 可能少列几篇（例如 `clinic.rst`）。所以这条退路只用来提示，
+      不参与「算不算差异」的判定。
+    """
+    out: list[str] = []
+    for line in text.splitlines():
+        m = re.match(r"^\s{2,}([a-z0-9][a-z0-9_\-]*)\s*$", line)
+        if m and m.group(1) not in out:
+            out.append(m.group(1))
+    return sorted(out)
+
+
+def official_volumes(branch: str) -> dict:
+    """官方某分支的册子清单 → `{'main': [...], 'howto': [...], 'approx': bool}`。
+
+    ★ 静态册看 `Doc/conf.py` 的 `latex_documents`（raw 接口，不限流）；
+      指南看 `Doc/howto/*.rst` 的文件数。后者官方用的是 GitHub contents API，
+      **匿名额只有 60 次/小时**（CI runner 共享 IP，很容易打满），
+      403 时退回 `index.rst` 的 toctree 做近似核对，并置 `approx=True` ——
+      这样限流不会再被误报成「配置和官方不一致」。
     """
     conf = _http_text(f"https://raw.githubusercontent.com/python/cpython/{branch}/Doc/conf.py")
     block = _latex_slug_block(conf)
@@ -7499,13 +7595,24 @@ def official_volumes(branch: str) -> dict[str, list[str]]:
             main.append(m.group(1))
     if re.search(r"['\"]whatsnew/['\"]\s*\+", block):
         main.append("whatsnew")
-    listing = json.loads(_http_text(
-        f"https://api.github.com/repos/python/cpython/contents/Doc/howto?ref={branch}"))
-    if isinstance(listing, dict):     # 出错时是 {"message": ...}
-        raise ValueError(f"列 Doc/howto 失败：{listing.get('message')}")
-    howto = sorted(x["name"][:-4] for x in listing
-                   if x.get("name", "").endswith(".rst") and x["name"] != "index.rst")
-    return {"main": main, "howto": ["howto-" + h for h in howto]}
+
+    approx = False
+    try:
+        listing = json.loads(_http_text(
+            f"https://api.github.com/repos/python/cpython/contents/Doc/howto?ref={branch}"))
+        if isinstance(listing, dict):     # 出错时是 {"message": ...}
+            raise ValueError(str(listing.get("message")))
+        howto = sorted(x["name"][:-4] for x in listing
+                       if x.get("name", "").endswith(".rst") and x["name"] != "index.rst")
+    except Exception as e:                # noqa: BLE001 —— 限流/网络抖动都走退路
+        print(f"        · GitHub API 不可用（{e}）→ 改用 Doc/howto/index.rst 近似核对")
+        idx = _http_text(
+            f"https://raw.githubusercontent.com/python/cpython/{branch}/Doc/howto/index.rst")
+        howto = _howto_from_index(idx)
+        if not howto:
+            raise ValueError("API 限流，且 index.rst 里也解析不出 toctree 条目") from e
+        approx = True
+    return {"main": main, "howto": ["howto-" + h for h in howto], "approx": approx}
 
 
 def vols_cli() -> int:
@@ -7536,19 +7643,133 @@ def vols_cli() -> int:
         have = expected_slugs(v)
         miss = [s for s in want if s not in have]        # 官方有、本地没登记
         extra = [s for s in have if s not in want]       # 本地登记了、官方没有
-        mark = "OK" if not (miss or extra) else "!!"
+        approx = bool(off.get("approx"))
+        # ★ 近似核对（API 限流时）只打印一行摘要、不列差异、不算失败：
+        #   index.rst 的 toctree 与 `os.listdir` 的口径本来就不一样（会少列几篇），
+        #   拿它当判据只会刷出几十行假差异。
+        mark = "OK" if (not (miss or extra) or approx) else "!!"
         print(f"  {v:5s} {mark} 官方 {len(want):2d} 册 / 本地 {len(have):2d} 册"
-              + (f"（分支 {branch}）" if branch != v else ""))
-        if miss:
-            bad = 1
-            print(f"        官方有但本地没登记 {len(miss)} 个：{'、'.join(miss)}")
-            print(f"        → 在 volumes.json 里补这些条目（name 里的 {{V}} 会换成版本号）")
-        if extra:
-            bad = 1
-            print(f"        本地登记了但官方没有 {len(extra)} 个：{'、'.join(extra)}")
-            print(f"        → 给它们加 min/max 版本区间，或删掉")
+              + (f"（分支 {branch}）" if branch != v else "")
+              + ("（近似，不作判据）" if approx else ""))
+        if approx:
+            print("        · GitHub API 额度用完了（匿名 60 次/小时）；"
+                  "精确核对请等额度恢复，或到 CI 上跑（runner 有自己的额度）")
+        else:
+            if miss:
+                bad = 1
+                print(f"        官方有但本地没登记 {len(miss)} 个：{'、'.join(miss)}")
+                print(f"        → 在 volumes.json 里补这些条目（name 里的 {{V}} 会换成版本号）")
+            if extra:
+                bad = 1
+                print(f"        本地登记了但官方没有 {len(extra)} 个：{'、'.join(extra)}")
+                print(f"        → 给它们加 min/max 版本区间，或删掉")
     print("\n" + ("全部与官方一致。" if bad == 0 else "有差异，见上。"))
     return 0 if bad == 0 else (1 if bad == 1 else 2)
+
+
+# ---------------------------------------------------------------------------
+# 内置工具：titles（官方文档站标题 → 完整版本号口径）
+#   入口：titles_cli
+# ---------------------------------------------------------------------------
+# """完整版本号从哪来 —— 看官方文档站的标题，而不是「这台机器上的解释器」。
+#
+# 每个版本首页的 h1 就是「Python <完整版本> 文档」：
+#     https://docs.python.org/zh-cn/3.10/  →  Python 3.10.22 文档
+#     https://docs.python.org/zh-cn/3.15/  →  Python 3.15.2 文档
+# 抓下来存进 `sphinx-pdf/version-titles.json`，`resolve_full_version()` 优先用它。
+# ★ 为什么必须这样：CI 的 `setup-python` 只保证「3.13 某个补丁版」，不一定等于文档站
+#   的 3.13.18。命名跟着解释器走，就会「内容是新分支、文件名是老补丁版」；
+#   而用户对照的就是文档站标题那个号。
+#
+# 用法：
+#     --tool titles                     抓六个版本，打印并与缓存比对（不写文件）
+#     --tool titles --write             同上，并把结果写进 version-titles.json
+#     --tool titles --versions 3.10,3.15
+# """
+
+DOCS_ZH_BASE = "https://docs.python.org/zh-cn/{v}/"
+
+
+def fetch_official_title(v: str) -> tuple[str, str]:
+    """抓官方该版本首页 → `('Python 3.10.22 文档', '3.10.22')`。
+
+    两套模板都要认：3.13 及更早是 `<h1>Python 3.10.22 文档</h1>`；
+    3.14 起换了主题，`<h1>` 里可能带额外的 `<span>`（先剥标签再匹配）。
+    `<title>` 作为兜底：3.10~3.13 写作 `3.10.22 Documentation`（没有 Python 前缀）。
+    """
+    from html import unescape
+    page = _http_text(DOCS_ZH_BASE.format(v=v))
+    cands: list[str] = []
+    for pat in (r"<h1[^>]*>(.*?)</h1>", r"<title[^>]*>(.*?)</title>"):
+        m = re.search(pat, page, re.S)
+        if m:
+            cands.append(unescape(re.sub(r"<[^>]+>", " ", m.group(1))))
+    for text in cands:
+        text = " ".join(text.split())
+        for pat in (r"Python\s+(\d+\.\d+\.\d+)\s*文档",
+                    r"Python\s+(\d+\.\d+\.\d+)\s+documentation",
+                    r"\b(\d+\.\d+\.\d+)\b"):
+            m = re.search(pat, text, re.I)
+            if m:
+                return text, m.group(1)
+    raise ValueError("标题里找不到完整版本号")
+
+
+def titles_cli() -> int:
+    argv = sys.argv[1:]
+    vers = list(KNOWN_VERSIONS)
+    for i, a in enumerate(argv):
+        if a == "--versions" and i + 1 < len(argv):
+            vers = [x.strip() for x in argv[i + 1].split(",") if x.strip()]
+    write = "--write" in argv
+    cached = official_titles(refresh=True)
+    existing = next((p for p in version_titles_candidates() if p.is_file()), None)
+    target = default_volumes_json_path().with_name(VERSION_TITLES_FILENAME)
+    print(f"缓存文件：{existing or target}"
+          + ("" if existing else "（还没有，--write 会写到这里）"))
+    print(f"{'版本':6s} {'官方标题':26s} {'官方完整版':11s} 缓存/结果")
+    bad = 0
+    titles: dict[str, dict[str, str]] = {}
+    for v in vers:
+        try:
+            text, full = fetch_official_title(v)
+        except Exception as e:                      # noqa: BLE001 —— 网络抖动都算
+            print(f"{v:6s} !! 取不到：{e}")
+            bad = 2
+            continue
+        old = (cached.get(v) or {}).get('full') or ''
+        if not full.startswith(v + "."):
+            mark = f"!! 版本对不上（应为 {v}.x）"
+            bad = 1
+        elif old == full:
+            mark = "= 缓存一致"
+        elif not old:
+            mark = "+ 缓存里没有"
+        else:
+            mark = f"! 缓存是 {old} → 需更新"
+            bad = max(bad, 1) if not write else bad
+        titles[v] = {'full': full, 'title': text}
+        print(f"{v:6s} {text:26s} {full:11s} {mark}")
+
+    if write and titles:
+        p = default_volumes_json_path().with_name(VERSION_TITLES_FILENAME)
+        payload = {
+            "schema": 1,
+            "_说明": "完整版本号口径：取自官方中文文档站各版本首页 h1（如 `Python 3.10.22 文档`）。"
+                     "文件名/文件夹名/Release 标题都以这里的 full 为准；由 `--tool titles --write` 生成。",
+            "_来源": "https://docs.python.org/zh-cn/<版本>/",
+            "titles": dict(sorted(titles.items(), key=lambda kv: _ver_key(kv[0]))),
+        }
+        tmp = p.with_suffix('.json.tmp')
+        tmp.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding='utf-8')
+        tmp.replace(p)
+        print(f"\n已写入 {p}（{len(titles)} 条）")
+        bad = 0
+    elif bad == 0:
+        print("\n全部与缓存一致。")
+    else:
+        print("\n有差异：加 `--write` 更新 version-titles.json。")
+    return 0 if bad == 0 else bad
 
 
 
@@ -7556,6 +7777,7 @@ def vols_cli() -> int:
 BUILTIN_TOOLS: dict[str, tuple[str, object]] = {
     "name-map": ("分册命名真源自检/查询（原 tools/name_map.py）", nm_cli),
     "volumes": ("各版本册数 / 对着官方 conf.py 复核", vols_cli),
+    "titles": ("官方文档站标题 → 完整版本号口径（version-titles.json）", titles_cli),
     "check-doc-refs": ("Doc/ 越界引用自检（原 tools/check-doc-refs.py）", cdr_main),
     "alias-po": ("接回被搬走目录的译文（原 tools/alias-po.py）", alpo_main),
     "localize-titles": ("封面标题中文化（原 tools/localize-titles.py）", loct_main),
@@ -8334,7 +8556,7 @@ class SettingsPanel(QWidget):
                             hint="勾几个跑几个（≥2 个 = 多进程并行）；"
                                  "每个版本各用各的解释器，留空 = 自动探测")
         vtip = QLabel("勾 1 个：和以前一样，就在右边这个面板里跑。"
-                      "勾 2~3 个：各起一个子进程同时跑，点「开始处理」后"
+                      "勾 2 个及以上：各起一个子进程同时跑（六版全勾 = 六路并行），点「开始处理」后"
                       "会弹出多版本并行日志窗口，一个版本一个独立日志框。")
         vtip.setObjectName("hint")
         vtip.setWordWrap(True)

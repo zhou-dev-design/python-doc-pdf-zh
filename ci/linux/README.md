@@ -62,7 +62,7 @@ context = multiprocessing.get_context('fork')      # Windows 没有 fork
 
 ```bash
 # ① 体检（不联网、不建大目录）
-python3 ci/linux/pdf_builder_linux.py --preflight --versions 3.13,3.14,3.15
+python3 ci/linux/pdf_builder_linux.py --preflight --versions 3.10,3.11,3.12,3.13,3.14,3.15
 
 # ② 物理自检（验证平台胶水层）
 python3 ci/linux/selftest.py
@@ -70,8 +70,8 @@ python3 ci/linux/selftest.py
 # ③ 单版本全套
 python3 ci/linux/pdf_builder_linux.py --versions 3.15 --jobs 4 --merge
 
-# ④ 三版本并行（按版本各起一个子进程，共用 --jobs 个核）
-python3 ci/linux/pdf_builder_linux.py --versions 3.13,3.14,3.15 --jobs 4 --merge
+# ④ 六版本并行（按版本各起一个子进程，共用 --jobs 个核）
+python3 ci/linux/pdf_builder_linux.py --versions 3.10,3.11,3.12,3.13,3.14,3.15 --jobs 4 --merge
 
 # ⑤ 只重跑后半段（前面产物已在）
 python3 ci/linux/pdf_builder_linux.py --versions 3.15 --only 6,6b,7,7b,8,9
@@ -127,17 +127,18 @@ sudo apt-get install -y \
 - `poppler-utils`：`pdfinfo` / `pdffonts`（步骤 7b/8 的核对要用）
 - `libcairo2`：3.14 / 3.15 的 `.svg` 插图（cairosvg）
 
-需要 3.10 ~ 3.16 任意一个版本的解释器（Sphinx 用哪个版本编都行，
-但**完整版本号是由该版本解释器报出来的**）。
-各版本册数不同（3.10 27 册 … 3.15 39 册），映射表见 `sphinx-pdf/volumes.json`；
-`asset-names.tsv` 里的 `09`（distributing）只有 3.10 会用到。
+需要 3.10 ~ 3.15 任意一个版本的解释器（Sphinx 用哪个版本编都行）。
+**完整版本号不靠解释器**：口径是官方文档站标题（`docs.python.org/zh-cn/3.13/` 的 h1
+= `Python 3.13.18 文档`），存在 `sphinx-pdf/version-titles.json`，由
+`sphinx-pdf/gui/pdf_builder_multi.py --tool titles --write` 生成；解释器只在没有缓存时兜底。
+各版本册数不同（3.10 27 册 … 3.15 39 册），映射表见 `sphinx-pdf/volumes.json`。
 
 ## 5. CI
 
 `.github/workflows/build-pdf-linux.yml`（仓库里**唯一**的流水线）：
 
 - **每天 UTC 04:00（北京时间 12:00）自动跑**，也可在 Actions 页面手动触发；
-- `versions` 拆成 matrix，每个版本一个 job（Ubuntu 上 4 核/job）；
+- `versions` 拆成 matrix，**六个版本同时起跑**（`max-parallel: 6`，每个 job 一个独立 runner）；
 - 每步：装依赖 → `--preflight` → `selftest.py` → 构建 → 上传 artifact → **发布到 Releases**；
 - 产物**不进分支**：一个版本一个 release，同版本重跑原地更新（附件 `--clobber`）。
 
@@ -171,6 +172,11 @@ old       ← 补丁版被顶下来时，按 tag 建目录归档旧产物（首�
 > （每个 80~90 MB 的孤儿提交，内容与 Releases 重复）。现在分支里不再有 PDF，
 > 想看产物去 Releases。tag 仍保留 —— release 依附于 tag，与分支无关。
 
+**Release 附件固定 2 个**：合并册 `Python-<完整版本>-docs-<日期>.pdf` +
+全部分册的压缩包（包内是中文原名 + 验收报告）。单册不单独挂 —— GitHub 附件名
+只接受 ASCII，中文会被服务端换成 `.`，挂上去反而认不出是哪一册。
+发布步骤会核对「**恰好 2 个**」：少一个报错，多一个（旧分册没清干净）也报错。
+
 ### 5.2 首次配置（三步）
 
 ```bash
@@ -182,14 +188,15 @@ git push -u origin main
 #    versions 先填 3.15 试一个
 ```
 
-成功的标志：**Releases 里出现 `v3.15.2`**，附件是「册号-英文」的 39 册 PDF +
-合并册 + `REPORT.md` + 一个 RAR；Branches 里**不该**多出任何 `v*` 分支。
+成功的标志：**Releases 里出现 `v3.15.2`**，附件**恰好 2 个** —— 合并册
+`Python-3.15.2-docs-<日期>.pdf` 与 `Python-3.15.2-docs-<日期>.rar`（包内是 39 册的
+中文原名 + 验收报告）；Branches 里**不该**多出任何 `v*` 分支。
 
 ✅ **本仓库是公开仓库** ⇒ Actions 分钟数不限（公开仓库免费、无额度上限），
-每天三个版本也随便跑。
+每天六个版本也随便跑。
 
 （若哪天改成私有：额度 2000 分钟/月、Ubuntu 按 1 倍计，而单版本约 30 分钟 ×
-3 版本 × 每天 = 2700 分钟/月，会超。那时三个选择：改回公开、改成每周跑、
+6 版本 × 每天 ≈ 5400 分钟/月，会超。那时三个选择：改回公开、改成每周跑、
 或上自托管 runner。）
 
 
