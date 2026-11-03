@@ -2704,6 +2704,64 @@ class Pipeline:
                 continue
         return hits
 
+    def _sphinx_major(self) -> int:
+        """构建 venv 里的 Sphinx 主版本号（问不到就按 99 处理 = 当新版本）。"""
+        rc, out = self.capture([str(self.vp), "-c", "import sphinx;print(sphinx.__version__)"])
+        m = re.match(r"(\d+)", (out or "").strip())
+        return int(m.group(1)) if m else 99
+
+    def _ensure_mo_files(self) -> None:
+        """把源目录 `locales/` 下的 .po 预编译成 .mo —— **Sphinx 3.x 必须这么做**。
+
+        ★ 现象（2026-11-03 实测 3.10 + Sphinx 3.4.3）：正文**整册英文**，
+          0 条 warning，验收报告全绿（页数、书签、索引都正常），
+          只有封面和页眉是中文（那是步骤 6b 硬改的），看着像「只是标题没翻译」。
+        ★ 真因在日志的第 3、5 行，两行连着看才看得懂：
+              loading translations [zh_CN]... done          ← 先加载翻译
+              building [mo]: targets for 495 po files ...   ← 之后才编译 .po
+              writing output... locales/zh_CN/.../xxx.mo    ← 而且写进了 **outdir**
+          Sphinx 3.x 的 MOFilesBuilder 把 .mo 生成到 `build/latex/locales/…`，
+          而翻译是从 **srcdir** 的 `locales/` 读的 —— 两边不是一个地方；
+          加上「先加载、后编译」的顺序，本轮永远读不到刚编出来的 .mo。
+          Sphinx 4.0 起改成写源码目录，所以 3.13+（8.x）一直正常 —— 只有老版本中招。
+        ★ 解法：用 babel（Sphinx 自带依赖）直接把 .po 编到源目录旁边，
+          让它 `loading translations` 时就有 .mo 可读。
+        """
+        if self.doc is None:
+            return
+        loc = self.doc / "locales"
+        if not loc.is_dir() or not any(loc.rglob("*.po")):
+            return
+        script = (
+            "import sys, pathlib\n"
+            "try:\n"
+            "    from babel.messages import mofile\n"
+            "    from babel.messages.pofile import read_po\n"
+            "except ImportError:\n"
+            "    print('NO_BABEL'); sys.exit(0)\n"
+            "root = pathlib.Path(sys.argv[1]); n = skip = bad = 0\n"
+            "for po in root.rglob('*.po'):\n"
+            "    mo = po.with_suffix('.mo')\n"
+            "    if mo.is_file() and mo.stat().st_mtime >= po.stat().st_mtime:\n"
+            "        skip += 1\n"
+            "        continue\n"
+            "    try:\n"
+            "        with po.open('rb') as f: cat = read_po(f)\n"
+            "        with mo.open('wb') as f: mofile.write_mo(f, cat)\n"
+            "        n += 1\n"
+            "    except Exception:\n"
+            "        bad += 1\n"
+            "print(f'COMPILED {n} SKIPPED {skip} BAD {bad}')\n"
+        )
+        rc, out = self.capture([str(self.vp), "-c", script, str(loc)],
+                               section="mo-build.log")
+        if "NO_BABEL" in (out or ""):
+            self.rep.log("venv 里没有 babel，跳过 .mo 预编译 —— 老版本会出英文正文", level="warn")
+            return
+        last = (out or "").strip().splitlines()[-1] if (out or "").strip() else ""
+        self.rep.log(f"预编译 .po → .mo（Sphinx 3.x 的 .mo 会写错目录，先补上）："
+                     f"{last or '无输出'}", level="ok")
+
     def _cairo_probe(self) -> tuple[bool, str]:
         """在**构建 venv** 里试一次 `import cairosvg`（结果缓存，失败给最后一行）。"""
         if self._cairo_state is not None:
@@ -2772,6 +2830,25 @@ class Pipeline:
             raise Fail(f"文档里有 {len(svgs)} 处 SVG 插图，却没能把它写进 conf.py：\n"
                        f"  {new}\n  请手工看 {conf} 里的 extensions 是怎么写的。")
 
+        # ★★ gettext_compact —— 老版本 conf.py 缺这一行，后果是整册英文 ★★
+        #   Sphinx 默认 gettext_compact = True，含义是「同一顶层目录共用一份 .mo」
+        #   （`library/*` 全去找 `locales/zh_CN/LC_MESSAGES/library.mo`）。
+        #   而 python-docs-zh-cn 是**每页一个 .po**（`library/array.po`），
+        #   于是 Sphinx 一个 catalog 都匹配不上 —— 正文全英文、**0 条 warning**、
+        #   进度 100%、页数书签索引全都正常。实测 3.10 的 conf.py 只有 236 行、
+        #   压根没有这一项；3.13+ 才有，所以此前从没暴露。
+        #   幂等：已经写了这行的版本原样不动。
+        txt2 = read_text_safe(conf)
+        if "gettext_compact" not in txt2:
+            conf.write_text(
+                txt2 + "\n# 由本工具补充：译文是**每页一个** .po/.mo。老版本 conf.py 没写\n"
+                       "# 这一项时 Sphinx 默认 True（每个顶层目录共用一份 .mo），会一个都\n"
+                       "# 匹配不上 → 整册英文且零 warning。\ngettext_compact = False\n",
+                encoding="utf-8")
+            self.rep.log("conf.py 里没有 gettext_compact，已补上 = False"
+                         "（不加这行，逐页译文一个都匹配不上，正文会整册英文）",
+                         level="warn")
+
         # ★★ 开编之前先确认「SVG → PDF」这条路真能走（2026-10-23 加）★★
         #   以前这里是裸跑 sphinx：CairoSVG 缺 cairo 运行库时，
         #   `cairosvgconverter.is_available()` 里 `import cairosvg` 抛的是 **OSError**
@@ -2810,6 +2887,11 @@ class Pipeline:
             self.rep.log(f"SVG 转换器可用（{len(svgs)} 个 rst 带 SVG 插图）", level="ok")
         else:
             self.rep.log("文档里没有 `.. image:: *.svg`，这一步不需要 cairo", level="meta")
+
+        # ★ Sphinx 3.x 的 .mo 会编到 outdir（不是源目录），本轮加载时读不到 →
+        #   正文整册英文、零 warning。构建前先把 .mo 补到源目录（见 _ensure_mo_files）。
+        if self._sphinx_major() < 4:
+            self._ensure_mo_files()
 
         # ⚠️ 不要加 Doc/Makefile 里的 --fail-on-warning：翻译有 fuzzy 条目会直接中断
         rc = self.run([str(self.vp), "-m", "sphinx", "-b", "latex",
