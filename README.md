@@ -1,11 +1,11 @@
 # python-doc-pdf-zh
 
 把 **CPython 官方文档** 与 **python-docs-zh-cn 中文译文** 编译成中文分册 PDF 的仓库。
-**平时不需要你做什么**：GitHub Actions 每天北京时间 12:00 自动构建，产物发布到 **Releases**。
+**平时不需要你做什么**：GitHub Actions 每天北京时间 **11:47** 自动构建，产物发布到 **Releases**。
 
 | | |
 |-|-|
-| 触发器 | 每天 `cron "0 4 * * *"`（UTC）= 北京时间 **12:00**；也可手动 Run workflow |
+| 触发器 | 每天 `cron "47 3 * * *"`（UTC）= 北京时间 **11:47**；也可手动 Run workflow |
 | 产物 | 3.13 → 37 册 / 3.14 → 38 册 / 3.15 → 39 册 PDF + 合并本 + 验收报告 |
 | 落点 | **Releases**，tag = `v<完整版本>`（例如 `v3.15.2`），同版本重跑原地更新 |
 | 入口 | 一个脚本：`ci/linux/pdf_builder_linux.py` |
@@ -19,7 +19,7 @@
 ## 一、它每天做什么
 
 ```
-GitHub Actions（04:00 UTC → 北京 12:00，每天）
+GitHub Actions（03:47 UTC → 北京 11:47，每天）
         │
    ┌────▼─────┐   prepare 读 versions → 拆成 matrix
    │ prepare  │   （默认 3.10~3.15 六个 job 并行，max-parallel: 6）
@@ -83,7 +83,7 @@ python3 ci/linux/pdf_builder_linux.py --versions 3.15 --print-config
 
 | 项 | 值 | 为什么 |
 |-|-|-|
-| `on.schedule` | `0 4 * * *` | GitHub cron 一律按 **UTC**，减 8 小时才是北京 12:00 |
+| `on.schedule` | `47 3 * * *` | GitHub cron 一律按 **UTC**，减 8 小时才是北京 11:47。**别写整点**：:00 是全世界 cron 的洪峰，GitHub 高负载时会延迟甚至丢弃 |
 | `on.workflow_dispatch` | 5 个输入 | `versions` / `jobs` / `merge` / `clean` / `push_branch` |
 | `runs-on` | `ubuntu-22.04` | 需要系统 TeX Live；Ubuntu 上 sphinx 的 `-j` 才真正生效 |
 | `permissions` | `contents: write` | 要建 Release、上传附件、维护 `old` 分支 |
