@@ -2,10 +2,12 @@
 # -*- coding: utf-8 -*-
 """Python 中文文档分册 PDF 构建器 · 多版本并行版（PyQt6 图形界面）
 
-★★ 本文件是 `pdf_builder_gui.py` 的**多版本并行版**（2026-10-17 派生）★★
+★★ 本文件是**唯一的主程序**（2026-11-03 起：原单版本版 `pdf_builder_gui.py` 已退役，
+`build-sphinx-pdf.sh`、启动器与 exe 打包全部指向这里）★★
 
-与单版本版的差别只有外面这几层，**步骤 0~10 的流水线一行未改**：
+要点：
   · 版本可以多选（3.11 ~ 3.15，册数各不相同：29 / 32 / 37 / 38 / 39），选几个就跑几个；
+    只勾一个就是原来的「单版本」用法，所以单版本版没有存在价值了；
   · 每个版本各用各的解释器（D:\\软件\\Python313 / 314 / 315），**各起一个子进程**并行跑
     —— 进程隔离，不会有 venv / 工作目录 / 环境变量互相踩的问题；
   · 点「开始处理」后弹出一个**多版本并行日志窗口**，每个版本一个独立日志面板
@@ -14,8 +16,9 @@
         <基准目录>/Python 3.13.16 PDF 文档 20261017
         <基准目录>/Python 3.13.16 PDF 文档 20261017/Python 3.13.16 文档 20261017.pdf
 
-⚠ 维护约定：流水线（Pipeline / 内置工具 / 步骤实现）与 `pdf_builder_gui.py` 是**同一份**
-  代码。改那部分时两个文件都要改 —— 这是唯一需要记住的同步点。
+⚠ 维护约定：流水线（Pipeline / 内置工具 / 步骤实现）**只有这一份**。
+  历史上它曾与单版本版同步维护，那次实验证明「两份实现」必然分叉 ——
+  所以 2026-11-03 直接把单版本版删了。改流水线只改这里。
 
 --------------------------------------------------------------------------------
 单版本版的原说明（仍然适用）：
@@ -59,12 +62,12 @@
 
 运行
 ----
-    GUI ：python pdf_builder_gui.py             （或双击 启动PDF构建器.bat）
-    命令行：python pdf_builder_gui.py --cli              全流程，终端打印
-            python pdf_builder_gui.py --cli --from 7     从步骤 7 开始（6b）
-            python pdf_builder_gui.py --cli --only 0     只跑指定步骤
-            python pdf_builder_gui.py --cli --version 3.13
-            python pdf_builder_gui.py --cli --config x.json
+    GUI ：python pdf_builder_multi.py             （或双击 启动PDF构建器.bat）
+    命令行：python pdf_builder_multi.py --cli              全流程，终端打印
+            python pdf_builder_multi.py --cli --from 7     从步骤 7 开始（6b）
+            python pdf_builder_multi.py --cli --only 0     只跑指定步骤
+            python pdf_builder_multi.py --cli --version 3.13
+            python pdf_builder_multi.py --cli --config x.json
 
 依赖
 ----
@@ -4032,7 +4035,7 @@ class ConsoleReporter:
 #   意味着要带走一整个目录；而且任何一份被改动而另一份没跟上，就会静默分叉
 #   （本项目为此吃过两次亏：分册名映射表三份、越界引用判定三份）。
 #   现在：下面这一段是唯一实现，tools/ 下那些文件只剩几行的**转发器**
-#   （转调 `pdf_builder_gui.py --tool <名字>`），bash 脚本与手工排查照旧能用。
+#   （转调 `pdf_builder_multi.py --tool <名字>`），bash 脚本与手工排查照旧能用。
 #
 # ★ 每个工具的代码都是**原样搬过来的**（注释一行没动），仍以「命令行形状」工作：
 #   自己读 `sys.argv`、自己 print 到 stdout。调用方用 `_tool_run()` 把这两样临时
@@ -4115,7 +4118,7 @@ def _import_pypdf(what: str = "本工具"):
 #     2026-09-26 实测踩到：分册名映射在**三个地方**各写了一份 ——
 #       * `rename-pdf.sh`         （slug → 中文文件名）
 #       * `tools/merge-pdf.py`    （中文文件名 → 书签标题 + 分组）
-#       * `gui/pdf_builder_gui.py`（slug → 中文文件名，一份 RENAME_MAP）
+#       * `gui/pdf_builder_multi.py`（slug → 中文文件名，一份 RENAME_MAP）
 #     三份都要手工同步，且都**写死了 3.14 的版本号**。后果实测过两次：
 #       * 改完 `RENAME_MAP` 的 asyncio 名，`merge-pdf.py` 没跟着改 → `MISSING 1`；
 #       * 3.13 建出来时 `--list` 报 `MISSING 1`（`0925远程调试附加协议`），
@@ -4892,7 +4895,7 @@ def _kind(repo_root: Path, rel: str) -> str:
     """问 git：`rel` 在 HEAD 里是 `blob`（单文件）还是 `tree`（目录）。
 
     ★★ 为什么非问不可 ★★
-    曾经这里（以及 `gui/pdf_builder_gui.py` 里的同一处判断）用的是
+    曾经这里（以及 `gui/pdf_builder_multi.py` 里的同一处判断）用的是
     「最后一段带不带 `.`」这个启发式。它栽在 `Modules/expat/COPYING` 上 ——
     这文件没有扩展名，于是被当成**目录**，建议出：
 
@@ -8002,14 +8005,14 @@ SHIM_FILES: dict[str, str] = {
 #: 转发器的正文模板。`{rel}` = 从转发器所在目录到主程序的相对路径。
 SHIM_TEMPLATE = '''#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""转发器 —— 真正的实现在 `gui/pdf_builder_gui.py` 里（2026-10-04 起内联）。
+"""转发器 —— 真正的实现在 `gui/pdf_builder_multi.py` 里（2026-10-04 起内联）。
 
 为什么还留着这个文件：
   * `build-sphinx-pdf.sh` 与手工排查照旧可以 `python tools/{fname} …`；
   * 但**不会有第二份实现** —— 下面只是把参数原样交给主程序的 `--tool {name}`，
     所以「脚本改了、主程序没跟上」这种静默分叉在这里不可能发生。
 
-★ 本文件可以用 `python gui/pdf_builder_gui.py --tool emit-shims tools` 重新生成。
+★ 本文件可以用 `python gui/pdf_builder_multi.py --tool emit-shims tools` 重新生成。
 """
 import runpy
 import sys
@@ -8024,11 +8027,11 @@ runpy.run_path(str(_MAIN), run_name='__main__')   # 退出码随 SystemExit 传�
 #: `{exe}` = exe 的绝对路径（用 repr 塞进来，路径含中文也安全）。
 SHIM_TEMPLATE_FROZEN = '''#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""转发器 —— 真正的实现在 pdf_builder_gui.exe 里（打包版）。
+"""转发器 —— 真正的实现在 PDF构建器-多版本.exe 里（打包版）。
 
 ★ 与源码版转发器的区别：exe 里**没有**可 `runpy` 的 .py 文件，
   所以这里直接把参数交给 exe 的 `--tool {name}`。
-★ 由 `pdf_builder_gui.exe --tool emit-shims tools` 生成。
+★ 由 `PDF构建器-多版本.exe --tool emit-shims tools` 生成。
 """
 import subprocess
 import sys
@@ -8204,7 +8207,7 @@ def _emit_makeindex_fix(dest: Path) -> None:
     main_py = Path(__file__).resolve()
     dest.write_text(
         "# -*- coding: utf-8 -*-\n"
-        "# 本文件由 pdf_builder_gui.py 自动生成（步骤 7），**不要手改**。\n"
+        "# 本文件由 pdf_builder_multi.py 自动生成（步骤 7），**不要手改**。\n"
         "# 兜底转发器（自包含脚本生成失败时才用，正常不应该出现）。\n"
         "import runpy\n"
         "import sys\n"
@@ -11018,7 +11021,7 @@ def main() -> int:
         print(f"缺少图形界面依赖：{QT_ERROR}", file=sys.stderr)
         print("请先安装：pip install PyQt6\n"
               "（只是不想开界面、要跑全流程的话不需要它：\n"
-              "  python pdf_builder_gui.py --cli）", file=sys.stderr)
+              "  python pdf_builder_multi.py --cli）", file=sys.stderr)
         return 3
 
     app = QApplication(sys.argv)

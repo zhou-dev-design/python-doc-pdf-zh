@@ -33,11 +33,11 @@ if not exist "%PY%" (
 
 if /i "%~1"=="--cli" goto :cli
 
-start "" "%PYW%" "%HERE%pdf_builder_gui.py"
+start "" "%PYW%" "%HERE%pdf_builder_multi.py"
 goto :eof
 
 :cli
-"%PY%" "%HERE%pdf_builder_gui.py" %*
+"%PY%" "%HERE%pdf_builder_multi.py" %*
 goto :eof
 
 :err

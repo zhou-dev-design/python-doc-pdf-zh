@@ -19,7 +19,7 @@
 # 第 6b 步会用主程序的 `--tool localize-titles` 把它们换成中文。
 # ★ 2026-10-04 起：所有后处理脚本（localize-titles / fix-index / name_map /
 #   rename-pdf / merge-pdf / report / alias-po / check-doc-refs …）都已**内联进
-#   gui/pdf_builder_gui.py**，本脚本一律走 `python <MAIN> --tool <名字>` ——
+#   gui/pdf_builder_multi.py**，本脚本一律走 `python <MAIN> --tool <名字>` ——
 #   于是与图形界面**永远同一份实现**。
 #   ★ 2026-11-03：`tools/*.py` 那批 18 行转发器已删除（同一能力两个入口只会
 #     让人猜「哪份在跑」）；`--tool <名字>` 是唯一入口。
@@ -27,7 +27,7 @@
 # 用法：  bash build-sphinx-pdf.sh [构建根目录]
 # 环境：  仅需 Git Bash（Windows）/ bash（Linux、macOS）；TeX Live 2025+ 在 PATH 中
 #
-# ★ 默认行为（与图形界面版 gui/pdf_builder_gui.py 一致）：
+# ★ 默认行为（与图形界面版 gui/pdf_builder_multi.py 一致）：
 #   · VERSION 决定「版本」并同时是两个仓库的分支：3.13 / 3.14 / 3.15（默认 3.14）
 #   · CPython 与 python-docs-zh-cn 都**从网站克隆**（默认中文 zh_CN）；
 #     ZH_SRC 指定本地目录时才改用本地翻译源
@@ -49,7 +49,7 @@
 #   TEXLIVE_BIN=...       TeX Live 的 bin 目录
 #   PIP_INDEX=...         pip 镜像
 #
-# ★ 步骤 9/10（可选，默认关；与 gui/pdf_builder_gui.py 的步骤 9/10 对应）：
+# ★ 步骤 9/10（可选，默认关；与 gui/pdf_builder_multi.py 的步骤 9/10 对应）：
 #   MERGE=1               把 38 册合并成一册，带完整书签（需要 pypdf）
 #                         一级书签 = 有独立 PDF 的册子；「Python 指南」下按官网
 #                         howto 索引页分「通用 / 高级开发 / 调试和性能分析」三组，
@@ -79,7 +79,7 @@ PIP_INDEX="${PIP_INDEX:-https://pypi.tuna.tsinghua.edu.cn/simple}"
 ZH_SRC="${ZH_SRC:-}"
 REFRESH="${REFRESH:-1}"                    # 1 = 已有克隆也 fetch 到最新（断网会自动跳过）
 
-# ★ 步骤 9/10（可选，默认关；与 gui/pdf_builder_gui.py 的步骤 9/10 一一对应）
+# ★ 步骤 9/10（可选，默认关；与 gui/pdf_builder_multi.py 的步骤 9/10 一一对应）
 MERGE="${MERGE:-0}"                        # 1 = 把 38 册合并成一册（带完整书签，需要 pypdf）
 MERGE_NAME="${MERGE_NAME:-}"               # 合并册文件名；留空 = Python <版本> 文档 <今天>.pdf
 CLEAN="${CLEAN:-none}"                     # none / build / all —— 跑完删掉过程文件
@@ -95,10 +95,10 @@ JOBS="${JOBS:-auto}"
 SPHINX_PDF_DIR="$(cd "$(dirname "$0")" && pwd)"
 # ★★ 2026-10-04 起：localize-titles / fix-index / name_map / rename-pdf /
 #    merge-pdf / report / alias-po / check-doc-refs / check-pdf-gaps /
-#    fix-md-escapes / verify-pdf **全部内联进** gui/pdf_builder_gui.py。
+#    fix-md-escapes / verify-pdf **全部内联进** gui/pdf_builder_multi.py。
 #    本脚本一律走 `python <MAIN> --tool <名字> …`。
 #    好处：与图形界面**永远同一份实现**，判据不可能再分叉（历史上分叉过两次）。
-MAIN="$SPHINX_PDF_DIR/gui/pdf_builder_gui.py"
+MAIN="$SPHINX_PDF_DIR/gui/pdf_builder_multi.py"
 
 log() { printf '\n\033[1;36m==> %s\033[0m\n' "$*"; }
 die() { printf '\n\033[1;31m[错误] %s\033[0m\n' "$*" >&2; exit 1; }

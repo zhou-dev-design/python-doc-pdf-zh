@@ -28,4 +28,4 @@ if [ ! -x "$PY" ]; then
   "$PY" -m pip install -q -r "$HERE/requirements.txt" || exit 1
 fi
 
-exec "$PY" "$HERE/pdf_builder_gui.py" "$@"
+exec "$PY" "$HERE/pdf_builder_multi.py" "$@"
