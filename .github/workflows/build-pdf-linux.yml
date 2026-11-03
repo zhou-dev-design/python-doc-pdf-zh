@@ -5,13 +5,6 @@ name: 构建 Python 中文文档 PDF（Linux）
 on:
   schedule:
     - cron: "0 4 * * *"         # UTC 04:00 = 北京时间 12:00（UTC+8）
-  # ★ 临时（2026-11-03，只为把 3.13/3.14 那两个 release 的旧附件名也换掉）：
-  #   3.15 已验证通过（42 个附件全部正确命名 + 带中文名的 RAR）。
-  #   这一轮跑完立刻删掉这两段，恢复「定时 + 手动」。
-  push:
-    branches: [main]
-    paths:
-      - ".github/workflows/build-pdf-linux.yml"
   workflow_dispatch:
     inputs:
       versions:
@@ -54,7 +47,7 @@ jobs:
         name: 解析版本列表 → matrix
         env:
           # 验证发布逻辑的临时改动：push 时只跑 3.15（验完恢复成只看 event.inputs）。
-          VERSIONS: ${{ github.event_name == 'push' && '3.13,3.14' || github.event.inputs.versions }}
+          VERSIONS: ${{ github.event.inputs.versions }}
         run: |
           python3 - <<'PY'
           import json, os
