@@ -127,8 +127,10 @@ sudo apt-get install -y \
 - `poppler-utils`：`pdfinfo` / `pdffonts`（步骤 7b/8 的核对要用）
 - `libcairo2`：3.14 / 3.15 的 `.svg` 插图（cairosvg）
 
-需要 3.13/3.14/3.15 三个解释器中的一个（Sphinx 用哪个版本编都行，
+需要 3.10 ~ 3.16 任意一个版本的解释器（Sphinx 用哪个版本编都行，
 但**完整版本号是由该版本解释器报出来的**）。
+各版本册数不同（3.10 27 册 … 3.15 39 册），映射表见 `sphinx-pdf/volumes.json`；
+`asset-names.tsv` 里的 `09`（distributing）只有 3.10 会用到。
 
 ## 5. CI
 
