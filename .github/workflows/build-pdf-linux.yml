@@ -493,25 +493,77 @@ jobs:
           MINOR="${FULL%.*}"
           TAG="v$FULL"                                    # 不带日期 → 一条线只有一个 release
           TITLE="Python $FULL 文档（$DATE）"
-          RAR="$RUNNER_TEMP/Python $FULL 文档 $DATE.rar"
-          echo "版本=$FULL  日期=$DATE  小版本线=$MINOR  tag=$TAG"
+          # ---------- 1) 摆一个「ASCII 名」的暂存目录 ----------
+          # ★ 2026-11-03 的坑：GitHub 的 release 附件名**只接受 ASCII**，
+          #   中文和空格会被服务端换成「.」——`01Python 3.15 有什么新变化.pdf`
+          #   变成 `01Python.3.15.pdf`，`0913如何利用 urllib 包获取网络资源.pdf`
+          #   变成 `0913.urllib.pdf`，`验收报告.md` 变成 `default.md`。这不是
+          #   rename 没跑（构建根里就是中文名），是上传时被改了名。
+          #   所以：单个附件统一用「册号-英文标识.pdf」（映射在 ci/linux/asset-names.tsv），
+          #   **中文文件名保留在压缩包内部**（压缩包是二进制，包内文件名不受此限）。
+          MAP="ci/linux/asset-names.tsv"
+          [ -f "$MAP" ] || { echo "::error::缺少 $MAP（册号→附件名映射）"; exit 1; }
 
-          # ---------- 1) 打 RAR ----------
+          STAGE="$RUNNER_TEMP/assets-$FULL"
+          rm -rf "$STAGE"; mkdir -p "$STAGE"
+          EXP=()                                  # 期望出现在 release 里的附件名
           shopt -s nullglob
-          ASSETS=( "$ROOT"/*.pdf )
-          NPDF=${#ASSETS[@]}                              # 只数 PDF（分册 + 合并册）
-          [ -f "$ROOT/验收报告.md" ] && ASSETS+=( "$ROOT/验收报告.md" )
-          if [ "$NPDF" -eq 0 ]; then echo "没有产出 PDF，不发布"; exit 1; fi
+          for f in "$ROOT"/*.pdf; do
+            base="$(basename "$f" .pdf)"
+            if [[ "$base" =~ ^([0-9]+) ]]; then
+              num="${BASH_REMATCH[1]}"
+              stem="$(awk -F'\t' -v k="$num" '$1==k{print $2; exit}' "$MAP")"
+              [ -n "$stem" ] || { echo "::error::$MAP 里没有册号 $num（$base）→ 加一册就要同步映射表"; exit 1; }
+              name="$num-$stem.pdf"
+            else
+              name="00-Python-$FULL-docs-$DATE.pdf"          # 合并册（没有册号）
+            fi
+            cp -f "$f" "$STAGE/$name"
+            EXP+=( "$name" )
+          done
+          NPDF=${#EXP[@]}                          # 只数 PDF（分册 + 合并册）
+          [ "$NPDF" -gt 0 ] || { echo "::error::没有产出 PDF，不发布"; exit 1; }
+          if [ -f "$ROOT/验收报告.md" ]; then
+            cp -f "$ROOT/验收报告.md" "$STAGE/REPORT.md"; EXP+=( "REPORT.md" )
+          fi
+          echo "暂存：$NPDF 个 PDF + 报告 → $STAGE"
+
+          # ---------- 2) 压缩包（包内用中文原名） ----------
+          ARCFILES=()
+          for f in "$ROOT"/*.pdf; do ARCFILES+=( "$(basename "$f")" ); done
+          [ -f "$ROOT/验收报告.md" ] && ARCFILES+=( "验收报告.md" )
+          ARCH=""
           if command -v rar >/dev/null 2>&1; then
-            # 在构建根里按**纯文件名**打包（${arr##*/}），避免把绝对路径写进压缩包
-            ( cd "$ROOT" && rar a -m1 -idq "$RAR" "${ASSETS[@]##*/}" ) \
-              && { ASSETS+=( "$RAR" ); echo "RAR: $(du -h "$RAR" | cut -f1)"; } \
-              || echo "::warning::打 RAR 失败，本次只发 PDF"
+            rm -f "$RUNNER_TEMP/pack.rar"
+            # 在构建根里按**纯文件名**打包，包里是中文名，不写绝对路径
+            if ( cd "$ROOT" && rar a -m1 -idq "$RUNNER_TEMP/pack.rar" "${ARCFILES[@]}" ); then
+              ARCH="Python-$FULL-docs-$DATE.rar"
+              cp -f "$RUNNER_TEMP/pack.rar" "$STAGE/$ARCH"
+            else
+              echo "::warning::rar 打包失败，改用 zip"
+            fi
+          fi
+          if [ -z "$ARCH" ] && command -v zip >/dev/null 2>&1; then
+            rm -f "$RUNNER_TEMP/pack.zip"
+            if ( cd "$ROOT" && zip -q -r "$RUNNER_TEMP/pack.zip" "${ARCFILES[@]}" ); then
+              ARCH="Python-$FULL-docs-$DATE.zip"
+              cp -f "$RUNNER_TEMP/pack.zip" "$STAGE/$ARCH"
+            else
+              echo "::warning::zip 打包也失败，本次只发单个 PDF"
+            fi
+          fi
+          if [ -n "$ARCH" ]; then
+            EXP+=( "$ARCH" ); echo "压缩包：$ARCH（$(du -h "$STAGE/$ARCH" | cut -f1)，内含中文文件名）"
           else
-            echo "::warning::没有 rar 命令（multiverse 装不上），本次只发 PDF"
+            echo "::warning::没有任何压缩工具（rar/zip）—— 本次只发单个 PDF"
           fi
 
-          # ---------- 2) 归档旧补丁版到 old 分支 ----------
+          # 上传前先自检：期望的附件都得真的存在（否则后面「清旧附件」会误伤）
+          for a in "${EXP[@]}"; do
+            [ -f "$STAGE/$a" ] || { echo "::error::暂存目录里没有 $a"; exit 1; }
+          done
+
+          # ---------- 3) 归档旧补丁版到 old 分支 ----------
           # 触发条件：同一条线（v3.15.*）里存在**别的** tag —— 说明补丁版本变了。
           MINOR_RE="${MINOR//./\\.}"
           STALE=()
@@ -570,22 +622,29 @@ jobs:
             fi
           fi
 
-          # ---------- 3) 生成发布说明 ----------
+          # ---------- 4) 生成发布说明 ----------
           NOTES="$RUNNER_TEMP/release-notes.md"
           {
             echo "**Python $FULL 中文文档 · 构建日期 $DATE**"
             echo
             if [ -f "$ROOT/验收报告.md" ]; then
-              sed -n 's/^- /- /p' "$ROOT/验收报告.md" | sed -n '2,8p'
+              grep '^- ' "$ROOT/验收报告.md" | sed -n '2,8p'
             fi
-            echo "- 分册 PDF：**$NPDF** 个 + 合并册 1 个"
-            if [ -f "$RAR" ]; then echo "- 一键下载：**$(basename "$RAR")**（全部 PDF + 验收报告）"; fi
+            echo "- 分册 PDF：**$NPDF** 个（含合并册）"
+            if [ -n "$ARCH" ]; then
+              echo "- 一键全下：**$ARCH**（包内是**中文文件名**，约 $(du -h "$STAGE/$ARCH" | cut -f1)）"
+            fi
+            echo
+            echo "**附件命名说明**：GitHub 的 release 附件名只支持 ASCII，中文会被替换成 \`.\`"
+            echo "（例如 \`01Python 3.15 有什么新变化.pdf\` 会变成 \`01Python.3.15.pdf\`）。"
+            echo "所以单个附件统一用 \`册号-英文标识.pdf\`（\`01-whatsnew\`、\`05-library\`、\`0901-asyncio\` …），"
+            echo "**中文文件名在压缩包内部保持不变**。"
             echo
             echo "> 同一版本重跑会**原地更新**本 release（同名附件自动替换），不会一天一个。"
             echo "> 补丁版本升级时，旧版本会整体归档到 [\`old\`](../../tree/old) 分支再删除其 release。"
           } > "$NOTES"
 
-          # ---------- 4) 建或改 release ----------
+          # ---------- 5) 建或改 release ----------
           if gh release view "$TAG" >/dev/null 2>&1; then
             echo "release $TAG 已存在 → 原地更新"
             gh release edit "$TAG" --title "$TITLE" --notes-file "$NOTES"
@@ -594,42 +653,37 @@ jobs:
             gh release create "$TAG" --title "$TITLE" --notes-file "$NOTES"
           fi
 
-          # 上传（--clobber：同名附件直接覆盖，这就是「原地更新」）
-          gh release upload "$TAG" --clobber "${ASSETS[@]}"
-
-          # ---------- 5) 只清「本轮没有的 .rar」----------
-          # ★ 2026-11-02 的坑（第一版把 41 个附件全删光了）：原来写的是「凡是不在
-          #   本轮名单里的附件全删」，判据是 `basename` 与 `gh release view --json
-          #   assets` 里的名字**逐字相等**。实测这俩对不上（GitHub 会把附件名里的
-          #   空格等字符换成点），于是 grep 一个都没匹配上 → 41 个附件全被删掉，
-          #   而步骤本身还报成功（删也是成功）。
-          #   现在只处理**命名规则确定会变**的那一个：带日期的 .rar。其余一律不动，
-          #   同名的由 --clobber 覆盖，不同名的不影响使用。
-          CUR_RAR="$(basename "$RAR")"
-          while IFS= read -r a; do
+          # ---------- 6) 先清掉「不在本轮名单里」的旧附件，再上传 ----------
+          # ★ 顺序很关键：**先清后传**。
+          #   上一版是「先传后清」，判据拿本地名（中文）跟服务端名（ASCII 化）比，
+          #   一个都匹配不上 → 把刚传上去的 41 个附件（含 RAR）当「过期」全删了，
+          #   而删除也返回 0，步骤还报绿。先清后传则最坏情况只是短暂空，随即被填满。
+          gh release view "$TAG" --json assets --jq '.assets[].name' 2>/dev/null | while IFS= read -r a; do
             [ -n "$a" ] || continue
-            case "$a" in
-              *.rar)
-                if [ "$a" != "$CUR_RAR" ]; then
-                  gh release delete-asset "$TAG" "$a" --yes && echo "  清掉旧压缩包：$a"
-                fi
-                ;;
-            esac
-          done < <(gh release view "$TAG" --json assets --jq '.assets[].name')
+            if ! printf '%s\n' "${EXP[@]}" | grep -Fxq -- "$a"; then
+              gh release delete-asset "$TAG" "$a" --yes && echo "  清掉旧附件：$a"
+            fi
+          done
 
-          # ---------- 6) 核对附件数（写进正文，不登录也能核对）----------
-          ACT="$(gh release view "$TAG" --json assets --jq '.assets|length')"
-          echo "本次附件：$ACT 个（期望 ${#ASSETS[@]} 个）"
+          # ---------- 7) 上传（--clobber：同名直接覆盖 = 原地更新） ----------
+          gh release upload "$TAG" --clobber "$STAGE"/*
+
+          # ---------- 8) 核对：期望的附件是不是都在 ----------
+          gh release view "$TAG" --json assets --jq '.assets[].name' > "$RUNNER_TEMP/actual.txt"
+          ACT="$(wc -l < "$RUNNER_TEMP/actual.txt")"
+          MISSING=()
+          for a in "${EXP[@]}"; do
+            grep -Fxq -- "$a" "$RUNNER_TEMP/actual.txt" || MISSING+=( "$a" )
+          done
+          echo "本次附件：$ACT 个（期望 ${#EXP[@]} 个）"
           { cat "$NOTES"
             echo
-            echo "- 附件数：**$ACT** 个"
-            echo
-            echo "<!-- 调试：$(gh release view "$TAG" --json assets --jq '[.assets[].name][0:2] | join(" | ")') -->"
+            echo "- 附件数：**$ACT** 个（PDF $NPDF + 报告 + 压缩包）"
           } > "$NOTES.final"
           gh release edit "$TAG" --notes-file "$NOTES.final"
-          if [ "$ACT" -lt 2 ]; then
-            echo "::error::发布后附件只有 $ACT 个（期望 ${#ASSETS[@]} 个），上传失败了"
-            gh release view "$TAG" --json assets --jq '.assets[].name' | head -5 || true
+          if [ "${#MISSING[@]}" -gt 0 ]; then
+            echo "::error::有 ${#MISSING[@]} 个附件没传上去：${MISSING[*]}"
+            head -10 "$RUNNER_TEMP/actual.txt"
             exit 1
           fi
 

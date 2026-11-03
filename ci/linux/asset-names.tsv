@@ -1,0 +1,45 @@
+# 附件名映射：册号 → ASCII 附件名
+# GitHub 的 release 附件名只接受 ASCII：中文/空格会被服务端换成「.」，
+# 于是 `01Python 3.15 有什么新变化.pdf` 会变成 `01Python.3.15.pdf`（无法辨认）。
+# 所以单个附件统一用「册号-英文标识.pdf」；要中文文件名请下压缩包（包内是中文）。
+# 由 name_map 的 MAIN/TAIL/HOWTO 生成 —— 加/改分册时必须同步这里。
+# num	stem
+01	whatsnew	# 01Python 3.14 有什么新变化
+02	tutorial	# 02Python 教程
+03	using	# 03Python安装和使用
+04	reference	# 04Python 语言参考手册
+05	library	# 05Python 标准库
+06	extending	# 06扩展和嵌入 Python 解释器
+07	c-api	# 07Python C API 参考手册
+08	installing	# 08安装 Python 模块
+10	faq	# 10Python 常见问题
+11	builtins	# 11Python 内置参考手册
+0901	a-conceptual-overview-of-asyncio	# 0901asyncio 的概念概述
+0902	annotations	# 0902注解最佳实践
+0903	argparse	# 0903argparse 教程
+0904	descriptor	# 0904描述器指南
+0905	enum	# 0905Enum 指南
+0906	functional	# 0906函数式编程指引
+0907	ipaddress	# 0907ipaddress模块介绍
+0908	logging	# 0908日志指南
+0909	logging-cookbook	# 0909日志专题手册
+0910	regex	# 0910正则表达式指南
+0911	sorting	# 0911排序的技术
+0912	unicode	# 0912Unicode 指南
+0913	urllib2	# 0913如何利用 urllib 包获取网络资源
+0914	curses	# 0914用 Python 进行 Curses 编程
+0915	free-threading-python	# 0915Python 对自由线程的支持
+0916	free-threading-extensions	# 0916自由线程的 C API 扩展支持
+0917	isolating-extensions	# 0917隔离扩展模块
+0918	mro	# 0918Python 2.3 方法解析顺序
+0919	sockets	# 0919套接字编程指南
+0920	timerfd	# 0920定时器文件描述符指南
+0921	cporting	# 0921将扩展模块移植到 Python 3
+0922	gdb_helpers	# 0922使用 GDB 调试 C API 扩展和 CPython 内部代码
+0923	instrumentation	# 0923使用 DTrace 和 SystemTap 检测CPython
+0924	perf_profiling	# 0924Python 对 Linux perf 性能分析器的支持
+0925	remote_debugging	# 0925远程调试附加协议
+0926	argparse-optparse	# 0926将 optparse 代码迁移至 argparse
+0927	clinic	# 0927Argument Clinic 的用法
+0928	pyporting	# 0928如何将 Python 2 代码移植到 Python 3
+0929	abi3t-migration	# 0929迁移到自由线程的稳定 ABI（abi3t）

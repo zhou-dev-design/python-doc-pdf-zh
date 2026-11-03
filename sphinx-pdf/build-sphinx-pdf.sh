@@ -19,8 +19,10 @@
 # 第 6b 步会用主程序的 `--tool localize-titles` 把它们换成中文。
 # ★ 2026-10-04 起：所有后处理脚本（localize-titles / fix-index / name_map /
 #   rename-pdf / merge-pdf / report / alias-po / check-doc-refs …）都已**内联进
-#   gui/pdf_builder_gui.py**，本脚本一律走 `python <MAIN> --tool <名字>`。
-#   `tools/*.py` 只是等价的转发器 —— 于是与图形界面**永远同一份实现**。
+#   gui/pdf_builder_gui.py**，本脚本一律走 `python <MAIN> --tool <名字>` ——
+#   于是与图形界面**永远同一份实现**。
+#   ★ 2026-11-03：`tools/*.py` 那批 18 行转发器已删除（同一能力两个入口只会
+#     让人猜「哪份在跑」）；`--tool <名字>` 是唯一入口。
 #
 # 用法：  bash build-sphinx-pdf.sh [构建根目录]
 # 环境：  仅需 Git Bash（Windows）/ bash（Linux、macOS）；TeX Live 2025+ 在 PATH 中
@@ -91,11 +93,10 @@ LANG_CODE="zh_CN"
 JOBS="${JOBS:-auto}"
 
 SPHINX_PDF_DIR="$(cd "$(dirname "$0")" && pwd)"
-TOOLS="$SPHINX_PDF_DIR/tools"   # ★ 现在只剩「转发器」，真实现已内联进主程序（见下）
 # ★★ 2026-10-04 起：localize-titles / fix-index / name_map / rename-pdf /
 #    merge-pdf / report / alias-po / check-doc-refs / check-pdf-gaps /
 #    fix-md-escapes / verify-pdf **全部内联进** gui/pdf_builder_gui.py。
-#    本脚本一律走 `python <MAIN> --tool <名字> …`，tools/*.py 只是等价的转发器。
+#    本脚本一律走 `python <MAIN> --tool <名字> …`。
 #    好处：与图形界面**永远同一份实现**，判据不可能再分叉（历史上分叉过两次）。
 MAIN="$SPHINX_PDF_DIR/gui/pdf_builder_gui.py"
 
