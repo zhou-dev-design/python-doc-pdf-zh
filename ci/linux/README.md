@@ -31,7 +31,7 @@ Linux 上跑，步骤 6 才能真的按核数提速。
 |-|-|
 | `pdf_builder_linux.py` | Linux / WSL 入口：导入主程序，只覆盖上面那几处 |
 | `selftest.py` | 逻辑自检，**任何系统都能跑**（用「临时把 `IS_POSIX` 置真」的办法验证 Linux 分支） |
-| `setup-github.ps1` | 首次配仓库用：建仓库、传部署公钥、写 `~/.ssh/config`。token 只从 `$env:GH_TOKEN` 读、不落盘 |
+| `update_readme_table.py` | summary job 用：把各版本的构建/译文时间写回 README 的表格 |
 
 ## 3. 用法
 
