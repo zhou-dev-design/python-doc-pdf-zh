@@ -3,6 +3,10 @@ name: 构建 Python 中文文档 PDF（Linux）
 # ★ 这是仓库里**唯一**的流水线（Windows 那条已于 2026-11-02 删除）。
 #   仓库是公开的 ⇒ Actions 分钟数不限，每天跑五个版本也没有额度问题。
 on:
+  # ⚠️ 临时（验完删）：让 archive-eol 的修复跑一次。build 在 push 事件下被 if 跳过，
+  #   所以这次只跑 prepare + archive-eol，约 1 分钟。
+  push:
+    branches: [main]
   # ★ 触发时间：UTC 03:47 = 北京时间 **11:47**。
   #   为什么不是 "0 4 * * *"（北京 12:00 整）：
   #   ① **整点分钟最挤** —— 全世界写成 :00 的 cron 都挤在同一分钟，GitHub 官方文档
@@ -99,12 +103,16 @@ jobs:
           #   3.10.22：Python 3.10 于 2026-10-31 EOL（官方停止安全更新）
           EOL_TAGS="v3.10.22"
           # ────────────────────────────────────────────────────────
+          # ★ gh 必须显式带 -R：这个 job 没有 actions/checkout，工作目录不是 git
+          #   仓库 —— 不加 -R 时 `gh release view` 会报 "not a git repository" 并返回
+          #   非 0，看起来跟「release 不存在」一模一样（2026-11-03 就这么静默跳过了）。
+          echo "repo=$GITHUB_REPOSITORY"
           TODO=()
           for t in $EOL_TAGS; do
-            if gh release view "$t" >/dev/null 2>&1; then
+            if gh release view "$t" -R "$GITHUB_REPOSITORY" >/dev/null 2>"$RUNNER_TEMP/gh-err.txt"; then
               TODO+=( "$t" )
             else
-              echo "$t 已不在（归档过或没发过）—— 跳过"
+              echo "$t 查不到 —— 跳过（gh 原话：$(head -3 "$RUNNER_TEMP/gh-err.txt" | tr '\n' ' ')）"
             fi
           done
           [ "${#TODO[@]}" -gt 0 ] || { echo "没有需要归档的版本"; exit 0; }
@@ -122,7 +130,7 @@ jobs:
           GOT=()
           for t in "${TODO[@]}"; do
             D="$RUNNER_TEMP/eol-$t"; rm -rf "$D"; mkdir -p "$D"
-            if gh release download "$t" --dir "$D" --clobber 2>/dev/null \
+            if gh release download "$t" -R "$GITHUB_REPOSITORY" --dir "$D" --clobber \
                && [ -n "$(ls -A "$D" 2>/dev/null)" ]; then
               mkdir -p "$W/$t"; cp -f "$D"/* "$W/$t"/
               GOT+=( "$t" )
@@ -147,7 +155,7 @@ jobs:
           done
           if [ "$PUSHED" -eq 1 ]; then
             for t in "${GOT[@]}"; do
-              gh release delete "$t" --yes --cleanup-tag \
+              gh release delete "$t" -R "$GITHUB_REPOSITORY" --yes --cleanup-tag \
                 && echo "  已删除 release $t（内容在 old 分支 $t/ 下）"
             done
           else
@@ -159,7 +167,8 @@ jobs:
   build:
     needs: prepare
     # 手动触发时勾了「只做归档」就跳过构建（定时触发没有这个 input，永远构建）
-    if: github.event.inputs.archive_only != 'true'
+    # push 触发（临时的归档验证通道）也只跑归档
+    if: github.event.inputs.archive_only != 'true' && github.event_name != 'push'
     runs-on: ubuntu-22.04
     timeout-minutes: 360
     strategy:
@@ -706,7 +715,7 @@ jobs:
             GOT=()
             for t in "${STALE[@]}"; do
               D="$RUNNER_TEMP/old-$t"; rm -rf "$D"; mkdir -p "$D"
-              if gh release download "$t" --dir "$D" --clobber 2>/dev/null \
+              if gh release download "$t" -R "$GITHUB_REPOSITORY" --dir "$D" --clobber \
                  && [ -n "$(ls -A "$D" 2>/dev/null)" ]; then
                 mkdir -p "$W/$t"; cp -f "$D"/* "$W/$t"/
                 GOT+=( "$t" )
@@ -731,7 +740,7 @@ jobs:
               done
               if [ "$PUSHED" -eq 1 ]; then
                 for t in "${GOT[@]}"; do
-                  gh release delete "$t" --yes --cleanup-tag \
+                  gh release delete "$t" -R "$GITHUB_REPOSITORY" --yes --cleanup-tag \
                     && echo "  已删除旧 release $t（内容在 old 分支 $t/ 下）"
                 done
               else
