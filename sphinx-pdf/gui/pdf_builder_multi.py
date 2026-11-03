@@ -7946,18 +7946,24 @@ def titles_cli() -> int:
 
     if write and titles:
         p = default_volumes_json_path().with_name(VERSION_TITLES_FILENAME)
+        # ★ 合并写回，不是覆盖：网络抖动时某个版本可能取不到（bad=2），
+        #   若直接拿本次结果整体覆盖，那个版本就会从缓存里**消失** ——
+        #   而缓存没有它时 resolve_full_version 会退回解释器，命名口径就飘了。
+        merged = dict(cached)
+        merged.update(titles)
         payload = {
             "schema": 1,
             "_说明": "完整版本号口径：取自官方中文文档站各版本首页 h1（如 `Python 3.10.22 文档`）。"
                      "文件名/文件夹名/Release 标题都以这里的 full 为准；由 `--tool titles --write` 生成。",
             "_来源": "https://docs.python.org/zh-cn/<版本>/",
-            "titles": dict(sorted(titles.items(), key=lambda kv: _ver_key(kv[0]))),
+            "titles": dict(sorted(merged.items(), key=lambda kv: _ver_key(kv[0]))),
         }
         tmp = p.with_suffix('.json.tmp')
         tmp.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding='utf-8')
         tmp.replace(p)
-        print(f"\n已写入 {p}（{len(titles)} 条）")
-        bad = 0
+        print(f"\n已写入 {p}（本次刷新 {len(titles)} 条，缓存共 {len(merged)} 条）")
+        # ★ 这里**不能**把 bad 清零：bad=2 表示「有版本没取到」，调用方必须知道
+        #   这份缓存不是全刷新的；而「缓存是旧值 → 需更新」(1) 已经写进文件，才算解决。
     elif bad == 0:
         print("\n全部与缓存一致。")
     else:

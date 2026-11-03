@@ -23,8 +23,8 @@
 ```
 GitHub Actions（UTC 03:47 → 北京 11:47）
         │
-   ┌────▼─────┐  prepare：读 versions → 拆 matrix（默认 3.11~3.15，五个 job 并行）
-   │ prepare  │
+   ┌────▼─────┐  prepare：① 对着官方文档站刷新 version-titles.json（变了就提交）
+   │ prepare  │           ② 读 versions → 拆 matrix（默认 3.11~3.15，五个 job 并行）
    └──┬────┬──┘
       │    │
       │    └──► archive-eol：把已 EOL 版本的 release 挪进 old 分支后删除（幂等）
@@ -73,9 +73,16 @@ old 分支
 - **tag 不带日期**：`v<完整版本>`。日期写在 release 标题「Python 3.15.2 文档（20261103）」、
   正文和压缩包名里 —— 既带日期，又不会一天一个 release。
 - **完整版本号的口径是官方文档站标题**（`docs.python.org/zh-cn/3.15/` 的 h1 =
-  `Python 3.15.2 文档`），缓存在 `sphinx-pdf/version-titles.json`。
-  `--tool titles` 核对、`--tool titles --write` 更新。**不用解释器报告**：
+  `Python 3.15.2 文档`），缓存在 `sphinx-pdf/version-titles.json`。**不用解释器报告**：
   CI 的 `setup-python` 补丁版常常落后于文档站，跟着它走会「内容新、文件名旧」。
+- **每次构建都会自动刷新这个缓存**（`prepare` job 第一件事）：
+  `--tool titles --write` 对着官方文档站抓一遍，**有变化就自动 commit + push 到 main**，
+  后面的 build job 显式 `ref: main` 拉到新值。所以上游发了 3.15.3 的当天，
+  构建就会产出 `v3.15.3` 这个新 tag，`v3.15.2` 随即被归档进 `old` —— 不需要人工改文件。
+  这是**必须成功的前置步骤**，不是提醒：缓存停在旧值时，新内容会被原地覆盖成旧名字，
+  旧 release 也不会归档，而且全程零报错。
+  两道保险：build job 里再核一次，**与官方不一致硬失败**（`rc=2` 即官方站点取不到才降级为警告）；
+  `--write` 是**合并写回**，网络部分失败不会把取不到的版本从缓存里删掉。
 - **附件恰好 2 个**：
 
   ```

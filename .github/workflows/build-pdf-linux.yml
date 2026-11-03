@@ -52,16 +52,22 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # ---------------------------------------------------------------- 拆版本
+  # ---------------------------------------------------------------- 拆版本 + 刷新版本号
   prepare:
     runs-on: ubuntu-22.04
     outputs:
       matrix: ${{ steps.m.outputs.matrix }}
+      versions: ${{ steps.m.outputs.versions }}
     steps:
+      - name: 取代码
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
       - id: m
         name: 解析版本列表 → matrix
         env:
-          # 定时触发时没有 inputs（为空）→ 用下面的六版本默认值；手动触发则按填的来。
+          # 定时触发时没有 inputs（为空）→ 用下面的五版本默认值；手动触发则按填的来。
           VERSIONS: ${{ github.event.inputs.versions }}
         run: |
           python3 - <<'PY'
@@ -76,7 +82,59 @@ jobs:
           print("matrix =", m)
           with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as f:
               f.write("matrix=" + m + "\n")
+              f.write("versions=" + ",".join(vs) + "\n")
           PY
+
+      # ★★ 每次构建都对着官方文档站核一遍版本号，变了就提交 ★★
+      #   为什么必须"每次"、而且必须真的写回仓库：
+      #     完整版本号（→ 构建根名 → release 的 tag）的唯一口径是官方文档站标题
+      #     `docs.python.org/zh-cn/3.1X/` 的 h1。缓存停在 3.15.2、而上游已经发了
+      #     3.15.3 时，构建出来的 TAG 还是 v3.15.2 —— 于是
+      #       ① 不会产生新 tag，旧 release 也就**不会**被归档到 old；
+      #       ② 新内容被原地覆盖成旧名字（内容新、文件名旧，且不报任何错）。
+      #     所以这一步不是"复核提醒"，而是**必须做成功的前置动作**。
+      - name: 刷新版本号缓存（对着官方文档站，变了就提交）
+        env:
+          VERSIONS: ${{ steps.m.outputs.versions }}
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -uo pipefail
+          # 返回码：0 全部成功 / 1 官方标题与请求的版本线对不上（严重）/
+          #         2 有版本取不到（网络）。--write 走的是**合并写回**，
+          #         所以 rc=2 时取到的那几个仍然有效，可以照常提交。
+          python3 sphinx-pdf/gui/pdf_builder_multi.py --tool titles --write \
+            --versions "$VERSIONS"
+          rc=$?
+          if [ "$rc" -eq 1 ]; then
+            echo "::error::官方文档站返回的标题与请求的版本线对不上 —— 中止，绝不用错版本号命名"
+            exit 1
+          fi
+          if [ "$rc" -eq 2 ]; then
+            echo "::warning::有版本取不到（网络）—— 取到的那几个仍然会更新并提交"
+          fi
+          if git diff --quiet -- sphinx-pdf/version-titles.json; then
+            echo "版本号无变化（缓存已是最新）"; exit 0
+          fi
+          echo "版本号有变化："
+          git diff --unified=0 -- sphinx-pdf/version-titles.json | grep -E '^[+-] ' || true
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add sphinx-pdf/version-titles.json
+          git commit -q -m "chore(titles): 官方文档站版本号更新（$(date -u '+%Y-%m-%d') UTC）"
+          for i in 1 2 3; do
+            if git push -q \
+                 "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" \
+                 HEAD:main; then
+              echo "✔ 已提交并推送到 main（后续 job 会拉到新值）"
+              exit 0
+            fi
+            echo "推送冲突，第 $i 次重试"
+            git pull -q --rebase --autostash \
+              "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" main || true
+            sleep 3
+          done
+          echo "::warning::version-titles.json 推送失败 —— 本轮命名会用旧版本号，\
+          旧 release 也就不会归档；下一轮会重试"
 
   # ---------------------------------------------------------------- 归档 EOL
   # ★ 停止支持的版本：把 release 里的附件挪进 old 分支的 <tag>/ 目录，然后删掉
@@ -178,6 +236,10 @@ jobs:
       - name: 取代码
         uses: actions/checkout@v4
         with:
+          # ★ 必须显式 ref + 拉最新：默认 checkout 的是**触发时的 sha**，
+          #   而 prepare 可能刚刚往 main 推了新的 version-titles.json。
+          #   不拿最新的话，这里读到的还是旧版本号 → TAG 旧 → 不归档且覆盖旧 release。
+          ref: ${{ github.ref_name }}
           fetch-depth: 1
 
       - name: 恢复 apt 缓存（省掉每轮约 250 MB 下载）
@@ -331,12 +393,25 @@ jobs:
       #   缓存在 sphinx-pdf/version-titles.json。文档站一发新版，这一步就会
       #   打出「缓存是 3.13.18 → 需更新」，提醒我们跑 `--tool titles --write`。
       #   取不到网络只警告：命名继续用缓存，绝不因此挡掉整轮构建。
-      - name: 版本号口径对着官方文档站复核（联网，失败只警告）
-        continue-on-error: true
+      # ★ 复核（不是"提醒"）：prepare 已经把官方标题写进 version-titles.json 并提交，
+      #   这里再对着官方核一次。**不一致就是硬失败** —— 说明 prepare 的推送没成功，
+      #   继续跑只会用旧版本号覆盖旧 release（内容新、名字旧，且不报错）。
+      #   只有「官方站点取不到」（rc=2）才降级为警告，那是网络问题，不是配置问题。
+      - name: 版本号口径复核（与官方不一致 = 失败）
         run: |
+          set +e
           python sphinx-pdf/gui/pdf_builder_multi.py --tool titles \
-            --versions "${{ matrix.version }}" \
-            || echo "::warning::官方文档站取不到或版本号有变化 —— 本轮命名仍按 version-titles.json"
+            --versions "${{ matrix.version }}"
+          rc=$?
+          if [ "$rc" -eq 2 ]; then
+            echo "::warning::官方文档站取不到 —— 本轮沿用缓存里的版本号"
+            exit 0
+          fi
+          if [ "$rc" -ne 0 ]; then
+            echo "::error::version-titles.json 与官方文档站不一致（prepare 的刷新/推送可能失败）—— \
+            继续跑会用旧 TAG 覆盖旧 release，故中止"
+            exit 1
+          fi
 
       - name: 分册清单自检（不联网，核对每版册数与合并册大纲）
         run: |
