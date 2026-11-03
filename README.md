@@ -237,7 +237,7 @@ python3 ci/linux/pdf_builder_linux.py --preflight --versions 3.15            # �
 ci/linux/
   pdf_builder_linux.py                  # CI 入口：导入主程序 + 覆盖平台差异
   selftest.py                           # 平台胶水层自检（不联网）
-  setup-github.ps1                      # 首次配置仓库（SSH 443 通道等）
+  update_readme_table.py                # 汇总各版本构建信息，改写 README 表格
   README.md                             # CI 侧细节与排错
 sphinx-pdf/
   gui/pdf_builder_multi.py              # ★ 唯一主程序：步骤 0~10 + PyQt6 界面 + 17 个内置工具
