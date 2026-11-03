@@ -22,7 +22,7 @@
 GitHub Actions（03:47 UTC → 北京 11:47，每天）
         │
    ┌────▼─────┐   prepare 读 versions → 拆成 matrix
-   │ prepare  │   （默认 3.10~3.15 六个 job 并行，max-parallel: 6）
+   │ prepare  │   （默认 3.11~3.15 五个 job 并行，max-parallel: 5）
    └────┬─────┘
         │  matrix: build ×6
    ┌────▼──────────────────────────────────────────────┐
@@ -36,7 +36,7 @@ GitHub Actions（03:47 UTC → 北京 11:47，每天）
    └────────────────────────────────────────────────────┘
 ```
 
-六个版本**互不影响**（`fail-fast: false`）：3.15 失败不会拦住 3.10 出稿。
+五个版本**互不影响**（`fail-fast: false`）：3.15 失败不会拦住 3.11 出稿。
 
 ---
 
@@ -51,7 +51,7 @@ GitHub Actions（03:47 UTC → 北京 11:47，每天）
 python3 ci/linux/pdf_builder_linux.py --versions 3.15 --jobs 4
 
 # 六版本并行（每个版本一个子进程）
-python3 ci/linux/pdf_builder_linux.py --versions 3.10,3.11,3.12,3.13,3.14,3.15 --jobs 4 --merge
+python3 ci/linux/pdf_builder_linux.py --versions 3.11,3.12,3.13,3.14,3.15 --jobs 4 --merge
 
 # 只重跑后半段（前面产物已在）
 python3 ci/linux/pdf_builder_linux.py --versions 3.15 --only 6,6b,7,7b,8,9
@@ -112,7 +112,7 @@ old 分支        ← 被新补丁版顶下来的旧版本，按 tag 建目录�
 |-|-|
 | 3.15.2 连跑两天 | `v3.15.2` 这个 release **原地更新**（附件 `--clobber` 覆盖），不会多出来一个 |
 | 3.15.2 → 3.15.3 | 先把 `v3.15.2` 的全部附件搬进 `old` 分支，**推成功之后**才删它的 release ⇒ 每条线永远只有一个 release |
-| 跑一年 | Releases 数量 = 版本线条数（6 条：3.10~3.15），体积不随天数增长 |
+| 跑一年 | Releases 数量 = 版本线条数（5 条：3.11~3.15；3.10 已归档到 `old`），体积不随天数增长 |
 
 几个要点：
 
@@ -151,7 +151,7 @@ old 分支        ← 被新补丁版顶下来的旧版本，按 tag 建目录�
 
 | 版本 | 静态册 | howto | 合计 | 与 3.15 的差别 |
 |-|-|-|-|-|
-| 3.10 | 10 | 17 | **27** | 多 `09分发 Python 模块`（distributing）；没有内置参考手册 |
+| 3.10 | 10 | 17 | **27** | 多 `09分发 Python 模块`（distributing）；没有内置参考手册。**已于 2026-10-31 EOL：不再构建，产物在 `old` 分支** |
 | 3.11 | 9 | 20 | **29** | distributing 被上游并进 installing |
 | 3.12 | 9 | 23 | **32** | |
 | 3.13 | 10 | 27 | **37** | 拆出《内置参考手册》（builtins） |

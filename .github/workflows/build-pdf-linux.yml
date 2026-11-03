@@ -1,7 +1,7 @@
 name: 构建 Python 中文文档 PDF（Linux）
 
 # ★ 这是仓库里**唯一**的流水线（Windows 那条已于 2026-11-02 删除）。
-#   仓库是公开的 ⇒ Actions 分钟数不限，每天跑六个版本也没有额度问题。
+#   仓库是公开的 ⇒ Actions 分钟数不限，每天跑五个版本也没有额度问题。
 on:
   # ★ 触发时间：UTC 03:47 = 北京时间 **11:47**。
   #   为什么不是 "0 4 * * *"（北京 12:00 整）：
@@ -18,8 +18,8 @@ on:
   workflow_dispatch:
     inputs:
       versions:
-        description: "要构建的版本，逗号分隔（3.10~3.15 六个版本；册数各不相同，见 volumes.json）"
-        default: "3.10,3.11,3.12,3.13,3.14,3.15"
+        description: "要构建的版本，逗号分隔（3.11~3.15 五个版本；3.10 已于 2026-10-31 EOL，不再构建）"
+        default: "3.11,3.12,3.13,3.14,3.15"
       jobs:
         description: "并发数：步骤 6 的 sphinx -j 与步骤 7 的册级并发共用"
         default: "4"
@@ -38,6 +38,11 @@ on:
         type: choice
         options: ["true", "false"]
         default: "true"
+      archive_only:
+        description: "只做归档（把 EOL 版本的 release 挪进 old 分支），不构建 —— 勾 true 时跳过所有 build"
+        type: choice
+        options: ["false", "true"]
+        default: "false"
 
 permissions:
   contents: write               # 要往仓库推分支
@@ -61,7 +66,8 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os
-          DEFAULT = ["3.10", "3.11", "3.12", "3.13", "3.14", "3.15"]
+          # ★ 3.10 已于 2026-10-31 EOL：不再构建，它的 release 由 archive-eol 归档到 old 分支
+          DEFAULT = ["3.11", "3.12", "3.13", "3.14", "3.15"]
           raw = os.environ.get("VERSIONS") or ""
           vs = [v.strip() for v in raw.split(",") if v.strip()]
           if not vs:
@@ -72,17 +78,96 @@ jobs:
               f.write("matrix=" + m + "\n")
           PY
 
+  # ---------------------------------------------------------------- 归档 EOL
+  # ★ 停止支持的版本：把 release 里的附件挪进 old 分支的 <tag>/ 目录，然后删掉
+  #   release（--cleanup-tag 连 tag 一起清）。与发布步骤里「补丁版升级时归档上一版」
+  #   是同一套做法，只是这里的触发条件是「版本线 EOL」而不是「出了新补丁版」。
+  #   幂等：release 已经不在了就跳过，所以每次运行都能无条件跑一遍。
+  #   加一个版本：往 EOL_TAGS 里添一个 tag 即可。
+  archive-eol:
+    needs: prepare
+    runs-on: ubuntu-22.04
+    continue-on-error: true          # 归档失败不该拦住建 PDF
+    steps:
+      - name: 把停止支持的版本归档到 old 分支
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -uo pipefail
+          # ── 停止支持的版本清单（tag）────────────────────────────────
+          #   3.10.22：Python 3.10 于 2026-10-31 EOL（官方停止安全更新）
+          EOL_TAGS="v3.10.22"
+          # ────────────────────────────────────────────────────────
+          TODO=()
+          for t in $EOL_TAGS; do
+            if gh release view "$t" >/dev/null 2>&1; then
+              TODO+=( "$t" )
+            else
+              echo "$t 已不在（归档过或没发过）—— 跳过"
+            fi
+          done
+          [ "${#TODO[@]}" -gt 0 ] || { echo "没有需要归档的版本"; exit 0; }
+          echo "要归档：${TODO[*]}"
+
+          W="$RUNNER_TEMP/oldrepo"
+          rm -rf "$W"
+          if ! git clone -q --depth 1 --branch old \
+               "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "$W" 2>/dev/null; then
+            mkdir -p "$W"; git -C "$W" init -q; git -C "$W" checkout -q -b old
+          fi
+          git -C "$W" config user.name  "github-actions[bot]"
+          git -C "$W" config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          GOT=()
+          for t in "${TODO[@]}"; do
+            D="$RUNNER_TEMP/eol-$t"; rm -rf "$D"; mkdir -p "$D"
+            if gh release download "$t" --dir "$D" --clobber 2>/dev/null \
+               && [ -n "$(ls -A "$D" 2>/dev/null)" ]; then
+              mkdir -p "$W/$t"; cp -f "$D"/* "$W/$t"/
+              GOT+=( "$t" )
+              echo "  已下载 $t（$(du -sh "$D" | cut -f1)）"
+            else
+              echo "::error::$t 下载失败或没有附件 —— 不删它的 release（下轮再试）"
+            fi
+          done
+          [ "${#GOT[@]}" -gt 0 ] || exit 0
+
+          git -C "$W" add -A
+          git -C "$W" commit -q -m "old: 归档 EOL ${GOT[*]}（$(date -u '+%Y-%m-%d %H:%M') UTC）" || true
+          PUSHED=0
+          for i in 1 2 3; do
+            if git -C "$W" push -q \
+                 "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" \
+                 HEAD:refs/heads/old; then PUSHED=1; break; fi
+            echo "  old 分支推送冲突，第 $i 次重试"
+            git -C "$W" pull -q --rebase --autostash \
+              "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" old || true
+            sleep 5
+          done
+          if [ "$PUSHED" -eq 1 ]; then
+            for t in "${GOT[@]}"; do
+              gh release delete "$t" --yes --cleanup-tag \
+                && echo "  已删除 release $t（内容在 old 分支 $t/ 下）"
+            done
+          else
+            echo "::error::old 分支推送失败，EOL 的 release 先留着（下轮再归档）"
+            exit 1
+          fi
+
   # ---------------------------------------------------------------- 构建
   build:
     needs: prepare
+    # 手动触发时勾了「只做归档」就跳过构建（定时触发没有这个 input，永远构建）
+    if: github.event.inputs.archive_only != 'true'
     runs-on: ubuntu-22.04
     timeout-minutes: 360
     strategy:
       fail-fast: false
-      # ★ 六个版本（3.10~3.15）全部同时起跑：每个 job 一个独立 runner，
+      # ★ 五个版本（3.11~3.15）全部同时起跑：每个 job 一个独立 runner，
       #   互不干扰；公开仓库 Actions 分钟数不限，唯一的瓶颈是并发额度
-      #   （免费/公开仓库通常允许 20 个，六个远够）。
-      max-parallel: 6
+      #   （免费/公开仓库通常允许 20 个，五个远够）。3.10 已 EOL，不再构建。
+      max-parallel: 5
       matrix: ${{ fromJson(needs.prepare.outputs.matrix) }}
     name: build ${{ matrix.version }}
     steps:
