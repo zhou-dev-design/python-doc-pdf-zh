@@ -838,6 +838,9 @@ jobs:
             echo
             echo "> 同一版本重跑会**原地更新**本 release（同名附件自动替换），不会一天一个。"
             echo "> 补丁版本升级时，旧版本会整体归档到 [\`old\`](../../tree/old) 分支再删除其 release。"
+            echo "> **页面底部的 \`Source code (zip/tar.gz)\` 与本项目产物无关** —— 那是 GitHub"
+            echo "> 按 tag 自动生成的仓库源码归档，**无法删除**（不是本 release 的附件）；"
+            echo "> 下载中文 PDF 请只用上面那两个文件。"
           } > "$NOTES"
 
           # ---------- 5) 建或改 release ----------
