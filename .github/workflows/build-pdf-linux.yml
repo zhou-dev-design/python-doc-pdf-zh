@@ -3,6 +3,10 @@ name: 构建 Python 中文文档 PDF（Linux）
 # ★ 这是仓库里**唯一**的流水线（Windows 那条已于 2026-11-02 删除）。
 #   仓库是公开的 ⇒ Actions 分钟数不限，每天跑六个版本也没有额度问题。
 on:
+  # ⚠️⚠️ 临时验证用（验完必须删）：为了验证 3.10~3.12 的修复，push main 也触发一次，
+  #   且只跑这三个版本、不发布。正常渠道只有下面两条。
+  push:
+    branches: [main]
   schedule:
     - cron: "0 4 * * *"         # UTC 04:00 = 北京时间 12:00（UTC+8）
   workflow_dispatch:
@@ -47,7 +51,8 @@ jobs:
         name: 解析版本列表 → matrix
         env:
           # 定时触发时没有 inputs（为空）→ 用下面的六版本默认值；手动触发则按填的来。
-          VERSIONS: ${{ github.event.inputs.versions }}
+          # push（临时验证通道）只跑 3.10~3.12。
+          VERSIONS: ${{ github.event_name == 'push' && '3.10,3.11,3.12' || github.event.inputs.versions }}
         run: |
           python3 - <<'PY'
           import json, os
@@ -255,7 +260,9 @@ jobs:
           BASE="$RUNNER_TEMP/build"
           mkdir -p "$BASE"
           MERGE_FLAG=""
-          if [ "${{ github.event.inputs.merge }}" = "false" ]; then MERGE_FLAG="--no-merge"; fi
+          # 临时验证通道（push）不做合并册，缩短反馈时间
+          if [ "${{ github.event.inputs.merge }}" = "false" ] \
+             || [ "${{ github.event_name }}" = "push" ]; then MERGE_FLAG="--no-merge"; fi
           python ci/linux/pdf_builder_linux.py \
             --versions "${{ matrix.version }}" \
             --base "$BASE" \
@@ -493,7 +500,8 @@ jobs:
             && echo "✔ 已推到 ci-logs 分支" || echo "✘ 推 ci-logs 失败（不影响其它步骤）"
 
       - name: 发布到 Releases（同版本原地更新；旧补丁版归档到 old 分支）
-        if: success() && github.event.inputs.push_branch != 'false'
+        # 临时验证通道（push）绝不发布：产物先人工看过再说
+        if: success() && github.event_name != 'push' && github.event.inputs.push_branch != 'false'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TOKEN: ${{ secrets.GITHUB_TOKEN }}

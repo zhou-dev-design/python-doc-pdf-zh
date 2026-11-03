@@ -2234,8 +2234,13 @@ class Pipeline:
                        f"请执行 git -C {cpy} sparse-checkout set "
                        + " ".join(SPARSE_PATHS))
 
+        # ★ cwd 必须是 Doc/：patchlevel.py 里是 `./../Include/patchlevel.h`
+        #   （相对**当前目录**），不设 cwd 就会拿启动目录去拼 → FileNotFoundError，
+        #   于是版本号恒为 "?"，还连带一句「与所选版本不一致」的假警告。
+        #   Sphinx 自己构建时 cwd 就是 Doc/，所以这里照它来。
         rc, out = self.capture(
-            [self.python, str(cpy / "Doc" / "tools" / "extensions" / "patchlevel.py")])
+            [self.python, str(cpy / "Doc" / "tools" / "extensions" / "patchlevel.py")],
+            cwd=cpy / "Doc")
         ver = out.strip().splitlines()[-1] if out.strip() else "?"
         self.rep.log(f"patchlevel → {ver}", level="ok")
         if not ver.startswith(self.cfg.version):
@@ -2438,6 +2443,44 @@ class Pipeline:
                 self.rep.log(f"这一次失败的原因：{hint}", level="warn")
         return last
 
+    def _pip_plan(self) -> tuple[list[str], list[str]]:
+        """这一版要装什么 → `(pip 参数, 就绪判据的模块名)`。
+
+        ★★ 为什么不能所有版本共用一份清单（2026-11-03 实测）★★
+        内置 `PIP_PACKAGES` 写的是 `sphinx<9.0.0`，装出来是 8.1.3。而官方各分支
+        `Doc/requirements.txt` 钉的版本天差地别：
+
+            3.10 → sphinx==3.4.3（还钉了 docutils==0.17.1 / jinja2==3.0.3）
+            3.11 → 见该分支 requirements.txt
+            3.12 → sphinx~=8.2.0
+            3.13+ → 与内置清单相容（已跑通，不动）
+
+        拿 Sphinx 8 去编 3.10 的 Doc，等于用五年后的工具链编五年前写的
+        `Doc/tools/extensions/*.py` —— 步骤 6 必挂。所以 **3.12 及更早一律改用
+        官方自己的 requirements.txt**（它连 docutils/jinja2 一起钉好，最忠实）。
+
+        两条附带约束：
+          · SVG 转换器**只在真有 SVG 时才装** —— `sphinxcontrib-svg2pdfconverter`
+            装上去会把老 Sphinx 顶掉，而 3.10~3.12 的 Doc 根本没有 SVG；
+          · `pypdf` 始终装（步骤 9 合并册与验收报告要用，官方清单里没有）。
+        """
+        doc = self.doc
+        if doc is None:
+            try:
+                self.resolve_state()
+                doc = self.doc
+            except Exception:
+                doc = None
+        req = doc / "requirements.txt" if doc else None
+        if req is not None and req.is_file() and ver_tuple(self.cfg.version) <= (3, 12):
+            cons = doc / "constraints.txt"
+            pkgs = ["-r", str(req)]
+            if cons.is_file():
+                pkgs += ["-c", str(cons)]
+            pkgs += ["pypdf>=5"]
+            return pkgs, ["sphinx", "python_docs_theme", "pypdf"]
+        return list(PIP_PACKAGES), list(READY_MODULES)
+
     def step4(self) -> str:
         # venv 位置：配置指定 > 自动探测（优先真的装了 sphinx 的那个）> <root>/venv
         vp = self.resolve_venv()
@@ -2454,8 +2497,12 @@ class Pipeline:
             raise Fail(f"venv 里的 Python 不存在：{self.vp}")
         self.rep.log(f"venv python → {self.vp}", level="meta")
 
+        pkgs, ready_mods = self._pip_plan()
+        if pkgs[:1] == ["-r"]:
+            self.rep.log(f"老版本（{self.cfg.version}）：按官方 Doc/requirements.txt 装依赖",
+                         level="info")
         ready = self.run([str(self.vp), "-c",
-                          "import " + ", ".join(READY_MODULES)], section="pip.log") == 0
+                          "import " + ", ".join(ready_mods)], section="pip.log") == 0
         if ready and self.cfg.skip_pip_if_ready:
             self.rep.log("依赖已就绪，跳过 pip 安装（省时间）", level="ok")
         else:
@@ -2466,7 +2513,12 @@ class Pipeline:
                            "-q", "-i", self.cfg.pip_index], section="pip.log")
             if rc != 0:
                 self.rep.log("pip 自升级失败，继续尝试装依赖（不影响出 PDF）", level="warn")
-            rc = self._pip_install(PIP_PACKAGES)
+            rc = self._pip_install(pkgs)
+            if rc != 0 and pkgs[:1] == ["-r"]:
+                # 官方清单装不上（网络/包撤下/环境不合）→ 退回内置清单，至少不比原来差
+                self.rep.log("按官方 requirements.txt 装不上，退回内置清单再试一次",
+                             level="warn")
+                rc = self._pip_install(list(PIP_PACKAGES))
             if rc != 0:
                 raise Fail(
                     "pip 安装依赖失败（已依次试过：配置源 → 同源清缓存 → 官方源），"
@@ -2684,21 +2736,41 @@ class Pipeline:
             raise Fail(f"找不到 {conf}")
         self._guard_doc_refs()
 
-        # ★★ 必须先把 conf.py 的 SVG 转换器从 rsvg 版改成 cairosvg 版 ★★
+        # ★★ conf.py 的 SVG 转换器：rsvg → cairosvg ★★
         #   conf.py 的可选扩展里写死 'sphinxcontrib.rsvgconverter'，它要调外部程序
         #   rsvg-convert（Windows 上没有），结果是只留一行软告警、SVG 原样进 LaTeX，
         #   之后报 `! LaTeX Error: Cannot determine size of graphic in xxx.svg`，
         #   c-api.pdf 直接编不过。
+        #
+        # ★★ 判据是「这一版的 Doc 里**到底有没有 SVG**」，不是「conf.py 里有没有
+        #   这串字」—— 后者会把 3.10~3.12 整批误杀（2026-11-03 实测）：
+        #     3.10 的 conf.py 只有 236 行，压根没有 SVG 转换器；
+        #     3.12 的 `_OPTIONAL_EXTENSIONS` 只有 `sphinxext.opengraph`；
+        #     `sphinxcontrib.rsvgconverter` 是 3.13 才随 SVG 插图一起加进来的。
+        #   老版本既没有 SVG、也不需要转换器，硬要求「必须改名成功」= 步骤 6 必失败。
         txt = read_text_safe(conf)
         old = "sphinxcontrib.rsvgconverter"
         new = "sphinxcontrib.cairosvgconverter"
+        svgs = self._svg_images()
         if old in txt:
             conf.write_text(txt.replace(old, new), encoding="utf-8")
             self.rep.log(f"conf.py：{old} → {new}", level="ok")
         elif new in txt:
             self.rep.log("conf.py 已经是 cairosvgconverter，跳过改写", level="meta")
-        if new not in read_text_safe(conf):
-            raise Fail("conf.py 里的 rsvgconverter 改名失败，请手工确认")
+        elif svgs:
+            # 有 SVG 却没注册转换器（上游刚引入 SVG 的那一版会这样）→ 补一行，
+            # 否则 SVG 原样进 LaTeX，`Cannot determine size of graphic` 会打死一整册。
+            conf.write_text(
+                txt + "\n# 由本工具补充：SVG 转 PDF（rsvg-convert 在 Windows 上没有）\n"
+                      f"extensions.append({new!r})\n", encoding="utf-8")
+            self.rep.log(f"conf.py 里没有 SVG 转换器，已追加 extensions.append({new!r})",
+                         level="warn")
+        else:
+            self.rep.log("本版本的 Doc 没有 SVG 插图（conf.py 里也没有转换器），无需改写",
+                         level="meta")
+        if svgs and new not in read_text_safe(conf):
+            raise Fail(f"文档里有 {len(svgs)} 处 SVG 插图，却没能把它写进 conf.py：\n"
+                       f"  {new}\n  请手工看 {conf} 里的 extensions 是怎么写的。")
 
         # ★★ 开编之前先确认「SVG → PDF」这条路真能走（2026-10-23 加）★★
         #   以前这里是裸跑 sphinx：CairoSVG 缺 cairo 运行库时，
@@ -2711,8 +2783,7 @@ class Pipeline:
             self.rep.log(f"cairo 运行库：{self.cairo_dir}"
                          f"（{'已加进子进程 PATH' if in_path else '⚠ 但不在子进程 PATH 里'}）",
                          level="meta" if in_path else "warn")
-        svgs = self._svg_images()
-        if svgs:
+        if svgs:          # 上面判断 conf.py 时已经扫过一次，这里直接用
             cairo_ok, why = self._cairo_probe()
             if not cairo_ok:
                 if "No module named" in why:
