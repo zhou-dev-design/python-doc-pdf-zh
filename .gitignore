@@ -26,3 +26,8 @@ _*.log
 
 # GUI 运行时留下的临时配置
 sphinx-pdf/_tmp*.json
+
+# GUI 的运行时配置：里面是本机绝对路径（输出目录、各版本解释器），
+# 提交上去对别人全是错的。程序找不到时会用内置默认值自己生成。
+sphinx-pdf/gui/config.json
+sphinx-pdf/gui/config-multi.json
