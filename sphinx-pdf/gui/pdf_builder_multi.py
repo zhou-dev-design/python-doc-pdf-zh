@@ -2929,9 +2929,23 @@ class Pipeline:
         #   效果与手删等价，却不会产生删除风暴。
         #   ⚠️ 旧 .pdf 由 latexmk 覆盖；只有它真的失败时旧 PDF 才会留下，而收尾
         #      「PDF 存在且非空」的判据仍然有效。
+        # ★ 索引样式文件不写死 ★ Sphinx 从 1.x 到 8.x 一直叫 python.ist，但这是它的
+        #   内部命名，不是承诺。3.4.3 这种五年老的版本上万一换了名，写死 `-s python.ist`
+        #   会让 makeindex 直接失败 → .ind=0 → 每册都没有索引（且 PDF 看着「正常」）。
+        #   这里按目录里的实际文件取：优先 python.ist，否则取第一个 *.ist，都没有就不加 -s。
+        ist = ""
+        if (latex / "python.ist").is_file():
+            ist = "-s python.ist "
+        else:
+            cand = sorted(latex.glob("*.ist"))
+            if cand:
+                ist = f"-s {cand[0].name} "
+                self.rep.log(f"索引样式文件不是 python.ist，改用 {cand[0].name}（本版本 Sphinx 换过名）",
+                             level="warn")
         cmd = [self._tool("latexmk"),                      # ★ 绝对路径，别靠 PATH
                "-pdf", "-gg", "-file-line-error", "-r", "latexmkrc",
-               "-e", "$makeindex = q{python makeindex-fix.py %O -s python.ist -o %D %S};",
+               "-e", "$makeindex = q{python makeindex-fix.py %O "
+                     + ist + "-o %D %S};",
                tex.name]
         try:
             proc = subprocess.Popen(

@@ -3,8 +3,8 @@ name: 构建 Python 中文文档 PDF（Linux）
 # ★ 这是仓库里**唯一**的流水线（Windows 那条已于 2026-11-02 删除）。
 #   仓库是公开的 ⇒ Actions 分钟数不限，每天跑六个版本也没有额度问题。
 on:
-  # ⚠️⚠️ 临时验证用（验完必须删）：为了验证 3.10~3.12 的修复，push main 也触发一次，
-  #   且只跑这三个版本、不发布。正常渠道只有下面两条。
+  # ⚠️⚠️ 临时通道（验完必须删）：push main 时只跑 3.10~3.12 —— 它们刚首次跑通，
+  #   需要把真实产物补进 Releases 才算验收完成。正常渠道只有下面两条。
   push:
     branches: [main]
   schedule:
@@ -260,9 +260,9 @@ jobs:
           BASE="$RUNNER_TEMP/build"
           mkdir -p "$BASE"
           MERGE_FLAG=""
-          # 临时验证通道（push）不做合并册，缩短反馈时间
-          if [ "${{ github.event.inputs.merge }}" = "false" ] \
-             || [ "${{ github.event_name }}" = "push" ]; then MERGE_FLAG="--no-merge"; fi
+          # 临时验证通道（push）跑完整流程（含合并册与发布）—— 3.10~3.12 首次跑通，
+          # 需要真实产物进 Releases 才算验收完成。
+          if [ "${{ github.event.inputs.merge }}" = "false" ]; then MERGE_FLAG="--no-merge"; fi
           python ci/linux/pdf_builder_linux.py \
             --versions "${{ matrix.version }}" \
             --base "$BASE" \
@@ -500,8 +500,7 @@ jobs:
             && echo "✔ 已推到 ci-logs 分支" || echo "✘ 推 ci-logs 失败（不影响其它步骤）"
 
       - name: 发布到 Releases（同版本原地更新；旧补丁版归档到 old 分支）
-        # 临时验证通道（push）绝不发布：产物先人工看过再说
-        if: success() && github.event_name != 'push' && github.event.inputs.push_branch != 'false'
+        if: success() && github.event.inputs.push_branch != 'false'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -664,9 +663,11 @@ jobs:
             echo "- 合并册：**$PDF_NAME**（单本，直接下载即看）"
             echo "- 全部分册（$((NB - 1)) 册）+ 合并册 + 验收报告：**$ARCH**（约 $(du -h "$STAGE/$ARCH" | cut -f1)）"
             echo
-            echo "**只要某一册？** 下载压缩包解压即可 —— 包里是 \`01Python 3.15 有什么新变化.pdf\`"
+            # ★ 短版本（3.10.22 → 3.10）：分册文件名里用的是小版本号，别写死 3.15
+            MV="${FULL%.*}"
+            echo "**只要某一册？** 下载压缩包解压即可 —— 包里是 \`01Python $MV 有什么新变化.pdf\`"
             echo "这样的**中文原名**。Release 不再逐个挂分册：GitHub 的附件名只接受 ASCII，"
-            echo "中文会被服务端替换成 \`.\`（\`01Python.3.15.pdf\`），挂上去反而认不出是哪一册。"
+            echo "中文会被服务端替换成 \`.\`（\`01Python.$MV.pdf\`），挂上去反而认不出是哪一册。"
             echo
             echo "> 同一版本重跑会**原地更新**本 release（同名附件自动替换），不会一天一个。"
             echo "> 补丁版本升级时，旧版本会整体归档到 [\`old\`](../../tree/old) 分支再删除其 release。"
