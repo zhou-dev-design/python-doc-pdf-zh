@@ -2949,16 +2949,30 @@ class Pipeline:
         # `Missing character: There is no 安 (U+5B89) in font [FreeSansBold.otf]`。
         stats = [(len(CJK_RE.findall(read_text_safe(f))), f.stem)
                  for f in list_root_tex(self.latex)]
+        cjk_total = sum(n for n, _ in stats)
         names = [name for n, name in stats if n < CJK_MIN_PER_BOOK]
-        if stats and len(names) > len(stats) / 2:
-            self.rep.log(f"★ {len(names)}/{len(stats)} 册的正文里几乎没有中文 —— "
-                         f"这不是翻译缺失，是「语言」设错了", level="err")
-            self.rep.log("  语言不是 CJK 时 Sphinx 不加载 xeCJK：正文按英文原文排版，"
-                         "步骤 6b 改出的中文标题也没有字体可用，"
-                         "会整段消失（日志里一片 Missing character）。", level="err")
-            self.rep.log("  ⇒ 把「语言」改回 zh_CN，重跑步骤 2→3（铺 .po）和 6→8。",
-                         level="err")
-        elif names:
+
+        # ★★ 「整批都没有中文」必须**当场打死**，不能只记一行日志 ★★
+        #   2026-11-03 实测（3.10）：2319 页全英文、**0 条 warning**、
+        #   验收报告全绿（册数/页数/书签/索引全对），只有封面和页眉是中文
+        #   —— 因为老版本 conf.py 缺 gettext_compact，逐页 .po 一个都没匹配上。
+        #   那轮就是这么「绿着」把英文 PDF 发出去的。判据分两档：
+        #     · 汉字总量极低（< 2000）且过半册子近乎无中文  → 整批没接上 = 硬失败
+        #     · 只有个别册中文少                          → 上游没译，正常，只 warn
+        if stats and str(self.cfg.lang).lower().startswith("zh") \
+                and cjk_total < 2000 and len(names) > len(stats) / 2:
+            raise Fail(
+                f"译文没接上：{len(names)}/{len(stats)} 册的正文几乎没有中文"
+                f"（整批合计只有 {cjk_total} 个汉字）。\n"
+                "  这不是「上游没译」，是 .po 一个都没被 Sphinx 用上。三个已知原因：\n"
+                "    ① conf.py 缺 `gettext_compact = False` —— 3.10/3.11 的 conf.py\n"
+                "       没有这一项，Sphinx 默认 True 会去找 `library.mo`，\n"
+                "       而译文是每页一个（`library/array.mo`）；\n"
+                "    ② .mo 不存在 —— Sphinx 3.x 把自己的 .mo 编到 outdir，\n"
+                "       翻译却从 srcdir 读（本程序已用 babel 预编译绕过）；\n"
+                "    ③ 「语言」不是 zh_CN，或译文分支与该版本对不上。")
+
+        if names:
             self.rep.log(f"  注：{len(names)} 册正文中文很少（{'、'.join(names[:5])}"
                          f"{' 等' if len(names) > 5 else ''}）——上游 zh-CN 尚未翻译，属正常",
                          level="warn")
