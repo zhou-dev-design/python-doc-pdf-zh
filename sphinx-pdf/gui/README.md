@@ -1,5 +1,9 @@
 # Python 中文文档分册 PDF 构建器（PyQt6 图形界面）
 
+> **2026-11-03**：单版本版 `pdf_builder_gui.py` 已**删除**，本程序（`pdf_builder_multi.py`）
+> 是唯一实现 —— 只勾一个版本就是原来的「单版本」用法。本文下方仍保留一些
+> 「单版本版 / 多版本版」的对比，作为历史说明；命令一律以 `pdf_builder_multi.py` 为准。
+
 把 `sphinx-pdf/build-sphinx-pdf.sh`（一键 bash 脚本）和
 `构建Python文档PDF-完整步骤.md`（分步说明）**完整搬进一个 Python 程序**，
 换成图形界面：**左边改配置和链接，右边看每一步的实时进度**。
@@ -15,9 +19,9 @@ A4、Fandol 字体、书签齐全、目录带点线页码、索引无 ` `、
 > **5 个可折叠区块**（详见 §三），截图未随更新重拍。
 
 ---
-## ★ 多版本并行版（`pdf_builder_multi.py` / `PDF构建器-多版本.exe`，2026-10-17）
+## ★ 多版本能力（现在就是主程序本身）
 
-同一个目录里还有一份**多版本并行版**：流水线（步骤 0\~10）与本文完全一致，
+多版本能力已并入主程序：流水线（步骤 0\~10）与上文完全一致，
 外面多了「版本多选 + 多进程并行 + 每版本独立日志面板 + 新命名规则」。
 
 |需求|落点|
@@ -38,7 +42,7 @@ A4、Fandol 字体、书签齐全、目录带点线页码、索引无 ` `、
 「合并册名」同时置灰 —— 多选时每版各出一本，名字由程序按
 `Python <完整版本> 文档 <日期>.pdf` 生成，手填的会被忽略（留着可编辑只会让人以为填了能生效）。
 
-**③ 本地环境里没有「Python 解释器」这一行**（单版本版有）。多版本版里解释器是
+**③ 本地环境里没有「Python 解释器」这一行**（早期单版本版才有）。多版本版里解释器是
 **每个版本一份**的，权威输入在 ① 的那三行；再放一个全局解释器会①表达不了
 「三个版本各用各的」②编辑它没有任何效果（`collect()` 里被 ① 覆盖）
 ③误导 —— 界面显示 3.13.12，而勾了 3.15 时实际用的是 `Python315\\\\\\\\python.exe`。
@@ -58,7 +62,7 @@ A4、Fandol 字体、书签齐全、目录带点线页码、索引无 ` `、
 `==> 步骤 7` / `✔ [7] …` 这类文本在中文 + GBK + ANSI 三者夹击下极脆
 （实测 `↳` 在 GBK 控制台里能把整个步骤崩成退出码 127）。
 
-命令行（与单版本版同一套参数，多了 `--json-log`）：
+命令行（参数与早期单版本版一致，多了 `--json-log`）：
 
 ```bash
 # 多版本同时跑（界面）：选 2\\\\\\\~3 个勾选框 → 开始处理
@@ -68,9 +72,10 @@ PDF构建器-多版本.exe --cli --version 3.13 --only 0
 PDF构建器-多版本.exe --cli --json-log --config <临时配置.json>
 ```
 
-> ⚠ 维护约定：`pdf_builder_multi.py` 的**流水线部分**与 `pdf_builder_gui.py` 是同一份代码
+> ⚠ 维护约定：`pdf_builder_multi.py` 的**流水线部分**与 `pdf_builder_multi.py` 是同一份代码
 > （派生自 2026-10-17 版）。改 `Pipeline` / 内置工具时两个文件都要改。
-> 配置文件也**刻意分开**：新版写 `config-multi.json`，不会动单版本版的 `config.json`。
+> 配置文件仍叫 `config-multi.json`（沿用历史名），不会动旧的 `config.json`。
+> 两者都含本机绝对路径，**已从 git 移除并写进 .gitignore**。
 
 ---
 ## 〇、★ 所有后处理脚本已内联进本程序（2026-10-04 起）
@@ -79,7 +84,7 @@ PDF构建器-多版本.exe --cli --json-log --config <临时配置.json>
 **同一件判据有两三份实现**（映射表、译文接回、补件类型、命名、合并顺序 …），
 靠手工同步 —— 实测漏同步过两次（分册名、版本门控），而且都是**静默**的。
 
-现在**只剩一份实现**：`gui/pdf_builder_gui.py`。那些脚本全部变成
+现在**只剩一份实现**：`gui/pdf_builder_multi.py`。那些脚本全部变成
 **18 行的转发器**（只做 `runpy` 本文件 + `--tool <名字>`），因此：
 
 * **`sphinx-pdf/build-sphinx-pdf.sh` 与本文所有旧命令照旧可用**，一个字不用改；
@@ -88,8 +93,8 @@ PDF构建器-多版本.exe --cli --json-log --config <临时配置.json>
 想**不经过任何中间文件**直接调，用 `--tool`：
 
 ```bash
-python pdf_builder_gui.py --tool                  # 列出全部内置工具
-python pdf_builder_gui.py --tool name-map --check # 任选一个，参数就是该工具自己的
+python pdf_builder_multi.py --tool                  # 列出全部内置工具
+python pdf_builder_multi.py --tool name-map --check # 任选一个，参数就是该工具自己的
 ```
 
 |`--tool` 名字|干什么|原来在|
@@ -119,7 +124,7 @@ python pdf_builder_gui.py --tool name-map --check # 任选一个，参数就是�
 
 **留空 = 只用内置那份，断网也能跑**；取不到只警告、不影响构建。
 
-> 📦 **只要带走 3 个文件就能跑**：`gui/pdf_builder_gui.py`、`gui/requirements.txt`、
+> 📦 **只要带走 3 个文件就能跑**：`gui/pdf_builder_multi.py`、`gui/requirements.txt`、
 > `启动PDF构建器.bat`。`tools/` 与 `sphinx-pdf/verify-pdf.py` 可以不带
 > （它们现在只是转发器）；想保留 `python tools/xxx.py` 这种旧用法时才需要。
 
@@ -130,9 +135,9 @@ python pdf_builder_gui.py --tool name-map --check # 任选一个，参数就是�
 |-|-|
 |Windows 双击|`启动PDF构建器.bat`|
 |Git Bash / Linux / macOS|`bash 启动PDF构建器.sh`|
-|直接跑|`python pdf_builder_gui.py`（需要已装 PyQt6）|
-|命令行模式（不开界面）|`python pdf_builder_gui.py --cli`（**不需要 PyQt6**，只要 pypdf）|
-|单个内置工具|`python pdf_builder_gui.py --tool <名字> [参数…]`（见 §〇）|
+|直接跑|`python pdf_builder_multi.py`（需要已装 PyQt6）|
+|命令行模式（不开界面）|`python pdf_builder_multi.py --cli`（**不需要 PyQt6**，只要 pypdf）|
+|单个内置工具|`python pdf_builder_multi.py --tool <名字> [参数…]`（见 §〇）|
 
 首次启动会自动在 `C:\\\\\\\\pypdfbuild\\\\\\\\gui-venv` 建隔离虚拟环境并装 `PyQt6` + `pypdf`
 （也可用环境变量 `GUI_VENV` 换位置）。**不会污染你现有的 Python 环境。**
@@ -143,18 +148,18 @@ python pdf_builder_gui.py --tool name-map --check # 任选一个，参数就是�
 命令行常用参数：
 
 ```bash
-python pdf_builder_gui.py --check                 # 只做步骤 0 的工具链自检 + 打印解析后的配置
-python pdf_builder_gui.py --cli                   # 全流程，终端打印
-python pdf_builder_gui.py --cli --version 3.13    # 换版本（两个仓库都切到 3.13 分支）
-python pdf_builder_gui.py --cli --root "D:/py315" # 换构建根目录
-python pdf_builder_gui.py --cli --from 7          # 从第 7 行（=脚本 6b）开始
-python pdf_builder_gui.py --cli --only 7,8,9      # 只跑 6b / 7 / 7b
-python pdf_builder_gui.py --cli --merge           # 步骤 9：把 38 册合并成一册
-python pdf_builder_gui.py --cli --only 11 --merge --merge-name "Python 3.14 文档.pdf"
-python pdf_builder_gui.py --cli --only 12 --clean all   # 步骤 10：清理（none/build/all）
-python pdf_builder_gui.py --cli --verbose         # 显示 LaTeX 的每一行输出
-python pdf_builder_gui.py --config my.json        # 用另一份配置
-python pdf_builder_gui.py --i18n-extra-url <源>    # 补充译文每次运行的更新源（见 §〇）
+python pdf_builder_multi.py --check                 # 只做步骤 0 的工具链自检 + 打印解析后的配置
+python pdf_builder_multi.py --cli                   # 全流程，终端打印
+python pdf_builder_multi.py --cli --version 3.13    # 换版本（两个仓库都切到 3.13 分支）
+python pdf_builder_multi.py --cli --root "D:/py315" # 换构建根目录
+python pdf_builder_multi.py --cli --from 7          # 从第 7 行（=脚本 6b）开始
+python pdf_builder_multi.py --cli --only 7,8,9      # 只跑 6b / 7 / 7b
+python pdf_builder_multi.py --cli --merge           # 步骤 9：把 38 册合并成一册
+python pdf_builder_multi.py --cli --only 11 --merge --merge-name "Python 3.14 文档.pdf"
+python pdf_builder_multi.py --cli --only 12 --clean all   # 步骤 10：清理（none/build/all）
+python pdf_builder_multi.py --cli --verbose         # 显示 LaTeX 的每一行输出
+python pdf_builder_multi.py --config my.json        # 用另一份配置
+python pdf_builder_multi.py --i18n-extra-url <源>    # 补充译文每次运行的更新源（见 §〇）
 ```
 
 ---
@@ -457,7 +462,7 @@ sparse-checkout 的三个路径、locales 的目录层级、`.po` 数量校验�
 |步骤 9 报「合并前检查没通过：有的分册还不在输出目录里」|先看它给出的那行「…里缺 N 册」，并**确认 `--version` 没传错**（传错时日志里会有版本反查警告）。也可能是某册在步骤 7 编译失败，去 `latex-build.log` 搜它的名字|
 |某个版本册数就是比别的少（3.13 是 37、3.14 是 38、3.15 是 39）|**正常**。上游会随版本增删 howto：`0925远程调试附加协议`（PEP 768）是 **3.14** 才有的、`0929迁移到自由线程的稳定 ABI（abi3t）` 是 **3.15** 才有的 —— 3.13 里这两册不存在，编号 `0925` 就是一个**空号**。程序把这叫 `UNPRODUCED`（本版本本就没有），**不算缺册、不会拒绝合并**|
 |步骤 8/9 日志里出现「tools/name_map.py 自检没过」|映射表自己有问题（编号撞车 / 文件名重复 / slug 拼错 / **HOWTO 表没按编号升序** / **`MERGE_ORDER` 与 `MAIN`+`TAIL` 对不上** / `MIN_VERSION` 指向不存在的 slug）。按它列出的问题逐条改主程序 `name_map` 段（或 `--tool name-map` 的提示）。这类错平时都不报，要到「两册同名互相覆盖」或「合并册缺章错位」才暴露，所以两道闸都拦在前头|
-|**PDF 里整章 / 整节内容不见了，但构建全绿、零报错**（如《Python 语言参考手册》第 10 章「完整的语法规范」只剩标题 + 两行引言）|★★ **`literalinclude` / `include` 的目标在 `Doc/` 之外，而稀疏克隆没取到**。这类指令找不到文件时 Sphinx **只留一条 warning**、把内容整段跳过、`.tex` 里什么都不写 —— 于是**正文整章消失，全程没有任何报错**（和上面那类「图片缺失 → latexmk 退出码 12」正好相反：一个是哑的，一个是响的）。已知四处越界来源：`reference/grammar.rst` → `Grammar/python.gram`（整章语法全文）、`library/ast.rst` → `Parser/Python.asdl`、`builtins/exceptions.rst` → `Lib/test/exception_hierarchy.txt`、`license.rst` → `Modules/expat/COPYING`（**3.15 才有**）。**处理**：程序现在会在步骤 1 和步骤 6 之前跑 `--tool check-doc-refs` 体检并**自动补齐** —— 目录型（如 `Grammar`）并进 `sparse-checkout add`，单文件型（如 `Lib/test/exception_hierarchy.txt`、`Modules/expat/COPYING`，cone 模式取不到「大目录里的单个文件」）用 `git show HEAD:<路径>` 按需拉那一个 blob；实在补不上才停。手工自查：`python gui/pdf_builder_gui.py --tool check-doc-refs <root>/cpython/Doc`，末尾出现 `REFMISSING 0` 才算齐。⚠️ **必须从第 6 步重跑**（`.tex` 必须重新生成），从第 7 步硬编没用|
+|**PDF 里整章 / 整节内容不见了，但构建全绿、零报错**（如《Python 语言参考手册》第 10 章「完整的语法规范」只剩标题 + 两行引言）|★★ **`literalinclude` / `include` 的目标在 `Doc/` 之外，而稀疏克隆没取到**。这类指令找不到文件时 Sphinx **只留一条 warning**、把内容整段跳过、`.tex` 里什么都不写 —— 于是**正文整章消失，全程没有任何报错**（和上面那类「图片缺失 → latexmk 退出码 12」正好相反：一个是哑的，一个是响的）。已知四处越界来源：`reference/grammar.rst` → `Grammar/python.gram`（整章语法全文）、`library/ast.rst` → `Parser/Python.asdl`、`builtins/exceptions.rst` → `Lib/test/exception_hierarchy.txt`、`license.rst` → `Modules/expat/COPYING`（**3.15 才有**）。**处理**：程序现在会在步骤 1 和步骤 6 之前跑 `--tool check-doc-refs` 体检并**自动补齐** —— 目录型（如 `Grammar`）并进 `sparse-checkout add`，单文件型（如 `Lib/test/exception_hierarchy.txt`、`Modules/expat/COPYING`，cone 模式取不到「大目录里的单个文件」）用 `git show HEAD:<路径>` 按需拉那一个 blob；实在补不上才停。手工自查：`python gui/pdf_builder_multi.py --tool check-doc-refs <root>/cpython/Doc`，末尾出现 `REFMISSING 0` 才算齐。⚠️ **必须从第 6 步重跑**（`.tex` 必须重新生成），从第 7 步硬编没用|
 |步骤 6 每次都停在「文档引用了 Doc/ 之外的 N 处文件」，日志里还写着**「补目录失败（多为 GitHub 代理断流）」**（3.15 实测：`Modules/expat/COPYING`）|★★ **把「单文件」当成了「目录」**。旧代码用「最后一段有没有 `.`」猜类型，而 `COPYING` **没有扩展名** → 被当成目录 → 拼出一条必然失败的命令 `git sparse-checkout set … Modules/expat/COPYING` → `fatal: '…' is not a directory; to treat it as a directory anyway, rerun with --skip-checks`。**后果不是「建议不准」，而是自动补件当场失效**：重试两次都失败，最后只留一句「多为代理断流」，把病因指到一个无关方向，真实缺口（3.15 新增的 `Doc/license.rst` 要 include 它）永远补不上。**处理**：已改成**问 git** —— `--tool check-doc-refs` 用 `git ls-tree` 的 objecttype 判定（只读 tree、不触网），以 `MISSINGKIND <路径> <blob\|tree>` 输出，GUI 与 bash 都只读这一个判据。**凡是靠文件名形状猜类型的地方，都会栽在 `COPYING`/`LICENSE`/`Makefile`/`NEWS`/`README` 上**|
 |怎么确认「这一章真的在 PDF 里」|这类中文 PDF 是字体子集 + 自定义编码，`extract_text()` **取不到文字**（返回空串）—— 别想着搜标题（会误判成「整册都没有」）。改用**书签定位页号 + 看该页内容流的字节数**：正常正文页 ≈ 20000 字节，空白页 < 1000。例：`i = r.get_destination_page_number(<该章书签>)`，再看 `len(r.pages[i+1].get_contents().get_data())`|
 |**整册正文全是英文，但 `.po` 装够了、日志全绿**（实测《11Python 内置参考手册》196 页全英文）|★★ **上游把整章文件搬了目录，译文还留在旧路径**。Sphinx 按「源文件相对路径」去 `LC_MESSAGES/<同名路径>.po` 找译文；CPython 3.14 把 `Doc/library/stdtypes.rst` 等 5 个文件搬去了 `Doc/builtins/`，而 python-docs-zh-cn 的 `3.14` 分支里译文仍在 `zh-cn/library/*.po` —— 路径对不上时 Sphinx **不报错、不警告、`translation progress` 还是 100%**，那几页就原样保留英文。**处理**：程序已在步骤 3 自动跑 `--tool alias-po`（把译文接到新路径，末尾 `ALIASED 5`）。它的判据不是「文件名相同」而是**拿 `.po` 的 msgid（= 英文原文）去 `.rst` 原文里找**：正确配对实测命中 0.40\~0.90、错配接近 0，因此默认跳过 `index`（`zh-cn/library/index.po` 是标准库总索引，绝不能配给 `Doc/builtins/index.rst`）。★ 还有**第四类**「上游**压根没译**」的页面 —— `Doc/builtins/index.rst`（章标题 + 引言）与 `Doc/builtins/time-complexity.rst`，把 535 个 `.po` 全量比对后最佳命中率都是 **0.00**；这两页由**内嵌进主程序的补充译文**顶上（步骤 3 会铺到 `<root>/i18n-extra`，末尾 `EXTRAED 2`）。⚠️ 别搞混：`zh-cn/library/builtins.po` **不是**它们的译文（那是 3.14 已删掉的 `Doc/library/builtins.rst`，配给 `builtins/index.rst` 实测 0/9）。⚠️ **必须从第 6 步重跑**，再重编该册。注：上游侧同样没修好 —— 官网同页正文也是英文，接回译文后 PDF 反而比官网完整|
@@ -485,11 +490,11 @@ sphinx-pdf/
 │   ├── fix-md-escapes.py  → `--tool fix-md-escapes`
 │   └── merge-pdf.py       → `--tool merge-pdf`
 └── gui/
-    ├── pdf_builder_gui.py     ★★ **唯一实现**：流程引擎 + 11 个内置工具 + PyQt6 界面
+    ├── pdf_builder_multi.py     ★★ **唯一实现**：流程引擎 + 11 个内置工具 + PyQt6 界面
     ├── 启动PDF构建器.bat      Windows 启动器（自动建 venv）
     ├── 启动PDF构建器.sh       Git Bash / Unix 启动器
     ├── build_exe.py           ★ 打包成 exe（见 §十一）
-    ├── pdf_builder_gui.spec     └ PyInstaller 配置（默认 onefile / 无控制台）
+    ├── pdf_builder_multi.spec     └ PyInstaller 配置（默认 onefile / 无控制台）
     ├── 打包exe.bat              └ 上面那个脚本的 Windows 双击壳
     ├── requirements.txt       GUI 自身的依赖（PyQt6 / pypdf）
     ├── config.json            配置（首次保存后生成）
@@ -504,7 +509,7 @@ sphinx-pdf/
 > 必须手工同步，实测漏同步过两次。现在**映射只有一份、改名逻辑只有一份** ——
 > 本程序的步骤 8、bash 脚本、`rename-pdf.sh` 走的都是主程序里那一段，
 > 行为不可能分叉。
-> 自检：`python gui/pdf_builder_gui.py --tool name-map --check`
+> 自检：`python gui/pdf_builder_multi.py --tool name-map --check`
 > （查编号撞车 / 文件名重复 / slug 拼错 / 分组名不认识 / `MIN_VERSION` 指向不存在的 slug）。
 > 本程序在步骤 8、9 前各跑一次。
 
@@ -575,7 +580,7 @@ PyInstaller），默认产物是 **`dist/PDF构建器.exe`** ——
 
 |东西|源码运行时|打包后|
 |-|-|-|
-|`config.json`|与 `pdf_builder_gui.py` 同目录|**exe 旁边**|
+|`config.json`|与 `pdf_builder_multi.py` 同目录|**exe 旁边**|
 |`tool-output.log`|不生成|无控制台时的 `--tool`/`--cli`/`--check` 输出落这里|
 |`gui-startup-error.log`|同目录|**exe 旁边**|
 
@@ -639,7 +644,7 @@ PyInstaller），默认产物是 **`dist/PDF构建器.exe`** ——
 |-|-|-|-|
 |1|运行日志里一片 `[2K[01mreading sources...`「乱码」|**Sphinx 8 在 Windows 上无条件着色** —— `sphinx/_cli/util/colour.py::terminal_supports_colour()` 里 `if sys.platform == 'win32': return True`，**不看 `isatty()`**，所以管道里也吐 ANSI（实测日志里有 6934 个 ESC 字节）。Linux 上同样代码是干净的，所以源码调试时很难发现|① 子进程环境里塞 `NO_COLOR=1`（Sphinx 认它，源头不出色）；② `strip_ansi()` 在 `run()` / `_run_book_tex()` / `tool()` 里**统一剥一遍**（防别的工具、别的版本）。进度条解析 `SPHINX_PROG` 改到剥之后|
 |2|构建过程中弹出**黑色控制台窗口**（空的）|exe 是 GUI 子系统（`console=False`），**自己没有控制台**；它一旦 spawn 一个控制台程序，Windows 会新分配一个控制台窗口。子进程的 stdout 又被我们接进了管道 → 窗口里**什么都没有，就是一块黑**。实测漏了三处：`git ls-tree`（引用自检）、`makeindex`（步骤 7 每册一次）、`pdftotext`（步骤 8 取封面标题）—— 它们不在 `run()` 里，所以没继承那个 flag|① 三处显式补 `creationflags=CREATE_NO_WINDOW`；② `_never_show_console_windows()` 在导入时**给 `subprocess.Popen` 包一层默认值**，之后任何调用点都漏不掉（实测在 `_winapi.CreateProcess` 边界上确认过 flag 真的传下去了）|
-|3|`NameError: name 'tool' is not defined`，步骤 7b 必崩|2026-10-04 把 `tools/*.py` 内联进主程序时，`tool = self.tools / "fix-index.py"` 那行删掉了，但 `step7b` 里**还有 4 处**按老形状写着 `[str(self.vp), str(tool), …]`（起子进程跑外部脚本）|四处统一改成进程内的 `self.tool("fix-index", fidx_main, …)`；顺带去掉 `--version`（fix-index 没有这个选项，旧写法里那个值会被 argparse 当成路径）。**排查手段**：`python -m pyflakes pdf_builder_gui.py \| grep "undefined name"` —— 这种「内联漏改」只有静态检查才抓得住|
+|3|`NameError: name 'tool' is not defined`，步骤 7b 必崩|2026-10-04 把 `tools/*.py` 内联进主程序时，`tool = self.tools / "fix-index.py"` 那行删掉了，但 `step7b` 里**还有 4 处**按老形状写着 `[str(self.vp), str(tool), …]`（起子进程跑外部脚本）|四处统一改成进程内的 `self.tool("fix-index", fidx_main, …)`；顺带去掉 `--version`（fix-index 没有这个选项，旧写法里那个值会被 argparse 当成路径）。**排查手段**：`python -m pyflakes pdf_builder_multi.py \| grep "undefined name"` —— 这种「内联漏改」只有静态检查才抓得住|
 
 > 附带修掉的一处（也是打包后才暴露的）：`exe --cli` 下 stdout 是**GBK** 代码页，
 > 打印 `↳` / `✔` 会抛 `UnicodeEncodeError`，把**已经干完活**的步骤崩成退出码 127

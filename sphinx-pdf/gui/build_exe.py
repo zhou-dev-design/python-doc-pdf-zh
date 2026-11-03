@@ -1,21 +1,21 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""把 `pdf_builder_gui.py` 打包成一个**可单独分发的 exe**（PyInstaller）。
+"""把 `pdf_builder_multi.py` 打包成一个**可单独分发的 exe**（PyInstaller）。
 
-    python build_exe.py                 # 默认 **onefile** → dist/PDF构建器.exe（单个文件）
-    python build_exe.py --onedir        # 备选：目录形态 → dist/PDF构建器/（启动快）
+    python build_exe.py                 # 默认 **onefile** → dist/PDF构建器-多版本.exe（单个文件）
+    python build_exe.py --onedir        # 备选：目录形态 → dist/PDF构建器-多版本/（启动快）
     python build_exe.py --no-smoke      # 只打包
     python build_exe.py --venv D:\\x     # 换打包 venv 位置
     python build_exe.py --console       # 保留控制台（排查打包问题时用）
 
 产物：
-    onefile（默认）→ `dist/PDF构建器.exe`         ← **一个文件，拷到哪都能跑**
-    onedir         → `dist/PDF构建器/`（目录）    ← 分发必须整个目录一起给
+    onefile（默认）→ `dist/PDF构建器-多版本.exe`         ← **一个文件，拷到哪都能跑**
+    onedir         → `dist/PDF构建器-多版本/`（目录）    ← 分发必须整个目录一起给
 
 ★★ 冒烟测试的核心判据（别再退化成「原地跑一下」）★★
   测试会把 exe **复制到一个全新的空目录**（没有 `_internal/`、没有源码、没有
   workspace）再运行。原地跑通过**不代表**单文件可用 —— onedir 的 exe 在
-  `dist/PDF构建器/` 里跑得好好的，一拷出来就退出码 127。
+  `dist/PDF构建器-多版本/` 里跑得好好的，一拷出来就退出码 127。
   这就是 2026-10-06 那次「打包完成仍然出问题」的全部原因。
 
 ★★ 打包**不能**让程序不依赖外部环境 ★★
@@ -39,11 +39,11 @@ import time
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-SPEC = HERE / "pdf_builder_gui.spec"
+SPEC = HERE / "pdf_builder_multi.spec"
 REQUIREMENTS = HERE / "requirements.txt"
-APP_NAME = "PDF构建器"
-#: 默认入口脚本。多版本版用 `--entry pdf_builder_multi.py --name PDF构建器-多版本`。
-DEFAULT_ENTRY = "pdf_builder_gui.py"
+APP_NAME = "PDF构建器-多版本"
+#: 唯一入口脚本（单版本版已退役，没有第二个入口了）。
+DEFAULT_ENTRY = "pdf_builder_multi.py"
 
 #: 打包用的 venv。跟 GUI 启动器同一个约定（都在 C:\pypdfbuild 下），
 #: 但**刻意分开**：打包 venv 要多装一个 PyInstaller，不该污染运行用的那份。
@@ -155,9 +155,9 @@ def _rd_force(p: Path) -> bool:
 def _clear_other_form(name: str, onefile: bool) -> None:
     """清掉「另一种形态」的同名产物，免得按老路径拿到旧壳子。
 
-    ★ 实测踩过：先打过 onedir（`dist/PDF构建器/`），再打 onefile 时
+    ★ 实测踩过：先打过 onedir（`dist/PDF构建器-多版本/`），再打 onefile 时
       `dist/` 里**两种形态并存**。若脚本/用户按老路径去取
-      `dist/PDF构建器/PDF构建器.exe`，拿到的还是那个旧壳子，
+      `dist/PDF构建器-多版本/PDF构建器-多版本.exe`，拿到的还是那个旧壳子，
       于是「明明重新打了还是不行」。所以每次打包前先互斥清理。
     """
     dist = HERE / "dist"
@@ -198,7 +198,7 @@ def do_build(py: Path, console: bool, onefile: bool,
     env = dict(os.environ)
     env.pop("PYTHONPATH", None)
     # ★ 入口脚本与产物名也走环境变量：一个 spec 就能打两种程序
-    #   （单版本 `pdf_builder_gui.py` / 多版本 `pdf_builder_multi.py`）。
+    #   （单版本 `pdf_builder_multi.py` / 多版本 `pdf_builder_multi.py`）。
     env["PDFBUILDER_EXE_ENTRY"] = entry
     env["PDFBUILDER_EXE_NAME"] = base
     # ★ 给了 spec 文件之后 PyInstaller 会拒绝 `--console` 这类命令行开关，
@@ -304,7 +304,7 @@ def _cleanup_dir(d: Path, tries: int = 6) -> None:
 def smoke(exe: Path) -> bool:
     """冒烟：把 exe **拷到干净目录**运行，证明单文件真的能独立用。
 
-    ★ 这一步是本次修复的核心。原来只在 `dist/PDF构建器/` 原地跑 ——
+    ★ 这一步是本次修复的核心。原来只在 `dist/PDF构建器-多版本/` 原地跑 ——
       onedir 在那儿当然没问题（`_internal/` 就在旁边），
       可这个「通过」什么也没证明：把 exe 拷出去立刻退出码 127。
       所以现在：新建空目录 → 只拷**这一个文件**进去 → 在那里运行。
@@ -405,9 +405,9 @@ def main() -> int:
     ap.add_argument("--index", default=None,
                     help="pip 源（可重复用逗号分隔；按顺序试，默认清华源→官方 PyPI）")
     ap.add_argument("--entry", default=DEFAULT_ENTRY,
-                    help="入口脚本（默认 pdf_builder_gui.py；多版本版用 pdf_builder_multi.py）")
+                    help="入口脚本（默认 pdf_builder_multi.py；多版本版用 pdf_builder_multi.py）")
     ap.add_argument("--name", default=APP_NAME,
-                    help=f"产物名（默认 {APP_NAME}；多版本版用 PDF构建器-多版本）")
+                    help=f"产物名（默认 {APP_NAME}）")
     args = ap.parse_args()
 
     if not SPEC.is_file():

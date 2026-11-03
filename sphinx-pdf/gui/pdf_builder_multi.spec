@@ -6,11 +6,11 @@
     python build_exe.py                # 推荐：默认 **onefile**，产出一个 exe 文件
     python build_exe.py --onedir       # 备选：产出一个目录（启动快，但要整目录分发）
     python build_exe.py --no-smoke
-    python -m PyInstaller --noconfirm --clean pdf_builder_gui.spec   # 手动（默认 onefile）
+    python -m PyInstaller --noconfirm --clean pdf_builder_multi.spec   # 手动（默认 onefile）
 
 产物：
-    onefile → `dist/PDF构建器.exe`            ← **单个文件**，拷到哪都能跑
-    onedir  → `dist/PDF构建器/`（整个目录）  ← 里面 exe 只有 3 MB，靠 `_internal/`
+    onefile → `dist/PDF构建器-多版本.exe`            ← **单个文件**，拷到哪都能跑
+    onedir  → `dist/PDF构建器-多版本/`（整个目录）  ← 里面 exe 只有 3 MB，靠 `_internal/`
 
 ────────────────────────────────────────────────────────────────────────────
 ★★ 为什么默认改成 onefile（2026-10-06）★★
@@ -72,7 +72,7 @@ _CONSOLE = os.environ.get("PDFBUILDER_EXE_CONSOLE") == "1"
 _ONEDIR = os.environ.get("PDFBUILDER_EXE_ONEDIR") == "1"
 #: 入口脚本与产物名 —— 都由 build_exe.py 用环境变量传进来（多版本版从
 #: `pdf_builder_multi.py` 打包）。留空时就是原来的单版本版。
-_ENTRY = os.environ.get("PDFBUILDER_EXE_ENTRY") or "pdf_builder_gui.py"
+_ENTRY = os.environ.get("PDFBUILDER_EXE_ENTRY") or "pdf_builder_multi.py"
 _BASE_NAME = os.environ.get("PDFBUILDER_EXE_NAME") or "PDF构建器"
 _NAME = _BASE_NAME + ("-console" if _CONSOLE else "")
 

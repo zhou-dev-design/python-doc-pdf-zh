@@ -148,7 +148,7 @@ cd sphinx-pdf\gui
 ```
 
 版本可多选、每版本一个独立日志面板、可只重跑某几步。
-打包成 exe：`python build_exe.py --entry pdf_builder_multi.py --name PDF构建器-多版本`
+打包成 exe：`python build_exe.py`（默认 onefile → `dist/PDF构建器-多版本.exe`）
 
 > **exe 只省「装 PyQt6 / 带一堆 .py」**。`git`、TeX Live、一个 Python 解释器、网络，
 > 一条都省不掉。打包必须 **onefile**，验收要在「拷进空目录」里做。
@@ -196,8 +196,7 @@ ci/linux/
   setup-github.ps1                      # 首次配置仓库（SSH 443 通道等）
   README.md                             # CI 侧细节与排错
 sphinx-pdf/
-  gui/pdf_builder_multi.py              # ★ 主程序：步骤 0~10 + PyQt6 界面 + 17 个内置工具
-  gui/pdf_builder_gui.py                # 单版本版（旧入口，仍被 build-sphinx-pdf.sh 使用）
+  gui/pdf_builder_multi.py              # ★ 唯一主程序：步骤 0~10 + PyQt6 界面 + 17 个内置工具
   gui/build_exe.py / *.spec             # PyInstaller 打包（--entry 选入口）
   gui/README.md                         # 界面说明
   build-sphinx-pdf.sh                   # 纯 bash 一键（步骤 0~10，全走 --tool）
