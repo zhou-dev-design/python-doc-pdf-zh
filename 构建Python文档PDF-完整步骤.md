@@ -1,446 +1,239 @@
 # 构建 Python 中文文档 PDF 的完整步骤
 
-> 目标：把 Python 3.14 的**中文**文档编译成 PDF，样式与官方/参考文件一致，**目录（TOC）和超链接都要有**。
+> 把 **CPython 官方 reST 文档** + **python-docs-zh-cn 中文译文** 编译成**中文分册 PDF**。
 >
-> 参考来源：
-> - devguide `#building-the-documentation`：<https://devguide.python.org/documentation/start-documenting/#building-the-documentation>
-> - devguide `#using-sphinx-build`：<https://devguide.python.org/documentation/start-documenting/#using-sphinx-build>
-> - 翻译构建说明（关键）：<https://devguide.python.org/documentation/translations/translating/#how-do-i-build-a-docs-translation>
-> - 翻译仓库：<https://github.com/python/python-docs-zh-cn/tree/3.14>
-> - 本目录的 `Makefile`（Sphinx 的 texinfo 输出用）
-> - 参考样张：`PDF(截止20251002)\python-3.14-docs-pdf-a4\docs-pdf\04Python 语言参考手册.pdf`
+> 本文讲**手工命令**（想自己跑一遍、或排查 CI 时对照）。
+> 日常构建走 GitHub Actions（每天 11:47）或图形界面 ——
+> 见 [`README.md`](README.md) 与 [`sphinx-pdf/gui/README.md`](sphinx-pdf/gui/README.md)。
 
 ---
 
-## 0. 先看结论（省时间）
+## 0. 一句话流程
 
-有**两条路**能出 PDF，产出**完全不一样**，先选对路：
-
-| | 路线 A：Sphinx（推荐） | 路线 B：Texinfo |
-|---|---|---|
-| 输入 | CPython 的 reST 源 + zh-cn 的 .po 翻译 | 本目录现成的 `python.texi` |
-| 命令 | `make latex` → `build/latex` 里 `make all-pdf` | `make pdf`（即 `texi2pdf` 跑 3 遍） |
-| 引擎 | XeLaTeX（`conf.py` 已写死） | pdfTeX（默认）／XeTeX（中文必须） |
-| 产出 | **分册 PDF**（reference / library / tutorial / c-api / …） | 一个 6000+ 页的单体 PDF |
-| 封面 | "The Python Language Reference"＋`Python Software Foundation` 地址块 | Texinfo 的朴素标题页 |
-| 目录 | `\tableofcontents`，3 级 | 同左 |
-| 超链接 | hyperref 内部交叉引用 + 外链脚注 | hyperref，但锚点体系不同 |
-| 与参考样张一致？ | ✅ 完全一致 | ❌ 样式对不上 |
-
-**结论：**
-- 要**和参考文件《04Python 语言参考手册.pdf》一模一样** → 走**路线 A**。
-- 只是想让手里这份 `python.texi` 变成一个能看的 PDF → 走**路线 B**（本目录 `Makefile` 就是干这个的，但中文必须额外改 3 处）。
-
-> 已核实：参考样张 `04Python 语言参考手册.pdf` 的 PDF 元数据是
-> `Creator: LaTeX with hyperref` / `Producer: xdvipdfmx (20220710)`，
-> 即 **XeLaTeX 产物**；封面文字 `发行版本 3.14.0rc3`、`Guido van Rossum and the Python development team`、
-> `Python Software Foundation / Email: docs@python.org` 分别来自 Sphinx 的本地化字符串、
-> `conf.py` 的 `_doc_authors`、以及 `latex_elements['preamble']` 里的 `\authoraddress`。
-> 所以它是 **CPython 的 Doc 用 Sphinx + `-D language=zh_CN` + XeLaTeX** 编出来的分册 PDF。
-
----
-
-## 1. 先认清"文件"是什么
-
-### 1.1 本目录 `python-3.14-docs-texinfo/`
-
-这是 **Sphinx 8.2.3 的 `texinfo` builder 的输出**（中文版，Python 3.14.7，生成日期 2026-09-10），不是 reST 源：
-
-| 文件 | 大小 | 说明 |
-|---|---|---|
-| `python.texi` | 19 MB | **单体** texinfo 源，整篇没有一条 `@include`；首行 `\input texinfo` |
-| `python.info` | 22.9 MB | 同一内容的 Info 版（`makeinfo` 产物） |
-| `python-figures/` | 19 张 | 17 个 PNG + 2 个 **SVG**（`datetime-inheritance.svg`、`lifecycle.dot.svg`） |
-| `Makefile` | 1.4 KB | Sphinx 为 texinfo 目录生成的 Makefile |
-
-### 1.2 `Makefile` 到底在干什么
-
-```make
-MAKEINFO          = makeinfo --no-split
-MAKEINFO_html     = makeinfo --no-split --html
-MAKEINFO_plaintext= makeinfo --no-split --plaintext
-TEXI2PDF          = texi2pdf --batch --expand
-ALLDOCS           = $(basename $(wildcard *.texi))     # → python
-
-all: info
-info / plaintext / html / pdf / install-info / uninstall-info / clean
-
-%.pdf: %.texi
-	-$(TEXI2PDF) '$<'      # ← 连着跑三遍，`-` 表示忽略单次报错
-	-$(TEXI2PDF) '$<'
-	-$(TEXI2PDF) '$<'
+```
+CPython 的 Doc/（reST 源）
+        +  python-docs-zh-cn 的 *.po（译文）
+        ↓  按 Doc/locales/zh_CN/LC_MESSAGES/<同路径>.po 铺好
+   sphinx -b latex -D language=zh_CN
+        ↓  build/latex/*.tex（conf.py 的 latex_documents 决定分成几册）
+   latexmk -pdf（xelatex）
+        ↓  每册一个 PDF，再合并成一册
 ```
 
-三个要点：
-
-1. **`pdf` 目标连跑 3 遍 `texi2pdf`** —— 因为目录、交叉引用（"见第 N 页"）、索引都要迭代收敛，一遍不够。
-2. 每行前面的 `-` 是 make 的"忽略错误"语法，所以**中途报错也会继续**，最后你看目录里有没有 `.pdf` 才算数。
-3. `texi2pdf` 自己不带引擎，它会去找系统中的 `tex`/`pdftex`；找不到就报
-   `You don't have a working TeX binary (tex) installed anywhere in your PATH`。
+**只 clone 翻译仓库是构建不了的**：它只有 `.po`，没有文档正文。
+两边必须配套，分支号要一致（3.14 的 `Doc` 配 3.14 的 `.po`）。
 
 ---
 
-## 2. 路线 A：Sphinx 构建（与参考文件一致）
+## 1. 依赖
 
-### 2.1 依赖清单
+| 类别 | 要求 |
+|-|-|
+| Python | ≥ 3.11（Sphinx 用哪个版本编都行，但要能建 venv） |
+| git | 要克隆两个仓库 |
+| TeX 发行版 | 需含 `xelatex`、`latexmk`、`makeindex`、`pdfinfo`/`pdffonts`；**TeX Live 2022 以上** |
+| 中文字体 | Windows 自带宋体/黑体即可；Linux 需 Noto CJK 或思源 |
+| 网络 | 装 Sphinx、`python-docs-theme`，以及克隆仓库 |
 
-| 类别 | 要求 | 本机实测 |
-|---|---|---|
-| Python | ≥ 3.11 | 3.13.14 ✅ |
-| git | 任意近版 | ✅ |
-| TeX 发行版 | TeX Live 2025 / MiKTeX，需含 `xelatex`、`latexmk`、`ctex`(或 `xeCJK`)、`makeindex`/`xindy` | TeX Live 2025（`F:\texlive\2025`）✅ |
-| 中文字体 | Windows 自带宋体/黑体即可；Linux 需 Noto CJK / 思源 | ✅ |
-| 网络 | `pip` 装 Sphinx、`python-docs-theme` 等 | ✅ |
+TeX Live 必须能让 `latexmk` 找到，Windows 上建议把它的 bin 目录加进 PATH，
+或在程序里直接填 bin 目录的绝对路径。
 
-### 2.2 取两份源码（这一步最容易被忽略）
+---
 
-> devguide「How do I build a docs translation?」明确要求：**需要同时有 CPython 仓库和翻译仓库**，
-> 并把 PO 文件放进 `Doc/locales/LANG/LC_MESSAGES/`。
-
-`python-docs-zh-cn` 是**纯翻译仓库**（只有 `.po`，根目录 9 个 + `library/` 326 个 + 各子目录），
-**单独 clone 它构建不了**，必须配 CPython 的 `Doc/`。
+## 2. 取两份源码
 
 ```bash
-# 1) CPython 源码（只取 Doc 和 Misc/NEWS.d，省流量）
-git clone --depth 1 --branch 3.14 --filter=blob:none --sparse https://github.com/python/cpython.git
+# 1) CPython（稀疏克隆，只拿 Doc 和 Doc 引用的那几处）
+git clone --depth 1 --branch 3.14 --filter=blob:none --sparse \
+  https://github.com/python/cpython.git
 cd cpython
-git sparse-checkout set Doc Misc/NEWS.d
+git sparse-checkout set Doc Misc/NEWS.d Include Grammar Parser Lib/profiling/sampling
 
-# 2) 中文翻译仓库
+# 2) 中文译文
 cd ..
-git clone --depth 1 --branch 3.14 https://github.com/python/python-docs-zh-cn.git zh-cn
-
-# 3) 把 PO 按原目录结构拷进 locales（LANG=zh_CN）
-cd cpython/Doc
-mkdir -p locales/zh_CN/LC_MESSAGES
-cp -r --parents ../../zh-cn/*.po locales/zh_CN/LC_MESSAGES/ 2>/dev/null || true
-# 更稳妥的写法（保持子目录层级）：
-cd ../../zh-cn
-find . -name '*.po' -exec sh -c 'mkdir -p "../cpython/Doc/locales/zh_CN/LC_MESSAGES/$(dirname "{}")" && cp "{}" "../cpython/Doc/locales/zh_CN/LC_MESSAGES/{}"' \;
+git clone --depth 1 --branch 3.14 \
+  https://github.com/python/python-docs-zh-cn.git zh-cn
 ```
 
-**`Misc/NEWS.d` 不能省**：`Doc/Makefile` 的 `build` 目标会检查 `../Misc/NEWS` 或 `../Misc/NEWS.d`，
-两者都没有会直接 `exit 1`（报 `Neither Misc/NEWS.d nor Misc/NEWS found; cannot build docs`）。
+稀疏检出的那几个路径**一个都不能少**，缺了会静默出问题：
 
-### 2.3 建虚拟环境 + 装依赖（devguide `#building-the-documentation`）
+| 路径 | 缺了会怎样 |
+|-|-|
+| `Misc/NEWS.d` | `Doc/Makefile` 直接 `exit 1`（`Neither Misc/NEWS.d nor Misc/NEWS found`） |
+| `Include` | Sphinx 第一秒就崩（`patchlevel.h` 找不到） |
+| `Grammar` | 《语言参考手册》第 10 章「完整的语法规范」**整章空白**，零报错 |
+| `Parser` | `library/ast` 里的 `literalinclude` 取不到，内容静默缺失 |
+| `Lib/profiling/sampling` | 3.15 起 `whatsnew` 引用了它下面的 PNG，缺了图片 → latexmk 退出码 12 |
 
-Unix / macOS：
+目录型（`Grammar`）用 `sparse-checkout add` 追加即可；**大目录里的单个文件**
+（如 `Lib/test/exception_hierarchy.txt`、`Modules/expat/COPYING`）cone 模式取不到，
+要用 `git show HEAD:<路径>` 单独拉那一个 blob。
+
+---
+
+## 3. 铺译文
+
+`.po` 必须**按源文件的相对路径**铺到 `Doc/locales/zh_CN/LC_MESSAGES/` 下：
+
+```
+Doc/locales/zh_CN/LC_MESSAGES/library/array.po   ← 对应 Doc/library/array.rst
+Doc/locales/zh_CN/LC_MESSAGES/tutorial/index.po  ← 对应 Doc/tutorial/index.rst
+```
+
+```bash
+cd zh-cn
+find . -name '*.po' -exec sh -c '
+  d="../cpython/Doc/locales/zh_CN/LC_MESSAGES/$(dirname "{}")"
+  mkdir -p "$d" && cp "{}" "$d"' \;
+```
+
+> ⚠️ 别用 `cp "$ZH"/library/*.po …` 这种 glob —— 目录多了会静默漏掉一部分，
+> 表现是「少部分页面是英文」，而且没有任何报错。
+
+---
+
+## 4. venv + 依赖（**版本差异最大的一步**）
 
 ```bash
 cd cpython/Doc
-make venv            # 内部 python -m venv venv && pip install -r requirements.txt
-```
-
-Windows（**`make.bat` 没有 `venv` 目标**，必须手动建并**激活**）：
-
-```bat
-cd cpython\Doc
 python -m venv venv
-venv\Scripts\activate
-python -m pip install --upgrade -r requirements.txt
+# Windows: venv\Scripts\activate  /  Unix: source venv/bin/activate
 ```
 
-> `requirements.txt` 里就是 Sphinx、`blurb`、**`python-docs-theme`**、`sphinxcontrib-svg2pdfconverter` 等。
-> 装了 `uv` 的话 `make venv` 会走 uv 分支，更快。
+装什么**取决于版本**：
 
-### 2.4 构建 HTML（这里才是 `python-theme` 生效的地方）
+| 版本 | 依赖来源 | 说明 |
+|-|-|-|
+| **3.10 / 3.11 / 3.12** | 用该分支自己的 `Doc/requirements.txt`（含 `-c constraints.txt`） | 官方 pin 得很死：3.10 = `sphinx==3.4.3`、3.11 = `~=7.2`、3.12 = `~=8.2` |
+| 3.13 及以上 | 内置清单 `sphinx<9` + `python-docs-theme` + `pypdf` + `sphinxcontrib-svg2pdfconverter[CairoSVG]` | |
 
-```bash
-# 方式一：用 make（Unix）
-make SPHINXOPTS="-D language=zh_CN" html
+**不要对所有版本一刀切装最新 Sphinx**：拿 Sphinx 8 去编 3.10 的 `Doc/tools/extensions/*.py`
+必然报错（那是五年前的代码）。反过来，老版本的 `python-docs-theme` 也要用分支自己 pin 的
+（最新主题要求 `sphinx>=7.3`，老 Sphinx 装不上）。
 
-# 方式二：直接用 Sphinx（devguide #using-sphinx-build 的写法）
-python -m sphinx -b html . build/html -D language=zh_CN
-```
+---
 
-- **主题**：`Doc/conf.py` 里 `html_theme = 'python_docs_theme'`、`html_theme_path = ['tools']`，
-  这个主题就是 `python-docs-theme` 包提供的，也就是 docs.python.org 的样子。
-- **目录**：左侧全局 TOC 由 `toctree` 生成，页内小目录由主题渲染。
-- **超链接**：`:ref:`/`:func:`/`:class:` 等 Sphinx 交叉引用自动变成站内链接。
-- 构建完打开 `build/html/index.html`；`make check` 可跑 sphinx-lint，`make linkcheck` 可查死链。
-
-> ⚠️ **`python-docs-theme` 只作用于 HTML 构建。** PDF 走 LaTeX，用的是 Sphinx 自己的
-> `sphinxmanual`/`sphinxhowto` 文档类和 `sphinx.sty`，与 HTML 主题无关。
-> 想要"官方样式"的 PDF，靠的是 `conf.py` 里的 LaTeX 配置，而不是 theme。
-
-### 2.5 生成 LaTeX 源
+## 5. 构建 LaTeX 源
 
 ```bash
-make SPHINXOPTS="-D language=zh_CN" latex
-# 或
 python -m sphinx -b latex . build/latex -D language=zh_CN
 ```
 
-产物在 `build/latex/`，里面会有**多个 `.tex`**，因为 `Doc/conf.py` 的 `latex_documents` 把文档分成了多册：
+产物 `build/latex/*.tex` 是**多册**——分几册由 `conf.py` 的 `latex_documents` 决定，
+各版本册数不同（见 §7）。
 
-```
-c-api.tex  extending.tex  faq.tex  howto-*.tex  installing.tex
-library.tex  reference.tex  tutorial.tex  using.tex  whatsnew.tex
-```
+### 构建前的三个必查项
 
-> 参考样张目录里 `01…10` 这一串分册文件，来源就是这里。
-> 想改成"一整本"，就精简 `latex_documents`，只保留一个根文档（如 `contents`）。
+**① `gettext_compact = False`**
 
-`conf.py` 里与 PDF 相关的关键配置（3.14 分支实测）：
+Sphinx 这个选项默认是 `True`，含义是「同一顶层目录共用一份 `.mo`」：`library/*` 全去找
+`locales/zh_CN/LC_MESSAGES/library.mo`。而译文是**每页一个** `.po`（`library/array.po`），
+按默认规则**一个都匹配不上** → **整册英文，零 warning**。
+
+- 3.12 起 `conf.py` 自带这行（注释写着 `Split pot files one per reST file`）
+- **3.10 / 3.11 没有** → 必须手工追加 `gettext_compact = False`
+
+**② SVG 转换器**
+
+3.13 起 Doc 里有 SVG 插图，`conf.py` 才注册 `sphinxcontrib.rsvgconverter`。
+它要调外部程序 `rsvg-convert`（Windows 上没有），所以换成 `cairosvgconverter`：
 
 ```python
-latex_engine = 'xelatex'                     # ← 无条件写死，因为要排中文
-latex_elements = {
-    'preamble': r'''
-\authoraddress{
-  \sphinxstrong{Python Software Foundation}\\
-  Email: \sphinxemail{docs@python.org}
-}
-\let\Verbatim=\OriginalVerbatim
-\let\endVerbatim=\endOriginalVerbatim
-\setcounter{tocdepth}{2}                     # ← 目录到 subsection（3 级）
-''',
-    'papersize': 'a4paper',
-    'pointsize': '10pt',
-    'maxlistdepth': '8',
-}
-latex_documents = [ ... 'manual'/'howto' ... ]   # 决定分册
-latex_appendices = ['glossary', 'about', 'license', 'copyright']
+# 仅当 conf.py 里出现 sphinxcontrib.rsvgconverter 时
+'sphinxcontrib.rsvgconverter' → 'sphinxcontrib.cairosvgconverter'
 ```
 
-### 2.6 编译 PDF（关键一步）
+3.10~3.12 的 Doc **压根没有 SVG**，也没有这个扩展 —— 不要以为「没找到就是失败」。
 
-`build/latex/` 里 Sphinx 会生成一个 Makefile，用它驱动 `latexmk`，自动跑够遍数、自动生成目录与索引：
+**③ Sphinx 3.x 的 `.mo` 陷阱**
+
+Sphinx 主版本 < 4 时，它把编译好的 `.mo` 写进 **输出目录**（`build/latex/locales/…`），
+而读翻译是从**源码目录** `Doc/locales/` 找；加上「先加载翻译、后编译 .po」的顺序，
+第一次构建永远读不到译文。解法：构建前用 babel 把 `.po` 预编译到源目录旁
+（`pybabel compile -D <域> -d Doc/locales/zh_CN/LC_MESSAGES`）。
+
+---
+
+## 6. 编译 PDF
 
 ```bash
 cd build/latex
-make all-pdf          # 内部：latexmk -pdf  → xelatex（因为 latex_engine=xelatex）
+latexmk -pdf -gg -file-line-error -r latexmkrc *.tex
 ```
 
-`build/latex/Makefile` 常用目标：
+Sphinx 生成的 `build/latex/Makefile` 里 `all-pdf` 目标也是跑 latexmk，等价。
 
-| 目标 | 作用 |
-|---|---|
-| `make all-pdf` | 生成**所有** PDF（每个 `latex_documents` 一项一个） |
-| `make <名字>.pdf` | 只编一册，如 `make reference.pdf` |
-| `make clean` | 清中间文件 |
-| `make latexpdf` | ⚠️ **Sphinx 自带 Makefile 才有**；CPython 的 `Doc/Makefile` 和 `build/latex/Makefile` 都**没有**这个目标 |
-| 在 `Doc/` 下 `make dist-pdf` | 一条命令编 A4 PDF 并打包成 zip（Unix） |
+**索引必须接管 `$makeindex`**，否则目录空白、满屏 `??`、索引页码点不动：
 
-**中文如果出现缺字/方框/乱码**（自建项目常见，CPython 这套已配好），在 `conf.py` 里补一段
-导言区即可：
-
-```python
-latex_engine = 'xelatex'
-latex_elements = {
-    'preamble': r'''
-\usepackage{ctex}          # 或者用 xeCJK + 显式指定字体
-''',
-}
-# 若需要打印 URL：latex_show_urls = 'footnote'
+```bash
+latexmk -pdf -gg -file-line-error -r latexmkrc \
+  -e '$makeindex = q{python makeindex-fix.py %O -s python.ist -o %D %S};' *.tex
 ```
 
-> 参考样张里 `发行版本 3.14.0rc3`、`十月 01, 2025` 这些中文字就是靠 `xelatex` + CJK 字体排出来的。
-> 顺带一提，`conf.py` 的 `smartquotes_excludes` 里显式排除了 `zh_CN`（避免中文被套上英文引号）。
+`makeindex-fix.py` 是我们自己的包装：先跑真的 `makeindex`，再就地修 `.ind`
+（分组标题、`\hyperpage`、长条目断点）。latexmk 的次序是
+`xelatex → makeindex → xelatex → xelatex`，所以第 2 遍就读到修好的 `.ind`。
 
-### 2.7 一键脚本
+> ⚠️ `latexmk -e` 的命令里**只能出现 ASCII**：它按 UTF-8 解析 `-e`，
+> 路径带中文会报 `Malformed UTF-8 character (fatal)`。所以先把脚本拷到
+> latex 目录并改成纯 ASCII 名（`makeindex-fix.py`），再用 PATH 里的 `python` 启动。
 
-见同目录 `build-sphinx-pdf.sh`（含上面全部步骤，Python 路径、LANG 可改）。
+> ⚠️ 在 Windows 上跑 `latexmk` 前要清掉 `LC_ALL` / `LANG` / `LC_CTYPE`：
+> TeX Live 自带的 perl 一看到非 C 的 locale，就按那个编码处理文件名，
+> 而 Windows 文件 API 走 ANSI 代码页 → **凡是路径带中文的都打不开**。
 
 ---
 
-## 3. 路线 B：Texinfo 构建（用本目录 `Makefile`）
+## 7. 各版本的「天花板」（一换版本就中招）
 
-### 3.1 直接跑
+上游每换一代工具链，就多一条写死的地方。凡是「某文件里必须有某字符串」的判据，
+都要先问一句：**这是所有版本都有，还是某一版才引入的？**
 
-```bash
-cd python-3.14-docs-texinfo
-make pdf                    # = texi2pdf --batch --expand python.texi ×3
-# 没有 make 就手写：
-texi2pdf --batch --expand python.texi
-texi2pdf --batch --expand python.texi
-texi2pdf --batch --expand python.texi
-```
+| 写死的东西 | 后果 | 正确判据 |
+|-|-|-|
+| 依赖一刀切装最新 | 3.10 装上 Sphinx 8.1.3（官方 pin 的是 3.4.3） | ≤3.12 用分支自己的 `requirements.txt` |
+| 「`conf.py` 里必须有 `rsvgconverter`」 | 该扩展 3.13 才引入，3.10~3.12 被误判为失败 | 看「Doc 里有没有 `.svg`」 |
+| 主题不管版本 | 最新主题要 `sphinx>=7.3`，老 Sphinx 装不上 | 老版本用分支 pin 的主题 |
+| 「`conf.py` 里必须有 `gettext_compact`」 | 3.10/3.11 没有 → 整册英文、零 warning | 没有就追加 `gettext_compact = False` |
+| 硬编册数 / 册名 | 各版本册数不同：**3.11=29 / 3.12=32 / 3.13=37 / 3.14=38 / 3.15=39** | 从 `volumes.json` 读，`--tool volumes --verify` 联网核对 |
 
-前提：`makeinfo`、`texinfo.tex`、TeX 引擎都在 PATH 里。
-
-### 3.2 但**中文**直接跑会全军覆没——必须额外做 3 件事
-
-原因：`python.texi` 头部只有 `@documentencoding UTF-8`，**没有 `@documentlanguage zh`**；
-TeX 默认按英文处理，所有汉字都会以 `Missing character` 静默丢掉；而默认的 `texi2pdf`
-用的是 **pdfTeX**，pdfTeX 根本排不了 UTF-8 中文。
-
-| # | 改动 | 为什么 |
-|---|---|---|
-| 1 | 第 1 行 `\input texinfo` → `\input texinfo-zh` | `texinfo-zh.tex` 会先载入 `zhspacing.sty`（中英混排间距），再载入 `texinfo.tex` |
-| 2 | 在 `@documentencoding UTF-8` 后插入 `@documentlanguage zh` | 让 texinfo 去读 `txi-zh.tex`（中文标题词、日期格式、中文字体定义） |
-| 3 | 用 **XeTeX** 引擎（`xetex`，不是 `xelatex`） | 只有 XeTeX 能载 UTF-8 中文字体；`texinfo-zh.tex` 里也写死了 "The TeX engine is not XeTeX" |
-
-外加**字体**：TeX Live 自带的 `txi-zh.tex` 默认要两套字体 ——
-`NotoSerifCJK-Regular.ttc`（思源宋体）和 `ukai.ttc`（AR PL 楷体）。
-没装就替换成系统字体（本仓库已给出补丁版）。
-
-### 3.3 实测可用的完整命令
-
-```bash
-# 0) 环境（本机实测路径，按需改）
-export PATH="/f/texlive/2025/bin/windows:$PATH"     # 让 texi2pdf 找得到 tex
-export TEXINPUTS="C:/pypdfbuild/texmf;"             # 让 TeX 优先找到补丁版 txi-zh.tex
-
-# 1) 生成改造版 texi：换入口 + 加语言
-sed -e '1s|\\input texinfo|\\input texinfo-zh|' \
-    -e '4a @documentlanguage zh' \
-    python.texi > python-zh.texi
-
-# 2) SVG 插图转成 PDF（XeTeX 不支持 SVG，见 3.4）
-python tools/svg2pdf.py python-figures
-
-# 3) 编译三遍（目录/交叉引用/索引需要迭代）
-xetex -interaction=nonstopmode python-zh.texi
-xetex -interaction=nonstopmode python-zh.texi
-rm -f python-zh.pdf     # ← 若上一遍的 PDF 被占用，先删掉，否则会 Unable to open
-xetex -interaction=nonstopmode python-zh.texi
-```
-
-补丁版 `txi-zh.tex` 只改了两处字体名（你装好思源宋体+AR PL 楷体的话就不需要它）：
-
-```bash
-sed -e 's/NotoSerifCJK-Regular\.ttc:2/simsun.ttc:0/g' \
-    -e 's/ukai\.ttc/simkai.ttf/g' \
-    /path/to/texlive/2025/texmf-dist/tex/texinfo/txi-zh.tex > pdf-build/texmf/txi-zh.tex
-```
-
-### 3.4 SVG 插图必须转换
-
-`python-figures/` 里有 2 个 SVG（`datetime-inheritance.svg`、`lifecycle.dot.svg`），
-但 `python.texi` 里引用的是**无扩展名**的基名：
-
-```
-@image{python-figures/datetime-inheritance,,,……,svg}
-@image{python-figures/lifecycle.dot,,,……,svg}
-```
-
-texinfo 的 XeTeX 图片加载器只认 `pdf/png/jpg/jpeg`，所以会报
-`Could not find image file ... for XeTeX`。解决：**生成同名 `.pdf` 或 `.png`**，
-文件名必须是 `datetime-inheritance.pdf` 和 `lifecycle.dot.pdf`（注意 `lifecycle.dot` 那个点号要保留）。
-本仓库的 `pdf-build/tools/svg2pdf.py` 用了 `svglib` + `reportlab`：
-
-```bash
-pip install svglib
-python pdf-build/tools/svg2pdf.py python-figures
-# OK    datetime-inheritance.svg -> datetime-inheritance.pdf  (386x188pt)
-# OK    lifecycle.dot.svg -> lifecycle.dot.pdf  (465x845pt)
-```
-
-### 3.5 本机实测结果
-
-| 项目 | 结果 |
-|---|---|
-| 工具链 | TeX Live 2025 + GNU Texinfo 7.2 + XeTeX 0.999997 |
-| 单遍耗时 | 约 **47 秒** |
-| 遍数 | 3 遍（合计 ~2.5 分钟） |
-| 产物 | `python-zh.pdf`，**6065 页**，约 **45 MB** |
-| 剩余告警 | 13 处 `You can't use @unskip in vertical mode`（Sphinx 输出的 `@*` 紧跟标题导致），**无害** |
-| 图片/字体错误 | 0（转完 SVG、补完字体后） |
-
-### 3.6 路线 B 的局限
-
-能出 PDF，但**做不到**参考样张的样子：封面是 Texinfo 的朴素标题页、没有分册、
-公式/代码/表头样式都不一样。要"和参考文件格式一致"，只能走路线 A。
+册数差异的根源是上游随版本增删 howto：
+`0925 远程调试附加协议`（PEP 768）是 **3.14** 才有、`0929 迁移到自由线程的稳定 ABI`
+是 **3.15** 才有 —— 3.13 里这两册不存在，编号 `0925` 就是**空号**（不是缺册）。
 
 ---
 
-## 4. 目录与超链接：怎么保证"都有"
+## 8. 故障排查
 
-这是最容易出问题的地方，分格式说清楚。
-
-### 4.1 HTML（`python-docs-theme`）
-
-| 需求 | 靠什么 | 检查点 |
-|---|---|---|
-| 全局目录 | 各 `index.rst` 里的 `.. toctree::` + 主题侧边栏 | 随便打开一页，左侧栏应有完整层级 |
-| 页内目录 | 主题对标题的自动渲染 / `.. contents::` | 长页面顶部应有本页目录 |
-| 站内超链接 | Sphinx 交叉引用（`:ref:`、`:func:`、`:class:`、`:term:`） | 点击应跳到目标锚点 |
-| 外链 | `[文字](url)` | 直接用浏览器验证 |
-| 死链检查 | `make linkcheck` | 输出 `build/linkcheck/output.txt` |
-
-主题配置在 `conf.py`：
-
-```python
-html_theme = 'python_docs_theme'
-html_theme_path = ['tools']
-html_theme_options = {
-    'collapsiblesidebar': True,
-    'issues_url': '/bugs.html',
-    'license_url': '/license.html',
-    'root_include_title': False,
-}
-```
-
-### 4.2 PDF（LaTeX）
-
-| 需求 | 靠什么 | 检查点 |
-|---|---|---|
-| **目录（正文前 TOC）** | `\tableofcontents`（Sphinx 自动插入） | 翻开前几页应有"Contents/目录"并带点线+页码 |
-| 目录深度 | `latex_elements['preamble']` 里的 `\setcounter{tocdepth}{2}` | 想更深设成 3 |
-| **PDF 书签（导航窗格）** | `hyperref` 自动从 `\section` 生成 outline | 用 Adobe/Edge 打开看左侧书签树；缺书签多半是 hyperref 被覆盖 |
-| **内部超链接** | `hyperref` + Sphinx 的 `\hyperref[...]` | 点目录、点"见 xxx"应能跳页 |
-| 外链 | `latex_show_urls`（`'footnote'`/`'inline'`/`'false'`） | 默认不打印 URL，只在脚注/内联显示 |
-| 链接不画红框 | `\usepackage[hidelinks]{hyperref}` 或 `latex_elements['hyperref']` | 参考样张用的就是 hidelinks |
-
-**PDF 没有目录/超链接，按这个顺序排查：**
-
-1. **builder 用错了** —— `-b html` 出的东西不会有 PDF 目录；PDF 必须是 `-b latex`。
-2. **编译遍数不够** —— LaTeX 要至少 2～3 遍才能把目录和 `\ref` 填上，表现为目录页码全是 `??`。
-   用 `build/latex/Makefile` 的 `make all-pdf`（`latexmk` 会自动补遍数）就不会有这个问题。
-3. **`tocdepth` 被设成 0** —— `conf.py` 的 `latex_elements['preamble']` 或文档类选项里查一下。
-4. **hyperref 被 `latex_elements['preamble']` 覆盖** —— 自己重定义 hyperref 会把 Sphinx 的设置冲掉。
-5. **阅读器没显示书签** —— 换个阅读器（Edge/Adobe）再确认，不是所有阅读器默认展开目录面板。
+| 报错 / 现象 | 原因 | 解决 |
+|-|-|-|
+| `Neither Misc/NEWS.d nor Misc/NEWS found` | 稀疏克隆漏了 `Misc/` | `git sparse-checkout set … Misc/NEWS.d` |
+| `FileNotFoundError: Include/patchlevel.h` | 漏了 `Include` | 同上，删 `cpython` 重跑步骤 1 |
+| 目录空白、满屏 `??`，或 latexmk **退出码 12** | `$makeindex` 没接管 | 用 §6 的 `-e` 写法 |
+| latexmk 报 `Missing character: There is no 安 (U+5B89)` | 语言不是 CJK，Sphinx 没加载 `xeCJK` | 加 `-D language=zh_CN` |
+| **整册正文英文，但 `.po` 装够了、日志全绿** | 缺 `gettext_compact = False`（3.10/3.11）、或译文路径与源文件对不上 | 见 §5① |
+| **某一章的 PDF 书签是英文**，其它章正常 | 原文改了一个字母的大小写，`msgid` 精确匹配失败 | 用 `--tool alias-po` 的漂移修补 |
+| **整章内容消失，构建全绿零报错** | `literalinclude` 目标在 `Doc/` 之外而稀疏克隆没取到 | 补齐路径（§2），**从步骤 6 重跑** |
+| 个别册 latexmk 退出码 12，`.log` 里无 LaTeX 错误，只有 `fwrite: Broken pipe` | 偶发（管道写失败），与内容无关 | 单独重编该册即可 |
+| `Latexmk: I cannot read the rc-file` / `Cannot write file 'xxx.aux'` | perl 的 locale 问题（见 §6） | `unset LC_ALL LANG LC_CTYPE` |
+| `RPC failed; curl 56` / `fatal: early EOF` | 代理断流 | 重跑（对象库已在，不会从零开始） |
+| 索引页码点不动 / 双栏叠字 | `.ind` 没修 | 跑 `--tool fix-index <latex目录>`；`--check` 只检不写 |
+| 想确认「某章真的在 PDF 里」 | 这类 PDF 是字体子集 + 自定义编码，`extract_text()` **取不到文字** | 用书签定位页号，再看该页内容流字节数（正常 ≈20000，空白 <1000） |
 
 ---
 
-## 5. 故障排查表（都是实测踩过的）
+## 9. 别自己重写这些步骤
 
-| 报错 | 原因 | 解决 |
-|---|---|---|
-| `You don't have a working TeX binary (tex) installed anywhere in your PATH` | TeX 的 bin 目录没进 PATH | 加上，如 `F:\texlive\2025\bin\windows` |
-| `/usr/bin/perl: bad interpreter: No such file or directory` | Git Bash 与 MSYS2 混用，脚本 shebang 解析不了 | 换到 MSYS2 shell，或显式 `perl /path/to/makeinfo ...` |
-| `Required CJK package is not found. Used 'texinfo-zh.tex' instead of 'texinfo.tex'` | 走了 `\input texinfo` 而不是 `texinfo-zh` | 第 1 行改成 `\input texinfo-zh` |
-| `Font ... not loadable: Metric (TFM) file or installed font not found` | 缺 `NotoSerifCJK-Regular.ttc` / `ukai.ttc` | 装思源宋体+AR PL 楷体，或用补丁版 `txi-zh.tex` 换 SimSun/KaiTi |
-| `Could not find image file ... for XeTeX` | SVG 插图 | 转成同名 `.pdf`/`.png`（见 3.4） |
-| `You can't use 'unskip' in vertical mode` | Sphinx 输出里 `@*` 紧跟标题 | 无害，忽略 |
-| `xdvipdfmx:fatal: Unable to open "xxx.pdf"` | 目标 PDF 被其它程序占用/未释放 | 先删除旧 PDF 再编译 |
-| 中文全是方框/消失 | 用了 pdfTeX，或缺 CJK 字体包 | 换 `xetex`/`xelatex`；`latex_elements['preamble']` 加 `\usepackage{ctex}` |
-| `Neither Misc/NEWS.d nor Misc/NEWS found; cannot build docs` | 稀疏 clone 时漏了 `Misc/` | `git sparse-checkout set Doc Misc/NEWS.d` |
+上面每一步在这个仓库里都已经实现好了，手工版只是用来对照：
 
----
+| 场景 | 用什么 |
+|-|-|
+| 每天自动构建、发布到 Releases | `.github/workflows/build-pdf-linux.yml`（CI） |
+| 本机图形界面，可多版本并行 | `sphinx-pdf/gui/pdf_builder_multi.py` |
+| 纯 bash 一键 | `sphinx-pdf/build-sphinx-pdf.sh` |
+| CI 同款脚本（Linux） | `ci/linux/pdf_builder_linux.py` |
+| 只想跑某一步 / 某个工具 | `python sphinx-pdf/gui/pdf_builder_multi.py --tool <名字>` |
 
-## 6. 本机环境实况（可直接照抄）
-
-```
-Python     : 3.13.14（C:\Users\zb137\.workbuddy\binaries\python\versions\3.13.12）
-TeX        : TeX Live 2025  →  F:\texlive\2025\bin\windows
-             含 xetex / xelatex / latexmk / pdftotext / dvisvgm
-             含 texinfo.tex、texinfo-zh.tex、txi-zh.tex、zhspacing.sty、ctex、xeCJK
-Texinfo    : GNU Texinfo 7.2（MSYS2 /usr/bin；注意上表中 perl 那个坑）
-字体       : 无 NotoSerifCJK / ukai；有 simsun.ttc、simkai.ttf、msyh.ttc、simhei.ttf
-中文翻译   : python-docs-zh-cn 3.14 已就位 → python-3.14-docs-texinfo/python-docs-zh-cn-3.14
-```
-
----
-
-## 7. 速查表
-
-```bash
-# ── 路线 A：Sphinx（和参考文件一致，分册 PDF） ──────────────────────────
-git clone --depth 1 --branch 3.14 --filter=blob:none --sparse https://github.com/python/cpython.git
-cd cpython && git sparse-checkout set Doc Misc/NEWS.d
-git clone --depth 1 --branch 3.14 https://github.com/python/python-docs-zh-cn.git ../zh-cn
-mkdir -p Doc/locales/zh_CN/LC_MESSAGES      # 把 zh-cn 的 *.po 按结构拷进去
-make venv                                    # Windows 手动建 venv 并激活
-make SPHINXOPTS="-D language=zh_CN" html     # 看：python-theme + 目录 + 超链接
-make SPHINXOPTS="-D language=zh_CN" latex    # 出 build/latex/*.tex（多册）
-cd build/latex && make all-pdf               # 出分册 PDF（xelatex + latexmk）
-
-# ── 路线 B：Texinfo（用本目录 Makefile，单体 PDF） ─────────────────────
-export PATH="/f/texlive/2025/bin/windows:$PATH"
-export TEXINPUTS=".../pdf-build/texmf;"
-sed -e '1s|\\input texinfo|\\input texinfo-zh|' -e '4a @documentlanguage zh' python.texi > python-zh.texi
-python pdf-build/tools/svg2pdf.py python-figures
-xetex -interaction=nonstopmode python-zh.texi   # ×3
-```
+分册名、编号、书签标题、版本区间、合并顺序的真源是
+**`sphinx-pdf/volumes.json`**（界面里「分册配置…」可视化编辑），
+改完 `--tool name-map --check` 自检。
