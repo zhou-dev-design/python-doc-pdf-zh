@@ -3,10 +3,6 @@ name: 构建 Python 中文文档 PDF（Linux）
 # ★ 这是仓库里**唯一**的流水线（Windows 那条已于 2026-11-02 删除）。
 #   仓库是公开的 ⇒ Actions 分钟数不限，每天跑六个版本也没有额度问题。
 on:
-  # ⚠️⚠️ 临时通道（验完必须删）：push main 时只跑 3.10~3.12 —— 它们刚首次跑通，
-  #   需要把真实产物补进 Releases 才算验收完成。正常渠道只有下面两条。
-  push:
-    branches: [main]
   schedule:
     - cron: "0 4 * * *"         # UTC 04:00 = 北京时间 12:00（UTC+8）
   workflow_dispatch:
@@ -51,8 +47,7 @@ jobs:
         name: 解析版本列表 → matrix
         env:
           # 定时触发时没有 inputs（为空）→ 用下面的六版本默认值；手动触发则按填的来。
-          # push（临时验证通道）只跑 3.10~3.12。
-          VERSIONS: ${{ github.event_name == 'push' && '3.10,3.11,3.12' || github.event.inputs.versions }}
+          VERSIONS: ${{ github.event.inputs.versions }}
         run: |
           python3 - <<'PY'
           import json, os
@@ -260,8 +255,6 @@ jobs:
           BASE="$RUNNER_TEMP/build"
           mkdir -p "$BASE"
           MERGE_FLAG=""
-          # 临时验证通道（push）跑完整流程（含合并册与发布）—— 3.10~3.12 首次跑通，
-          # 需要真实产物进 Releases 才算验收完成。
           if [ "${{ github.event.inputs.merge }}" = "false" ]; then MERGE_FLAG="--no-merge"; fi
           python ci/linux/pdf_builder_linux.py \
             --versions "${{ matrix.version }}" \
