@@ -5,7 +5,7 @@
 ★★ 本文件是 `pdf_builder_gui.py` 的**多版本并行版**（2026-10-17 派生）★★
 
 与单版本版的差别只有外面这几层，**步骤 0~10 的流水线一行未改**：
-  · 版本可以多选（3.13 / 3.14 / 3.15），选几个就跑几个；
+  · 版本可以多选（3.10 ~ 3.16，册数各不相同：27 / 29 / 32 / 37 / 38 / 39 / 39），选几个就跑几个；
   · 每个版本各用各的解释器（D:\\软件\\Python313 / 314 / 315），**各起一个子进程**并行跑
     —— 进程隔离，不会有 venv / 工作目录 / 环境变量互相踩的问题；
   · 点「开始处理」后弹出一个**多版本并行日志窗口**，每个版本一个独立日志面板
@@ -41,8 +41,11 @@
     7b         9              索引自检（分组标题「非字母/数字」+ 页码超链接 + 长条目断点）
     8          10             收集 / 验收 / 重命名
 
-★ 默认配置就能直接跑：版本默认 3.14（可换 3.13 / 3.14 / 3.15，两个仓库同步切分支），
-  源码与翻译源默认**从网站实时克隆/更新**，语言默认中文，构建目录按版本自动推算。
+★ 默认配置就能直接跑：版本默认 3.14（可选 3.10 ~ 3.16，两个仓库同步切分支；
+  3.16 还没切分支时自动用 main），源码与翻译源默认**从网站实时克隆/更新**，
+  语言默认中文，构建目录按版本自动推算。
+★ 分册表（每版几册、每册叫什么）在 `sphinx-pdf/volumes.json`，界面「分册配置…」
+  可以可视化编辑；`--tool volumes --verify` 联网对着 CPython 官方复核。
 
 ★ 索引（与参考样张一致）：
   · 所有非字母条目排在最前，并有加粗分组标题「非字母」（数字组是「数字」）
@@ -804,7 +807,14 @@ def _guess_base_dir() -> str:
 
 
 #: 支持的版本 —— 两个仓库（cpython / python-docs-zh-cn）都有同名的 3.x 分支。
-KNOWN_VERSIONS = ["3.13", "3.14", "3.15"]
+#: ★ 册数**每个版本都不一样**（3.10 27 册 / 3.11 29 / 3.12 32 / 3.13 37 / 3.14 38 /
+#:   3.15 39 / 3.16 39），来源是各分支 `Doc/conf.py` 的 `latex_documents` 加上
+#:   `Doc/howto/*.rst` 的文件数；`--tool volumes --verify` 会联网对着官方复核。
+KNOWN_VERSIONS = ["3.10", "3.11", "3.12", "3.13", "3.14", "3.15", "3.16"]
+
+#: ★ 还没切出独立分支的版本 → 借哪个分支。3.16 目前就是 main；
+#:   等 `3.16` 分支真的切出来后，把这里这一行删掉即可（界面里也能用「分支覆盖」）。
+BRANCH_ALIAS: dict[str, str] = {"3.16": "main"}
 
 #: ★ 每个版本用哪个解释器 —— 三个分支各用各的，互不干扰（避免共用 venv / 依赖）。
 #: 界面上可以改（① 版本与目录 → 每个版本一行），改完存进 config.json 的
@@ -995,8 +1005,16 @@ class Config:
     # ---------------------------------------------------------------- helpers
     @property
     def branch(self) -> str:
-        """两个仓库用的分支名：默认就是版本号（3.13 / 3.14 / 3.15）。"""
-        return (self.version_branch or "").strip() or (self.version or "").strip() or "3.14"
+        """两个仓库用的分支名：默认就是版本号（3.10…3.16）。
+
+        ★ 还没切出分支的版本走 `BRANCH_ALIAS`（3.16 → main）；界面上的
+          「分支覆盖」永远优先，所以哪个版本切出来了都不用改代码。
+        """
+        explicit = (self.version_branch or "").strip()
+        if explicit:
+            return explicit
+        ver = (self.version or "").strip() or "3.14"
+        return BRANCH_ALIAS.get(ver, ver)
 
     # ------------------------------------------------------- 版本 / 命名
     def date_tag_eff(self) -> str:
@@ -3869,7 +3887,7 @@ def _import_pypdf(what: str = "本工具"):
 #   ★ 目标文件名里的 `3.14` 会被 `--version` 替换（`whatsnew` 那一项）。
 # ---------------------------------------------------------------------------
 MAIN: list[tuple[str, str, str]] = [
-    ('whatsnew',   '01Python 3.14 有什么新变化',      'Python的新变化'),
+    ('whatsnew',   '01Python {V} 有什么新变化',       'Python的新变化'),
     ('tutorial',   '02Python 教程',                    'Python 教程'),
     ('using',      '03Python安装和使用',               'Python安装和使用'),
     ('reference',  '04Python 语言参考手册',            'Python 语言参考手册'),
@@ -3877,6 +3895,11 @@ MAIN: list[tuple[str, str, str]] = [
     ('extending',  '06扩展和嵌入 Python 解释器',       '扩展和嵌入 Python 解释器'),
     ('c-api',      '07Python C API 参考手册',          'Python/C API 参考手册'),
     ('installing', '08安装 Python 模块',               '安装 Python 模块'),
+    # ★ 只有 3.10 及更早才有这一册：3.11 起上游把《Distributing Python Modules》
+    #   并进了 installing，`Doc/distributing/` 目录直接消失。实测 3.10 的
+    #   `Doc/conf.py` 里 `latex_documents` 同时列了 installing 与 distributing。
+    #   编号用 `09`（两位数），与 howto 的 `09xx` 四位号不冲突。
+    ('distributing', '09分发 Python 模块',             '分发 Python 模块'),
 ]
 
 #: 尾部两册（放最后，与参考图一致）
@@ -3902,7 +3925,7 @@ MERGE_ORDER: list[str] = [
     'reference',
     'builtins',
     'library',
-    'extending', 'c-api', 'installing',
+    'extending', 'c-api', 'installing', 'distributing',
     HOWTO_KEY,
     'faq',
 ]
@@ -3996,10 +4019,33 @@ HOWTO: list[tuple[str, str, str]] = [
 #   ★ 新增条目时**必须同时验证**：高版本目录不报 MISSING、低版本目录也不报 MISSING。
 # ---------------------------------------------------------------------------
 MIN_VERSION: dict[str, tuple[int, int]] = {
+    # ---- 静态册（MAIN / TAIL） ----
+    # `Doc/builtins.rst` 是 3.13 才从 library 里拆出来的独立章。
+    'builtins': (3, 13),
+
+    # ---- howto：以下全部按 github.com/python/cpython 各分支的
+    #      `Doc/howto/` 目录实测（2026-11-03 用 `--tool volumes --verify` 核过） ----
+    'howto-enum':                  (3, 11),   # Enum HOWTO
+    'howto-gdb_helpers':           (3, 11),   # GDB 调试辅助
+    'howto-isolating-extensions':  (3, 11),   # 隔离扩展模块
+    'howto-mro':                   (3, 12),   # 方法解析顺序
+    'howto-perf_profiling':        (3, 12),   # Linux perf
+    'howto-argparse-optparse':     (3, 12),   # optparse → argparse 迁移
+    'howto-a-conceptual-overview-of-asyncio': (3, 13),
+    'howto-timerfd':               (3, 13),
+    'howto-free-threading-python': (3, 13),
+    'howto-free-threading-extensions': (3, 13),
     # PEP 768「安全的外部调试器接口」是 3.14 新增，3.13 的 Doc/howto 里没有这篇。
     'howto-remote_debugging': (3, 14),
     # 3.15 新增（自由线程的稳定 ABI abi3t）。
     'howto-abi3t-migration': (3, 15),
+}
+
+#: ★ 上限门控：只在「某版本及之前」才有的册子（缺的版本不算缺册）。
+#:   与 `MIN_VERSION` 合起来就是一条闭区间：`min <= 当前版本 <= max`。
+MAX_VERSION: dict[str, tuple[int, int]] = {
+    # 3.11 起《Distributing Python Modules》并入 installing，distributing/ 目录被删。
+    'distributing': (3, 10),
 }
 
 
@@ -4017,9 +4063,13 @@ def _subst(name: str, version: str) -> str:
 
     ★ 只换文件名、不动书签标题：标题是本工具自己定的中文短语（如 `Python的新变化`），
       不含版本号，也不该被文件名影响。
+    ★ 新写法用 `{V}` 占位（`01Python {V} 有什么新变化`）；老写法里写死的 `3.14`
+      仍然照旧替换 —— 外部 `volumes.json` 与界面里两种都能用。
     """
     if not name:
         return name
+    if '{V}' in name:
+        return name.replace('{V}', str(version))
     return name.replace('3.14', str(version))
 
 
@@ -4027,9 +4077,218 @@ def min_version_of(slug: str) -> tuple[int, int]:
     return MIN_VERSION.get(slug, (0, 0))
 
 
+def max_version_of(slug: str) -> tuple[int, int] | None:
+    """上限（含）；`None` = 不设上限（该版本起一直有）。"""
+    return MAX_VERSION.get(slug)
+
+
 def has_in_version(slug: str, version: str) -> bool:
-    """该 slug 在当前版本里**应当**存在（不区分「本版本没有」与「该有却缺」）。"""
-    return min_version_of(slug) <= ver_tuple(version)
+    """该 slug 在当前版本里**应当**存在（不区分「本版本没有」与「该有却缺」）。
+
+    区间是闭区间：`min <= 当前版本 <= max`。上限用来表达「上游删掉了一册」——
+    典型例子就是 3.10 之后消失的 `distributing`。没有上限时只看下限，
+    所以老行为（只登记 MIN_VERSION）完全不变。
+    """
+    cur = ver_tuple(version)
+    if min_version_of(slug) > cur:
+        return False
+    hi = max_version_of(slug)
+    return hi is None or cur <= hi
+
+
+# ---------------------------------------------------------------------------
+# 外部配置：volumes.json
+#   ★ 为什么要有它：册数**随版本变**，而且上游每年都会加/删几册。把表留在代码里
+#     就只能改代码 + 重新打包。现在「加一个版本」「改一个文件名」都只是编辑这个
+#     JSON（或界面里点几下），代码不动。
+#   ★ 没有这个文件 = 用下面内置的表，行为与以前完全一致 —— 所以它是**可选覆盖**，
+#     不是必需依赖。读坏了也只会打一行警告然后退回内置，绝不因此起不来。
+# ---------------------------------------------------------------------------
+
+#: 内置默认值快照 —— 外部文件读坏、或用户点「还原内置默认」时回到这里。
+_EMBEDDED: dict[str, object] = {
+    'MAIN': list(MAIN),
+    'TAIL': list(TAIL),
+    'HOWTO': list(HOWTO),
+    'MERGE_ORDER': list(MERGE_ORDER),
+    'MIN_VERSION': dict(MIN_VERSION),
+    'MAX_VERSION': dict(MAX_VERSION),
+    'HOWTO_ROOT_TITLE': HOWTO_ROOT_TITLE,
+}
+
+VOLUMES_FILENAME = 'volumes.json'
+VOLUMES_SCHEMA = 2
+
+#: 实际生效的外部文件路径（'' = 用的是内置表）。
+VOLUMES_LOADED = ''
+#: 加载结果的一句话说明（界面会显示，出问题时也靠它定位）。
+VOLUMES_NOTE = '使用内置默认表'
+
+
+def volumes_json_candidates() -> list[Path]:
+    """到哪里找 `volumes.json`（按优先级）。
+
+    ★ 顺序有意义：打包成 exe 时 `__file__` 指向解包临时目录，改那里等于白改，
+      所以 **exe 所在目录优先**；其次是主程序同级的上一级（源码树里的
+      `sphinx-pdf/volumes.json`）；最后是当前目录（临时试用）。
+    """
+    out: list[Path] = []
+    env = os.environ.get('PDFBUILDER_VOLUMES', '').strip()
+    if env:
+        out.append(Path(env))
+    if getattr(sys, 'frozen', False):
+        out.append(Path(sys.executable).resolve().parent / VOLUMES_FILENAME)
+    here = Path(__file__).resolve().parent
+    out += [here / VOLUMES_FILENAME, here.parent / VOLUMES_FILENAME, Path.cwd() / VOLUMES_FILENAME]
+    seen: set[str] = set()
+    uniq: list[Path] = []
+    for p in out:
+        if str(p) not in seen:
+            seen.add(str(p))
+            uniq.append(p)
+    return uniq
+
+
+def volumes_json_path() -> Path | None:
+    """现成可读的那一个；没有就 None（= 走内置表）。"""
+    for p in volumes_json_candidates():
+        if p.is_file():
+            return p
+    return None
+
+
+def default_volumes_json_path() -> Path:
+    """要写文件时写到哪儿 —— 源码树里是 `sphinx-pdf/volumes.json`。"""
+    if getattr(sys, 'frozen', False):
+        return Path(sys.executable).resolve().parent / VOLUMES_FILENAME
+    return Path(__file__).resolve().parent.parent / VOLUMES_FILENAME
+
+
+def _restore_embedded() -> None:
+    global MAIN, TAIL, HOWTO, MERGE_ORDER, MIN_VERSION, MAX_VERSION, HOWTO_ROOT_TITLE
+    MAIN = list(_EMBEDDED['MAIN'])
+    TAIL = list(_EMBEDDED['TAIL'])
+    HOWTO = list(_EMBEDDED['HOWTO'])
+    MERGE_ORDER = list(_EMBEDDED['MERGE_ORDER'])
+    MIN_VERSION = dict(_EMBEDDED['MIN_VERSION'])
+    MAX_VERSION = dict(_EMBEDDED['MAX_VERSION'])
+    HOWTO_ROOT_TITLE = str(_EMBEDDED['HOWTO_ROOT_TITLE'])
+
+
+def dump_volumes() -> dict:
+    """把当前生效的表导成 JSON 结构（`--tool name-map --dump` 与界面保存都用它）。"""
+    vols: list[dict] = []
+    for slug, name, title in (*MAIN, *HOWTO, *TAIL):
+        kind = 'main' if any(s == slug for s, _n, _t in MAIN) else (
+            'tail' if any(s == slug for s, _n, _t in TAIL) else 'howto')
+        item: dict[str, object] = {'slug': slug, 'name': name, 'title': title, 'kind': kind}
+        lo = MIN_VERSION.get(slug)
+        if lo:
+            item['min'] = '%d.%d' % lo
+        hi = MAX_VERSION.get(slug)
+        if hi:
+            item['max'] = '%d.%d' % hi
+        vols.append(item)
+    return {
+        'schema': VOLUMES_SCHEMA,
+        '_说明': ('分册配置。kind: main=前置册 / howto=Python 指南 / tail=尾部册。'
+                 'min/max 是闭区间的版本上下限（省略 = 不限）。'
+                 'name 里的 {V} 会替换成当前版本号。'
+                 '改完跑 `--tool name-map --check` 自检，`--tool volumes --verify` 可对着 '
+                 'github.com/python/cpython 各分支的 Doc/conf.py 在线核对。'),
+        'howto_root_title': HOWTO_ROOT_TITLE,
+        'merge_order': list(MERGE_ORDER),
+        'volumes': vols,
+    }
+
+
+def load_volumes(path: str | Path | None = None, *, quiet: bool = False) -> str:
+    """读外部 `volumes.json` 覆盖内置表；返回一句话说明。
+
+    ★ 只在**全部校验通过**之后才替换全局表：宁可整份不用，也不要半份生效
+      （半份生效的后果是「某几册名字对、某几册没名」，比完全失败更难查）。
+    """
+    global MAIN, TAIL, HOWTO, MERGE_ORDER, MIN_VERSION, MAX_VERSION
+    global HOWTO_ROOT_TITLE, VOLUMES_LOADED, VOLUMES_NOTE
+
+    p = Path(path) if path else volumes_json_path()
+    if p is None or not p.is_file():
+        _restore_embedded()
+        VOLUMES_LOADED, VOLUMES_NOTE = '', '使用内置默认表'
+        return VOLUMES_NOTE
+
+    try:
+        data = json.loads(p.read_text(encoding='utf-8'))
+        if not isinstance(data, dict):
+            raise ValueError('顶层不是对象')
+        vols = data.get('volumes')
+        if not isinstance(vols, list) or not vols:
+            raise ValueError('缺少 volumes 数组')
+
+        main: list[tuple[str, str, str]] = []
+        tail: list[tuple[str, str, str]] = []
+        howto: list[tuple[str, str, str]] = []
+        lo_map: dict[str, tuple[int, int]] = {}
+        hi_map: dict[str, tuple[int, int]] = {}
+        buckets = {'main': main, 'tail': tail, 'howto': howto}
+        slugs: set[str] = set()
+
+        for i, item in enumerate(vols, 1):
+            if not isinstance(item, dict):
+                raise ValueError(f'第 {i} 条不是对象')
+            slug = str(item.get('slug') or '').strip()
+            name = str(item.get('name') or '').strip()
+            title = str(item.get('title') or '').strip()
+            kind = str(item.get('kind') or 'main').strip().lower()
+            if not slug or not name:
+                raise ValueError(f'第 {i} 条缺 slug 或 name')
+            if kind not in buckets:
+                raise ValueError(f'第 {i} 条 kind={kind} 不认识（只能是 main/tail/howto）')
+            if slug in slugs:
+                raise ValueError(f'slug 重复：{slug}')
+            slugs.add(slug)
+            buckets[kind].append((slug, name, title))
+            for key, tgt in (('min', lo_map), ('max', hi_map)):
+                raw = str(item.get(key) or '').strip()
+                if raw and raw != '0.0':
+                    tgt[slug] = ver_tuple(raw)
+                    if tgt[slug] == (0, 0):
+                        raise ValueError(f'{slug} 的 {key}={raw!r} 解析不出主次版本号')
+
+        for slug in slugs:
+            lo, hi = lo_map.get(slug), hi_map.get(slug)
+            if lo and hi and lo > hi:
+                raise ValueError(f'{slug} 的 min({lo[0]}.{lo[1]}) > max({hi[0]}.{hi[1]})')
+        if not main or not howto:
+            raise ValueError('main 或 howto 一册都没有（显然不对）')
+
+        order = data.get('merge_order')
+        if order is None:
+            order = [s for s, _n, _t in (*main, *tail)] + [HOWTO_KEY]
+        if not isinstance(order, list) or HOWTO_KEY not in order:
+            raise ValueError(f'merge_order 必须是数组且含 {HOWTO_KEY} 占位')
+
+        title_root = str(data.get('howto_root_title') or HOWTO_ROOT_TITLE)
+
+        MAIN, TAIL, HOWTO = main, tail, howto
+        MERGE_ORDER = [str(k) for k in order]
+        MIN_VERSION, MAX_VERSION = lo_map, hi_map
+        HOWTO_ROOT_TITLE = title_root
+        VOLUMES_LOADED = str(p)
+        VOLUMES_NOTE = (f'外部配置生效：{p}（{len(vols)} 条，'
+                        f'{len(main)} 前置 / {len(howto)} 指南 / {len(tail)} 尾部）')
+    except (OSError, ValueError, TypeError, json.JSONDecodeError) as e:
+        _restore_embedded()
+        VOLUMES_LOADED = ''
+        VOLUMES_NOTE = f'外部配置读不了，已退回内置表：{p} —— {e}'
+        if not quiet:
+            print(f'[警告] {VOLUMES_NOTE}', file=sys.stderr)
+    return VOLUMES_NOTE
+
+
+# 导入时生效一次（找不到文件就是内置表，行为与旧版完全一致）
+load_volumes(quiet=True)
+
 
 
 # ---------------------------------------------------------------------------
@@ -4112,13 +4371,14 @@ def build_spec(version: str = '3.14') -> list[tuple[str, str, int]]:
       `builtins` 因此可以夹在 reference 与 library 之间，而不是排在整册最后。
     ★ `Python 指南` 下**不再分组**：各册按 09xx 编号升序平铺（与参考图一致）。
     """
-    cur = ver_tuple(version)
-
     def fn(name: str) -> str:
         return _subst(name, version) if name else name
 
     def keep(slug: str) -> bool:
-        return MIN_VERSION.get(slug, (0, 0)) <= cur
+        # ★ 必须走 has_in_version（同时看上限）—— 只看 MIN_VERSION 的话，
+        #   3.10 的 `distributing` 会出现在 3.15 的合并册大纲里，然后因为文件不存在
+        #   被判成 MISSING 而卡住合并。
+        return has_in_version(slug, version)
 
     info: dict[str, tuple[str, str]] = {s: (n, t) for s, n, t in (*MAIN, *TAIL)}
     spec: list[tuple[str, str, int]] = []
@@ -4215,17 +4475,28 @@ def selfcheck() -> list[str]:
         if s not in seen_keys:
             problems.append(f'{s} 没写进 MERGE_ORDER（合并册里会少这一册）')
 
-    # MIN_VERSION 的 slug 必须真的存在
+    # MIN_VERSION / MAX_VERSION 的 slug 必须真的存在，且区间本身要站得住
     known = set(all_slugs)
     for slug, ver in MIN_VERSION.items():
         if slug not in known:
-            problems.append(f'MIN_VERSION 里的 {slug} 不在清单里（最低版本 {ver}）')
+            problems.append(f'MIN_VERSION 里的 {slug} 不在清单里（最低版本 {ver[0]}.{ver[1]}）')
+    for slug, ver in MAX_VERSION.items():
+        if slug not in known:
+            problems.append(f'MAX_VERSION 里的 {slug} 不在清单里（最高版本 {ver[0]}.{ver[1]}）')
+        lo = MIN_VERSION.get(slug)
+        if lo and lo > ver:
+            problems.append(f'{slug} 的版本区间反了：min {lo[0]}.{lo[1]} > '
+                            f'max {ver[0]}.{ver[1]}')
 
     # 每个版本都要能自洽：门控掉的不能同时又被算进 expected
-    for ver in ('3.13', '3.14', '3.15'):
+    for ver in KNOWN_VERSIONS:
         exp = expected(ver)
+        if not exp:
+            problems.append(f'{ver} 的应有清单是空的（门控写反了？）')
         if len(exp) != len(set(exp)):
             problems.append(f'{ver} 的应有清单里有重名')
+        if not build_spec(ver):
+            problems.append(f'{ver} 的合并册大纲是空的')
     return problems
 
 # ---------------------------------------------------------------------------
@@ -7083,6 +7354,20 @@ def _tool_run(fn, argv, cwd: Path | None = None) -> tuple[int, str]:
 
 
 
+def expected_slugs(version: str) -> list[str]:
+    """本版本**应当有**的上游产物名（已过滤版本区间）—— 与 `expected()` 同源。"""
+    return [s for s, _f in all_entries() if has_in_version(s, version)]
+
+
+def volume_stats(version: str) -> dict[str, int]:
+    """`{'main': n, 'howto': n, 'tail': n, 'total': n}` —— 界面/报告都用它数册。"""
+    got = set(expected_slugs(version))
+    main = sum(1 for s, _n, _t in MAIN if s in got)
+    tail = sum(1 for s, _n, _t in TAIL if s in got)
+    howto = sum(1 for s, _n, _t in HOWTO if s in got)
+    return {'main': main, 'howto': howto, 'tail': tail, 'total': main + howto + tail}
+
+
 def nm_cli() -> int:
     """`name_map.py` 原来的 `__main__` 块（改成函数，逻辑一字未动）。
 
@@ -7099,11 +7384,36 @@ def nm_cli() -> int:
             return 1
         print(f"OK  name_map 自检通过（"
               f"{len(all_entries())} 个条目，编号 {' '.join(used_numbers())}）")
+        print(f"    配置来源：{VOLUMES_NOTE}")
         return 0
 
-    v = argv[0] if argv else "3.14"
+    # ★ 把当前生效的表导成 JSON —— 界面「导出」与手工建 volumes.json 都走这里，
+    #   免得手抄 39 行出笔误。
+    if "--dump" in argv:
+        out = None
+        for i, a in enumerate(argv):
+            if a in ("--dump", "-o") and i + 1 < len(argv) and not argv[i + 1].startswith("-"):
+                out = argv[i + 1]
+        text = json.dumps(dump_volumes(), ensure_ascii=False, indent=2) + "\n"
+        if out:
+            Path(out).write_text(text, encoding="utf-8")
+            print(f"已写出 {out}（{len(all_entries())} 条）")
+        else:
+            print(text, end="")
+        return 0
+
+    if "--versions" in argv:
+        for v in KNOWN_VERSIONS:
+            st = volume_stats(v)
+            print(f"  {v:5s} 共 {st['total']:2d} 册"
+                  f"（前置 {st['main']} + 指南 {st['howto']} + 尾部 {st['tail']}）")
+        return 0
+
+    v = next((a for a in argv if not a.startswith("-")), "3.14")
+    st = volume_stats(v)
     print(f"版本 {v}")
-    print(f"  应有册子 {len(expected(v))} 个")
+    print(f"  应有册子 {len(expected(v))} 个"
+          f"（前置 {st['main']} + 指南 {st['howto']} + 尾部 {st['tail']}）")
     print(f"  本版本没有 {len(unproduced(v))} 个："
           + ("、".join(f for _s, f in unproduced(v)) or "（无）"))
     print(f"  已用编号 {' '.join(used_numbers(v))}")
@@ -7111,10 +7421,141 @@ def nm_cli() -> int:
     return 0
 
 
+# ---------------------------------------------------------------------------
+# 内置工具：volumes（各版本册数 / 对着官方 conf.py 复核）
+#   入口：vols_cli
+# ---------------------------------------------------------------------------
+# """册数从哪来 —— 别猜，直接问上游。
+#
+# CPython 每册 PDF 都由 `Doc/conf.py` 的 `latex_documents` 决定，howto 那一批是
+# 目录里 `Doc/howto/*.rst` 的个数（conf.py 里用 `os.listdir('howto')` 现数）。
+# 所以「某版本有几册」= 静态条目数 + howto 的 .rst 数（去掉 index.rst）。
+#
+# 实测（2026-11-03，`--verify` 全绿）：
+#     3.10 → 10 + 17 = 27     3.13 → 10 + 27 = 37
+#     3.11 →  9 + 20 = 29     3.14 → 10 + 28 = 38
+#     3.12 →  9 + 23 = 32     3.15 → 10 + 29 = 39
+#
+# 用法：
+#     --tool volumes                      各版本应有册数（离线）
+#     --tool volumes --verify             联网核对（缺/多都会列出来）
+#     --tool volumes --verify --versions 3.10,3.12
+# """
+
+def _http_text(url: str, timeout: int = 30, tries: int = 3) -> str:
+    """GET 一个文本资源，失败重试。
+
+    ★ 重试不是洁癖：连续打 raw.githubusercontent.com 时实测会出现
+      `Remote end closed connection without response`（连接被中途掐掉），
+      同一秒重发就好了。七次请求里撞过四次，不加就会误报「配置和官方不一致」。
+    """
+    import urllib.request
+    last: Exception | None = None
+    for n in range(tries):
+        try:
+            req = urllib.request.Request(url, headers={
+                "User-Agent": "python-doc-pdf-zh-volumes/1.0",
+                "Accept": "application/vnd.github+json",
+            })
+            with urllib.request.urlopen(req, timeout=timeout) as r:
+                return r.read().decode("utf-8", "replace")
+        except Exception as e:                      # noqa: BLE001
+            last = e
+            if n + 1 < tries:
+                time.sleep(1.5 * (n + 1))
+    raise RuntimeError(f"{last}")
+
+
+def _latex_slug_block(conf: str) -> str:
+    """截出 `latex_documents = [ ... ]` 那一段（3.12 起 ruff 会把它排成多行）。"""
+    m = re.search(r"^latex_documents\s*=\s*\[", conf, re.M)
+    if not m:
+        return ""
+    i = conf.index("[", m.start())
+    depth, j = 0, i
+    while j < len(conf):
+        if conf[j] == "[":
+            depth += 1
+        elif conf[j] == "]":
+            depth -= 1
+            if depth == 0:
+                return conf[i:j + 1]
+        j += 1
+    return conf[i:]
+
+
+def official_volumes(branch: str) -> dict[str, list[str]]:
+    """官方某分支的册子清单 → `{'main': [...], 'howto': [...]}`（slug 形式）。
+
+    ★ 用 GitHub 的 raw + contents 两个公开接口，不需要 token；两个都是只读。
+    """
+    conf = _http_text(f"https://raw.githubusercontent.com/python/cpython/{branch}/Doc/conf.py")
+    block = _latex_slug_block(conf)
+    if not block:
+        raise ValueError("conf.py 里找不到 latex_documents")
+    main: list[str] = []
+    for m in re.finditer(r"['\"]([A-Za-z0-9_\-]+)/index['\"]", block):
+        if m.group(1) not in main:
+            main.append(m.group(1))
+    if re.search(r"['\"]whatsnew/['\"]\s*\+", block):
+        main.append("whatsnew")
+    listing = json.loads(_http_text(
+        f"https://api.github.com/repos/python/cpython/contents/Doc/howto?ref={branch}"))
+    if isinstance(listing, dict):     # 出错时是 {"message": ...}
+        raise ValueError(f"列 Doc/howto 失败：{listing.get('message')}")
+    howto = sorted(x["name"][:-4] for x in listing
+                   if x.get("name", "").endswith(".rst") and x["name"] != "index.rst")
+    return {"main": main, "howto": ["howto-" + h for h in howto]}
+
+
+def vols_cli() -> int:
+    argv = sys.argv[1:]
+    vers = list(KNOWN_VERSIONS)
+    for i, a in enumerate(argv):
+        if a == "--versions" and i + 1 < len(argv):
+            vers = [x.strip() for x in argv[i + 1].split(",") if x.strip()]
+    print(f"配置来源：{VOLUMES_NOTE}")
+    if "--verify" not in argv:
+        for v in vers:
+            st = volume_stats(v)
+            print(f"  {v:5s} 共 {st['total']:2d} 册"
+                  f"（前置 {st['main']} + 指南 {st['howto']} + 尾部 {st['tail']}）")
+        print("\n（加 --verify 联网对着 github.com/python/cpython 复核）")
+        return 0
+
+    bad = 0
+    for v in vers:
+        branch = BRANCH_ALIAS.get(v, v)
+        try:
+            off = official_volumes(branch)
+        except Exception as e:                      # noqa: BLE001 —— 网络/限流都算
+            print(f"  {v:5s} !! 取不到官方数据（分支 {branch}）：{e}")
+            bad = 2
+            continue
+        want = off["main"] + off["howto"]
+        have = expected_slugs(v)
+        miss = [s for s in want if s not in have]        # 官方有、本地没登记
+        extra = [s for s in have if s not in want]       # 本地登记了、官方没有
+        mark = "OK" if not (miss or extra) else "!!"
+        print(f"  {v:5s} {mark} 官方 {len(want):2d} 册 / 本地 {len(have):2d} 册"
+              + (f"（分支 {branch}）" if branch != v else ""))
+        if miss:
+            bad = 1
+            print(f"        官方有但本地没登记 {len(miss)} 个：{'、'.join(miss)}")
+            print(f"        → 在 volumes.json 里补这些条目（name 里的 {{V}} 会换成版本号）")
+        if extra:
+            bad = 1
+            print(f"        本地登记了但官方没有 {len(extra)} 个：{'、'.join(extra)}")
+            print(f"        → 给它们加 min/max 版本区间，或删掉")
+    print("\n" + ("全部与官方一致。" if bad == 0 else "有差异，见上。"))
+    return 0 if bad == 0 else (1 if bad == 1 else 2)
+
+
 
 #: `--tool <名字>` 的名单：名字 → (说明, 入口函数)
 BUILTIN_TOOLS: dict[str, tuple[str, object]] = {
     "name-map": ("分册命名真源自检/查询（原 tools/name_map.py）", nm_cli),
+    "volumes": ("各版本册数 / 对着官方 conf.py 复核", vols_cli),
     "check-doc-refs": ("Doc/ 越界引用自检（原 tools/check-doc-refs.py）", cdr_main),
     "alias-po": ("接回被搬走目录的译文（原 tools/alias-po.py）", alpo_main),
     "localize-titles": ("封面标题中文化（原 tools/localize-titles.py）", loct_main),
@@ -7530,7 +7971,7 @@ try:
     from PyQt6.QtCore import Qt, QThread, QTimer, pyqtSignal       # noqa: E402
     from PyQt6.QtGui import QColor, QFont                          # noqa: E402
     from PyQt6.QtWidgets import (                                  # noqa: E402
-        QApplication, QCheckBox, QComboBox, QFileDialog, QFrame,
+        QApplication, QCheckBox, QComboBox, QDialog, QFileDialog, QFrame,
         QGridLayout, QGroupBox, QHBoxLayout, QHeaderView, QLabel, QLineEdit,
         QMainWindow, QMessageBox, QPlainTextEdit, QProgressBar, QPushButton,
         QScrollArea, QSizePolicy, QSplitter, QTableWidget, QTableWidgetItem,
@@ -7554,9 +7995,9 @@ except ImportError as _e:                                         # pragma: no c
                 f"或直接双击 启动PDF构建器.bat（它会自动建 venv 并装好）。")
 
     Qt = QThread = QTimer = QColor = QFont = _MissingQt
-    QApplication = QCheckBox = QComboBox = QFileDialog = QFrame = _MissingQt
-    QGridLayout = QGroupBox = QHBoxLayout = QHeaderView = QLabel = _MissingQt
-    QLineEdit = QMainWindow = QMessageBox = QPlainTextEdit = _MissingQt
+    QApplication = QCheckBox = QComboBox = QDialog = QFileDialog = _MissingQt
+    QFrame = QGridLayout = QGroupBox = QHBoxLayout = QHeaderView = _MissingQt
+    QLabel = QLineEdit = QMainWindow = QMessageBox = QPlainTextEdit = _MissingQt
     QProgressBar = QPushButton = QScrollArea = QSizePolicy = _MissingQt
     QSplitter = QTableWidget = QTableWidgetItem = QToolButton = _MissingQt
     QVBoxLayout = QWidget = _MissingQt
@@ -7928,6 +8369,27 @@ class SettingsPanel(QWidget):
         vg.setColumnStretch(1, 1)
         g1.add(vh)
 
+        # ── 分册配置入口 ──────────────────────────────────────────────────
+        # 册数随版本变（3.10 27 册 → 3.15 39 册），所以这张表必须是可改的：
+        # 点这里能看到每册的编号/文件名/书签/版本区间，并直接编辑 volumes.json。
+        vh2 = QWidget()
+        vh2l = QHBoxLayout(vh2)
+        vh2l.setContentsMargins(0, 2, 0, 0)
+        vh2l.setSpacing(6)
+        self.btn_volumes = QPushButton("分册配置…")
+        self.btn_volumes.setFixedWidth(112)
+        self.btn_volumes.setToolTip(
+            "各版本的册数不一样（3.10 27 / 3.11 29 / 3.12 32 / 3.13 37 / 3.14 38 / 3.15 39）；"
+            "这里可以改分册名、编号、书签标题、版本区间与合并顺序，保存到 sphinx-pdf/volumes.json")
+        self.btn_volumes.clicked.connect(self.on_edit_volumes)
+        self.lbl_volumes = QLabel("")
+        self.lbl_volumes.setObjectName("hint")
+        self.lbl_volumes.setWordWrap(True)
+        vh2l.addWidget(self.btn_volumes)
+        vh2l.addWidget(self.lbl_volumes, 1)
+        g1.add(vh2)
+        self._refresh_volume_hint()
+
         for key, label, tip, kind, ph in self.FIELDS_MAIN:
             g1.add(self._row_widget(key, label, tip, kind, ph))
         lay.addWidget(g1)
@@ -8126,8 +8588,28 @@ class SettingsPanel(QWidget):
             edit.setText(str(Path(p)).replace("\\", "/"))
 
     # ------------------------------------------------------------- 读写
+    def _refresh_volume_hint(self) -> None:
+        """版本区下面那行小字：分册表从哪来 + 每个版本几册。
+
+        ★ 这行字是「册数随版本变」的唯一可见提示。以前勾了 3.13 却按 3.14 的表
+          去改名，结果是 `MISSING 1` 而看不出原因；现在一眼能看到 3.13 是 37 册。
+        """
+        try:
+            parts = [f"{v} {volume_stats(v)['total']}" for v in KNOWN_VERSIONS]
+            src = Path(VOLUMES_LOADED).name if VOLUMES_LOADED else "内置表"
+            self.lbl_volumes.setText("分册表（%s）册数：%s" % (src, " / ".join(parts)))
+            self.lbl_volumes.setToolTip(VOLUMES_NOTE)
+        except Exception as e:                                   # noqa: BLE001
+            self.lbl_volumes.setText(f"分册表读取异常：{e}")
+
+    def on_edit_volumes(self) -> None:
+        """打开可视化分册配置（各版本册数不同，都在这个窗口里改）。"""
+        dlg = VolumeEditorDialog(self)
+        dlg.exec()
+        self._refresh_volume_hint()
+
     def _checked_versions(self) -> list[str]:
-        """勾选的版本（按 3.13 → 3.15）。"""
+        """勾选的版本（按 3.10 → 3.16）。"""
         return [v for v in KNOWN_VERSIONS
                 if v in self.chk_ver and self.chk_ver[v].isChecked()]
 
@@ -9169,6 +9651,346 @@ class MultiRunWindow(QWidget):
 # ---------------------------------------------------------------------------
 # 6.4 主窗口
 # ---------------------------------------------------------------------------
+
+class VolumeEditorDialog(QDialog):
+    """分册配置编辑器 —— 可视化编辑 `volumes.json`。
+
+    ★ 为什么要有这个窗口：**册数随版本变**（3.10 27 册 → 3.15 39 册），而且上游每年
+      都会加或删几册（3.11 删了 distributing、3.13 拆出 builtins、每年加几篇 howto）。
+      以前「加一行」要改 9000 行的主程序再重新打包 exe；现在在这里点几下，存成
+      `volumes.json` 就生效 —— 同一份文件 CI 与命令行工具也在用。
+    ★ 表格的**行顺序 = 合并册的一级顺序**（`merge_order`），所以「上移/下移」就是
+      调合并册的章节顺序，`builtins` 因此能排在 reference 与 library 之间。
+    ★ 「指南整块」那一行是占位符（代表 29 篇 howto 打包成的一块），它不能删，
+      也不能改文件名 —— 只决定这块在合并册里的位置。
+    """
+
+    COLS = ["类型", "上游产物名（slug）", "文件名（含编号）", "书签标题", "最低版本", "最高版本"]
+    #: 界面文字 → 内部 kind
+    KINDS = [("前置册", "main"), ("指南整块", HOWTO_KEY), ("指南分册", "howto"), ("尾部册", "tail")]
+    KIND_TIP = {
+        "main": "合并册里的一级章节（01~08 那批）",
+        HOWTO_KEY: "占位行：代表《Python 指南》整块；位置=这块在合并册里的位置",
+        "howto": "《Python 指南》下的分册，文件名必须以 4 位编号开头（0901…）",
+        "tail": "排在末尾的册（常见问题 / 内置参考手册）",
+    }
+
+    def __init__(self, parent=None) -> None:
+        super().__init__(parent)
+        self.setWindowTitle("分册配置 · 各版本册数不同，在这里改")
+        self.resize(1240, 740)
+
+        lay = QVBoxLayout(self)
+        tip = QLabel(
+            "行顺序 = 合并册的一级顺序。版本区间是闭区间（留空 = 不限）："
+            "例如 distributing 只有 ≤3.10 有，就填「最高版本 3.10」；"
+            "builtins 3.13 才拆出来，就填「最低版本 3.13」。"
+            "文件名里的 {V} 会替换成当前版本号。")
+        tip.setObjectName("hint")
+        tip.setWordWrap(True)
+        lay.addWidget(tip)
+
+        self.table = QTableWidget(0, len(self.COLS))
+        self.table.setHorizontalHeaderLabels(self.COLS)
+        hh = self.table.horizontalHeader()
+        hh.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
+        hh.setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
+        hh.setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
+        hh.setSectionResizeMode(3, QHeaderView.ResizeMode.Stretch)
+        hh.setSectionResizeMode(4, QHeaderView.ResizeMode.ResizeToContents)
+        hh.setSectionResizeMode(5, QHeaderView.ResizeMode.ResizeToContents)
+        self.table.verticalHeader().setVisible(False)
+        self.table.cellChanged.connect(lambda *_: self._refresh_preview())
+        lay.addWidget(self.table, 1)
+
+        self.lbl_preview = QLabel("")
+        self.lbl_preview.setObjectName("hint")
+        self.lbl_preview.setWordWrap(True)
+        lay.addWidget(self.lbl_preview)
+
+        bar = QHBoxLayout()
+        for text, slot, tipx in (
+            ("新增一行", self.on_add, "在末尾加一册（默认前置册）"),
+            ("删除行", self.on_del, "删掉选中的行（「指南整块」不能删）"),
+            ("上移", lambda: self.on_move(-1), "往前挪：合并册里就排在前面"),
+            ("下移", lambda: self.on_move(+1), "往后挪"),
+            ("自检", self.on_check, "跑 name-map 的全部一致性检查"),
+        ):
+            b = QPushButton(text)
+            b.setToolTip(tipx)
+            b.clicked.connect(slot)
+            bar.addWidget(b)
+        bar.addStretch(1)
+        for text, slot, tipx in (
+            ("还原内置默认", self.on_reset, "把表格恢复成程序内置的表（不删文件）"),
+            ("另存为…", self.on_save_as, "存到别处；注意只有 sphinx-pdf/volumes.json 会被自动加载"),
+            ("保存并生效", self.on_save, "写入 volumes.json 并立刻重新加载"),
+        ):
+            b = QPushButton(text)
+            b.setToolTip(tipx)
+            b.clicked.connect(slot)
+            bar.addWidget(b)
+        close = QPushButton("关闭")
+        close.clicked.connect(self.reject)
+        bar.addWidget(close)
+        lay.addLayout(bar)
+
+        self.lbl_where = QLabel("")
+        self.lbl_where.setObjectName("hint")
+        self.lbl_where.setWordWrap(True)
+        lay.addWidget(self.lbl_where)
+
+        self._load_rows()
+        self._refresh_preview()
+
+    # ------------------------------------------------------------ 表格读写
+    def _kind_combo(self, kind: str) -> QComboBox:
+        cb = QComboBox()
+        for text, code in self.KINDS:
+            cb.addItem(text, code)
+        idx = max(0, cb.findData(kind))
+        cb.setCurrentIndex(idx)
+        cb.setToolTip(self.KIND_TIP.get(kind, ""))
+        cb.currentIndexChanged.connect(lambda *_: self._refresh_preview())
+        return cb
+
+    def _add_row(self, kind: str, slug: str, name: str, title: str,
+                 lo: str = "", hi: str = "") -> None:
+        r = self.table.rowCount()
+        self.table.insertRow(r)
+        self.table.setCellWidget(r, 0, self._kind_combo(kind))
+        for c, text in ((1, slug), (2, name), (3, title), (4, lo), (5, hi)):
+            self.table.setItem(r, c, QTableWidgetItem(text))
+        if kind == HOWTO_KEY:
+            # 占位行：slug / 文件名 都不该手改，改灰掉免得误编辑
+            self.table.item(r, 1).setText(HOWTO_KEY)
+            for c in (1, 2):
+                it = self.table.item(r, c)
+                it.setFlags(it.flags() & ~Qt.ItemFlag.ItemIsEditable)
+
+    def _load_rows(self) -> None:
+        """按当前生效的表重建表格（合并顺序 → 行顺序）。"""
+        self.table.blockSignals(True)
+        self.table.setRowCount(0)
+        info = {s: (n, t) for s, n, t in (*MAIN, *TAIL)}
+        for key in MERGE_ORDER:
+            if key == HOWTO_KEY:
+                self._add_row(HOWTO_KEY, HOWTO_KEY, HOWTO_ROOT_TITLE, "")
+                for slug, name, title in HOWTO:
+                    self._add_row('howto', slug, name, title,
+                                  self._v(MIN_VERSION.get(slug)), self._v(MAX_VERSION.get(slug)))
+                continue
+            if key not in info:
+                continue
+            name, title = info[key]
+            kind = 'main' if any(s == key for s, _n, _t in MAIN) else 'tail'
+            self._add_row(kind, key, name, title,
+                          self._v(MIN_VERSION.get(key)), self._v(MAX_VERSION.get(key)))
+        self.table.blockSignals(False)
+        self.lbl_where.setText(
+            f"当前生效：{VOLUMES_NOTE}\n保存位置：{volumes_json_path() or default_volumes_json_path()}")
+
+    @staticmethod
+    def _v(t) -> str:
+        return '%d.%d' % t if t else ''
+
+    def _collect(self) -> tuple[list[dict], list[str]]:
+        """把表格读成 (volumes, merge_order)；不合法的单元格抛 ValueError。"""
+        vols: list[dict] = []
+        order: list[str] = []
+        seen: set[str] = set()
+        for r in range(self.table.rowCount()):
+            cb = self.table.cellWidget(r, 0)
+            kind = cb.currentData() if cb else 'main'
+            slug = (self.table.item(r, 1).text() if self.table.item(r, 1) else '').strip()
+            if kind == HOWTO_KEY:
+                order.append(HOWTO_KEY)
+                continue
+            name = (self.table.item(r, 2).text() if self.table.item(r, 2) else '').strip()
+            title = (self.table.item(r, 3).text() if self.table.item(r, 3) else '').strip()
+            lo = (self.table.item(r, 4).text() if self.table.item(r, 4) else '').strip()
+            hi = (self.table.item(r, 5).text() if self.table.item(r, 5) else '').strip()
+            if not slug or not name:
+                raise ValueError(f"第 {r + 1} 行：slug 和文件名都不能空")
+            if slug in seen:
+                raise ValueError(f"第 {r + 1} 行：slug 重复（{slug}）")
+            seen.add(slug)
+            if kind == 'howto' and not (name[:4].isdigit() and len(name) > 4):
+                raise ValueError(f"第 {r + 1} 行：指南分册的文件名要以 4 位编号开头（{name}）")
+            for lab, raw in (("最低版本", lo), ("最高版本", hi)):
+                if raw and ver_tuple(raw) == (0, 0):
+                    raise ValueError(f"第 {r + 1} 行：{lab}「{raw}」不是 3.10 这种格式")
+            item = {'slug': slug, 'name': name, 'title': title, 'kind': kind}
+            if lo:
+                item['min'] = lo
+            if hi:
+                item['max'] = hi
+            vols.append(item)
+            # ★ merge_order 只登记「一级」条目：main / tail + 指南整块的占位符。
+            #   howto 是块**内部**的顺序（由它们在表格里的先后决定），混进来会让
+            #   合并册去 MAIN/TAIL 里找一个不存在的键 → KeyError。
+            if kind in ('main', 'tail'):
+                order.append(slug)
+        if HOWTO_KEY not in order:
+            raise ValueError("「指南整块」那一行不能删")
+        return vols, order
+
+    # ------------------------------------------------------------ 预览/操作
+    def _refresh_preview(self) -> None:
+        try:
+            vols, _order = self._collect()
+        except ValueError as e:
+            self.lbl_preview.setText(f"⚠ {e}")
+            return
+        rows = []
+        for v in KNOWN_VERSIONS:
+            cur = ver_tuple(v)
+            n = 0
+            for item in vols:
+                lo = ver_tuple(item.get('min') or '0.0')
+                hi = ver_tuple(item.get('max') or '999.0')
+                if lo <= cur <= hi:
+                    n += 1
+            rows.append(f"{v} {n} 册")
+        self.lbl_preview.setText("按当前表格算出的册数：" + " · ".join(rows)
+                                 + f"（共 {len(vols)} 条登记）")
+
+    def on_add(self) -> None:
+        r = self.table.currentRow()
+        r = self.table.rowCount() if r < 0 else r + 1
+        self.table.insertRow(r)
+        self.table.setCellWidget(r, 0, self._kind_combo('main'))
+        for c, text in ((1, ''), (2, ''), (3, ''), (4, ''), (5, '')):
+            self.table.setItem(r, c, QTableWidgetItem(text))
+        self.table.setCurrentCell(r, 1)
+        self._refresh_preview()
+
+    def on_del(self) -> None:
+        r = self.table.currentRow()
+        if r < 0:
+            return
+        cb = self.table.cellWidget(r, 0)
+        if cb and cb.currentData() == HOWTO_KEY:
+            QMessageBox.information(self, "这一行不能删",
+                                    "「指南整块」是占位行，它代表 29 篇 howto 打包成的那一块，"
+                                    "删掉就没有《Python 指南》了。")
+            return
+        self.table.removeRow(r)
+        self._refresh_preview()
+
+    def on_move(self, step: int) -> None:
+        r = self.table.currentRow()
+        if r < 0:
+            return
+        cb = self.table.cellWidget(r, 0)
+        is_howto = bool(cb and cb.currentData() == 'howto')
+        block_row = next((i for i in range(self.table.rowCount())
+                          if (self.table.cellWidget(i, 0)
+                              and self.table.cellWidget(i, 0).currentData() == HOWTO_KEY)), -1)
+        if not is_howto:
+            # 顶层的行跨过「指南整块」是允许的：那正是「指南排在标准库之前/之后」的调整
+            tgt = r + step
+            if tgt < 0 or tgt >= self.table.rowCount():
+                return
+            if tgt == block_row:
+                tgt += step
+            if tgt < 0 or tgt >= self.table.rowCount():
+                return
+            if self.table.cellWidget(tgt, 0) and \
+                    self.table.cellWidget(tgt, 0).currentData() == HOWTO_KEY:
+                return
+        else:
+            tgt = r + step
+            if tgt < 0 or tgt >= self.table.rowCount():
+                return
+            tcb = self.table.cellWidget(tgt, 0)
+            if not (tcb and tcb.currentData() == 'howto'):
+                return
+        for c in range(1, self.table.columnCount()):
+            a = self.table.item(r, c)
+            b = self.table.item(tgt, c)
+            if a and b and (a.flags() & Qt.ItemFlag.ItemIsEditable):
+                ta, tb = a.text(), b.text()
+                a.setText(tb)
+                b.setText(ta)
+        self.table.setCurrentCell(tgt, 1)
+        self._refresh_preview()
+
+    def on_check(self) -> None:
+        try:
+            vols, order = self._collect()
+        except ValueError as e:
+            QMessageBox.warning(self, "表格里有问题", str(e))
+            return
+        bad = selfcheck()
+        if bad:
+            QMessageBox.warning(self, "自检没过", "· " + "\n· ".join(bad)
+                                + "\n\n（这些都是保存之后才会暴露的坑，先改表格再存）")
+            return
+        QMessageBox.information(self, "自检通过",
+                                f"{len(vols)} 条登记、{len(order)} 个合并位置，"
+                                f"编号与文件名都不撞车。")
+
+    def on_reset(self) -> None:
+        if QMessageBox.question(
+                self, "还原内置默认",
+                "把表格恢复成程序内置的表（外部 volumes.json 不动）。\n"
+                "要真正生效，之后点「保存并生效」覆盖掉那个文件。\n\n继续？"
+        ) != QMessageBox.StandardButton.Yes:
+            return
+        _restore_embedded()
+        self._load_rows()
+        self._refresh_preview()
+
+    def _write(self, path: Path) -> None:
+        vols, order = self._collect()
+        data = {
+            'schema': VOLUMES_SCHEMA,
+            '_说明': ('分册配置。kind: main=前置册 / howto=Python 指南 / tail=尾部册；'
+                     'min/max 是闭区间版本上下限（省略 = 不限）；name 里的 {V} 换成当前版本号。'
+                     '改完跑 `--tool name-map --check` 自检，'
+                     '`--tool volumes --verify` 可对着 github.com/python/cpython 各分支在线复核。'),
+            'howto_root_title': (self.table.item(
+                next(i for i in range(self.table.rowCount())
+                     if self.table.cellWidget(i, 0)
+                     and self.table.cellWidget(i, 0).currentData() == HOWTO_KEY), 2).text().strip()
+                or HOWTO_ROOT_TITLE),
+            'merge_order': order,
+            'volumes': vols,
+        }
+        path.parent.mkdir(parents=True, exist_ok=True)
+        tmp = path.with_suffix(path.suffix + '.tmp')
+        tmp.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding='utf-8')
+        tmp.replace(path)                      # 原子替换：写一半断电也不会留下坏文件
+        note = load_volumes(path, quiet=True)
+        bad = selfcheck()
+        msg = f"已保存：{path}\n{note}"
+        if bad:
+            msg += "\n\n⚠ 自检发现 %d 个问题：\n· %s" % (len(bad), "\n· ".join(bad))
+        else:
+            msg += "\n\n自检通过。下次构建就按新表改名字/合并。"
+        self.lbl_where.setText(f"当前生效：{VOLUMES_NOTE}\n保存位置：{path}")
+        QMessageBox.information(self, "保存完成", msg)
+        parent = self.parent()
+        if parent is not None and hasattr(parent, "_refresh_volume_hint"):
+            parent._refresh_volume_hint()
+
+    def on_save(self) -> None:
+        try:
+            self._write(volumes_json_path() or default_volumes_json_path())
+        except ValueError as e:
+            QMessageBox.warning(self, "表格里有问题", str(e))
+
+    def on_save_as(self) -> None:
+        p, _f = QFileDialog.getSaveFileName(
+            self, "另存分册配置", str(default_volumes_json_path()), "JSON (*.json)")
+        if not p:
+            return
+        try:
+            self._write(Path(p))
+        except (ValueError, OSError) as e:
+            QMessageBox.warning(self, "保存失败", str(e))
+
 
 class MainWindow(QMainWindow):
     def __init__(self, cfg: Config) -> None:

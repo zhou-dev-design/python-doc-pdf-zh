@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       versions:
-        description: "要构建的版本，逗号分隔（matrix 会拆成并行 job）"
+        description: "要构建的版本，逗号分隔（3.10~3.16 都认；册数各不相同，见 volumes.json）"
         default: "3.13,3.14,3.15"
       jobs:
         description: "并发数：步骤 6 的 sphinx -j 与步骤 7 的册级并发共用"

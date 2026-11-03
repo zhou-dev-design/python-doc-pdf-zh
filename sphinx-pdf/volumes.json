@@ -1,0 +1,275 @@
+{
+  "schema": 2,
+  "_说明": "分册配置。kind: main=前置册 / howto=Python 指南 / tail=尾部册。min/max 是闭区间的版本上下限（省略 = 不限）。name 里的 {V} 会替换成当前版本号。改完跑 `--tool name-map --check` 自检，`--tool volumes --verify` 可对着 github.com/python/cpython 各分支的 Doc/conf.py 在线核对。",
+  "howto_root_title": "Python 指南",
+  "merge_order": [
+    "whatsnew",
+    "tutorial",
+    "using",
+    "reference",
+    "builtins",
+    "library",
+    "extending",
+    "c-api",
+    "installing",
+    "distributing",
+    "__howto__",
+    "faq"
+  ],
+  "volumes": [
+    {
+      "slug": "whatsnew",
+      "name": "01Python {V} 有什么新变化",
+      "title": "Python的新变化",
+      "kind": "main"
+    },
+    {
+      "slug": "tutorial",
+      "name": "02Python 教程",
+      "title": "Python 教程",
+      "kind": "main"
+    },
+    {
+      "slug": "using",
+      "name": "03Python安装和使用",
+      "title": "Python安装和使用",
+      "kind": "main"
+    },
+    {
+      "slug": "reference",
+      "name": "04Python 语言参考手册",
+      "title": "Python 语言参考手册",
+      "kind": "main"
+    },
+    {
+      "slug": "library",
+      "name": "05Python 标准库",
+      "title": "Python 标准库",
+      "kind": "main"
+    },
+    {
+      "slug": "extending",
+      "name": "06扩展和嵌入 Python 解释器",
+      "title": "扩展和嵌入 Python 解释器",
+      "kind": "main"
+    },
+    {
+      "slug": "c-api",
+      "name": "07Python C API 参考手册",
+      "title": "Python/C API 参考手册",
+      "kind": "main"
+    },
+    {
+      "slug": "installing",
+      "name": "08安装 Python 模块",
+      "title": "安装 Python 模块",
+      "kind": "main"
+    },
+    {
+      "slug": "distributing",
+      "name": "09分发 Python 模块",
+      "title": "分发 Python 模块",
+      "kind": "main",
+      "max": "3.10"
+    },
+    {
+      "slug": "howto-a-conceptual-overview-of-asyncio",
+      "name": "0901asyncio 的概念概述",
+      "title": "asyncio 的概念概述",
+      "kind": "howto",
+      "min": "3.13"
+    },
+    {
+      "slug": "howto-annotations",
+      "name": "0902注解最佳实践",
+      "title": "注解最佳实践",
+      "kind": "howto"
+    },
+    {
+      "slug": "howto-argparse",
+      "name": "0903argparse 教程",
+      "title": "argparse 教程",
+      "kind": "howto"
+    },
+    {
+      "slug": "howto-descriptor",
+      "name": "0904描述器指南",
+      "title": "描述器指南",
+      "kind": "howto"
+    },
+    {
+      "slug": "howto-enum",
+      "name": "0905Enum 指南",
+      "title": "Enum 指南",
+      "kind": "howto",
+      "min": "3.11"
+    },
+    {
+      "slug": "howto-functional",
+      "name": "0906函数式编程指引",
+      "title": "函数式编程指引",
+      "kind": "howto"
+    },
+    {
+      "slug": "howto-ipaddress",
+      "name": "0907ipaddress模块介绍",
+      "title": "ipaddress 模块介绍",
+      "kind": "howto"
+    },
+    {
+      "slug": "howto-logging",
+      "name": "0908日志指南",
+      "title": "日志指南",
+      "kind": "howto"
+    },
+    {
+      "slug": "howto-logging-cookbook",
+      "name": "0909日志专题手册",
+      "title": "日志专题手册",
+      "kind": "howto"
+    },
+    {
+      "slug": "howto-regex",
+      "name": "0910正则表达式指南",
+      "title": "正则表达式指南",
+      "kind": "howto"
+    },
+    {
+      "slug": "howto-sorting",
+      "name": "0911排序的技术",
+      "title": "排序的技术",
+      "kind": "howto"
+    },
+    {
+      "slug": "howto-unicode",
+      "name": "0912Unicode 指南",
+      "title": "Unicode 指南",
+      "kind": "howto"
+    },
+    {
+      "slug": "howto-urllib2",
+      "name": "0913如何利用 urllib 包获取网络资源",
+      "title": "如何利用 urllib 包获取网络资源",
+      "kind": "howto"
+    },
+    {
+      "slug": "howto-curses",
+      "name": "0914用 Python 进行 Curses 编程",
+      "title": "用 Python 进行 Curses 编程",
+      "kind": "howto"
+    },
+    {
+      "slug": "howto-free-threading-python",
+      "name": "0915Python 对自由线程的支持",
+      "title": "Python 对自由线程的支持",
+      "kind": "howto",
+      "min": "3.13"
+    },
+    {
+      "slug": "howto-free-threading-extensions",
+      "name": "0916自由线程的 C API 扩展支持",
+      "title": "自由线程的 C API 扩展支持",
+      "kind": "howto",
+      "min": "3.13"
+    },
+    {
+      "slug": "howto-isolating-extensions",
+      "name": "0917隔离扩展模块",
+      "title": "隔离扩展模块",
+      "kind": "howto",
+      "min": "3.11"
+    },
+    {
+      "slug": "howto-mro",
+      "name": "0918Python 2.3 方法解析顺序",
+      "title": "Python 2.3 方法解析顺序",
+      "kind": "howto",
+      "min": "3.12"
+    },
+    {
+      "slug": "howto-sockets",
+      "name": "0919套接字编程指南",
+      "title": "套接字编程指南",
+      "kind": "howto"
+    },
+    {
+      "slug": "howto-timerfd",
+      "name": "0920定时器文件描述符指南",
+      "title": "定时器文件描述符指南",
+      "kind": "howto",
+      "min": "3.13"
+    },
+    {
+      "slug": "howto-cporting",
+      "name": "0921将扩展模块移植到 Python 3",
+      "title": "将扩展模块移植到 Python 3",
+      "kind": "howto"
+    },
+    {
+      "slug": "howto-gdb_helpers",
+      "name": "0922使用 GDB 调试 C API 扩展和 CPython 内部代码",
+      "title": "使用 GDB 调试 C API 扩展和 CPython 内部代码",
+      "kind": "howto",
+      "min": "3.11"
+    },
+    {
+      "slug": "howto-instrumentation",
+      "name": "0923使用 DTrace 和 SystemTap 检测CPython",
+      "title": "使用 DTrace 和 SystemTap 检测 CPython",
+      "kind": "howto"
+    },
+    {
+      "slug": "howto-perf_profiling",
+      "name": "0924Python 对 Linux perf 性能分析器的支持",
+      "title": "Python 对 Linux perf 性能分析器的支持",
+      "kind": "howto",
+      "min": "3.12"
+    },
+    {
+      "slug": "howto-remote_debugging",
+      "name": "0925远程调试附加协议",
+      "title": "远程调试附加协议",
+      "kind": "howto",
+      "min": "3.14"
+    },
+    {
+      "slug": "howto-argparse-optparse",
+      "name": "0926将 optparse 代码迁移至 argparse",
+      "title": "将 optparse 代码迁移至 argparse",
+      "kind": "howto",
+      "min": "3.12"
+    },
+    {
+      "slug": "howto-clinic",
+      "name": "0927Argument Clinic 的用法",
+      "title": "Argument Clinic 的用法",
+      "kind": "howto"
+    },
+    {
+      "slug": "howto-pyporting",
+      "name": "0928如何将 Python 2 代码移植到 Python 3",
+      "title": "如何将 Python 2 代码移植到 Python 3",
+      "kind": "howto"
+    },
+    {
+      "slug": "howto-abi3t-migration",
+      "name": "0929迁移到自由线程的稳定 ABI（abi3t）",
+      "title": "迁移到自由线程的稳定 ABI（abi3t）",
+      "kind": "howto",
+      "min": "3.15"
+    },
+    {
+      "slug": "faq",
+      "name": "10Python 常见问题",
+      "title": "Python 常见问题",
+      "kind": "tail"
+    },
+    {
+      "slug": "builtins",
+      "name": "11Python 内置参考手册",
+      "title": "Python 内置参考手册",
+      "kind": "tail",
+      "min": "3.13"
+    }
+  ]
+}

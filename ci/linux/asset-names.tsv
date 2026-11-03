@@ -12,6 +12,7 @@
 06	extending	# 06扩展和嵌入 Python 解释器
 07	c-api	# 07Python C API 参考手册
 08	installing	# 08安装 Python 模块
+09	distributing	# 09分发 Python 模块（只有 3.10 及更早才有这一册）
 10	faq	# 10Python 常见问题
 11	builtins	# 11Python 内置参考手册
 0901	a-conceptual-overview-of-asyncio	# 0901asyncio 的概念概述
