@@ -136,8 +136,8 @@ sudo apt-get install -y \
 
 - **每天 UTC 04:00（北京时间 12:00）自动跑**，也可在 Actions 页面手动触发；
 - `versions` 拆成 matrix，每个版本一个 job（Ubuntu 上 4 核/job）；
-- 每步：装依赖 → `--preflight` → `selftest.py` → 构建 → 上传 artifact → 推 `v<完整版本>` 分支；
-- 分支仍是「孤儿提交 + 强推」，只留最新日期；不同补丁版各占一个分支。
+- 每步：装依赖 → `--preflight` → `selftest.py` → 构建 → 上传 artifact → **发布到 Releases**；
+- 产物**不进分支**：一个版本一个 release，同版本重跑原地更新（附件 `--clobber`）。
 
 ```yaml
 on:
@@ -149,37 +149,39 @@ on:
 托管 runner 装 TeX Live 约 3~5 分钟，整轮单版本大约 25~35 分钟；
 自托管 Linux（`runs-on: [self-hosted, linux]`）可以省掉装依赖那一段。
 
-### 5.1 分支模型：一个小版本一个分支，只留最新一次
+### 5.1 落点模型：产物进 Releases，分支只留三根
 
 ```
-main      ← 只有代码
-v3.13.18  ← 3.13.18 的成品，永远只有**最新那一天**
-v3.14.10
-v3.15.2
+main      ← 代码 + 文档（唯一开发线）
+ci-logs   ← 只在构建失败时被强推一次，存「显微镜」证据；永远 1 个提交
+old       ← 补丁版被顶下来时，按 tag 建目录归档旧产物（首次升级才会出现）
 ```
 
-推送方式是「临时仓库 + 孤儿提交 + `git push --force`」，于是：
+产物落 **Releases**，tag = `v<完整版本>`（不带日期），于是：
 
 | 情况 | 结果 |
 |-|-|
-| 3.13.18 在 1010 和 1011 各跑一次 | `v3.13.18` 里只剩 1011 的产物，旧的自动消失 |
-| 3.14.2 与 3.14.3 都跑 | 两个分支各自保留（补丁版不同 = 不同分支） |
-| 跑一年 | 仓库体积 ≈ 版本数 × 85 MB，**不随天数增长** |
+| 3.15.2 连跑两天 | `v3.15.2` 这个 release **原地更新**，不会多出一个 |
+| 3.15.2 → 3.15.3 | 旧 release 附件搬进 `old/v3.15.2/`，**推成功之后**才删旧 release ⇒ 每条线只有 1 个 release |
+| 跑一年 | 分支数恒定 3 根，仓库体积**不随天数增长** |
 
-分支名里的版本号由该版本解释器自己报告（`sys.version_info`），不写死。
+> 2026-11-03 已删除历史上那批 `v3.13.18` / `v3.14.10` / `v3.15.2` **产物分支**
+> （每个 80~90 MB 的孤儿提交，内容与 Releases 重复）。现在分支里不再有 PDF，
+> 想看产物去 Releases。tag 仍保留 —— release 依附于 tag，与分支无关。
 
 ### 5.2 首次配置（三步）
 
 ```bash
 # 1) GitHub 上新建空仓库（私有/公开都行，别勾 README）
 # 2) 本目录推送（首次会弹浏览器授权）
-git remote add origin https://github.com/<账号>/python-docs-zh-pdf.git
+git remote add origin ssh://git@github.com/1721324295/python-doc-pdf-zh.git
 git push -u origin main
 # 3) Actions 页 → 构建 Python 中文文档 PDF（Linux）→ Run workflow
 #    versions 先填 3.15 试一个
 ```
 
-成功的标志：Branches 里出现 `v3.15.2`，点进去只有一个提交、根目录就是 39 册 PDF + 验收报告。
+成功的标志：**Releases 里出现 `v3.15.2`**，附件是「册号-英文」的 39 册 PDF +
+合并册 + `REPORT.md` + 一个 RAR；Branches 里**不该**多出任何 `v*` 分支。
 
 ✅ **本仓库是公开仓库** ⇒ Actions 分钟数不限（公开仓库免费、无额度上限），
 每天三个版本也随便跑。
