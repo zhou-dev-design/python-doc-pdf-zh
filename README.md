@@ -102,7 +102,7 @@ python3 ci/linux/pdf_builder_linux.py --versions 3.15 --print-config
 
 ```
 Releases
-├── v3.15.2    39 册 + 合并册 + 验收报告 + RAR   ← 同版本重跑原地更新
+├── v3.15.2    39 册 + 合并册 + 报告 + RAR   ← 同版本重跑原地更新
 ├── v3.14.10   38 册 + …
 └── v3.13.18   37 册 + …
 old 分支        ← 被新补丁版顶下来的旧版本，按 tag 建目录存档
@@ -117,15 +117,30 @@ old 分支        ← 被新补丁版顶下来的旧版本，按 tag 建目录�
 几个要点：
 
 - **tag 不带日期**：`v<完整版本>`（如 `v3.15.2`）。日期写在 release 标题
-  「Python 3.15.2 文档（20261102）」、正文和 RAR 文件名里 —— 这样既"带日期"，
+  「Python 3.15.2 文档（20261102）」、正文和压缩包名里 —— 既带日期，
   又不会一天一个 release。
-- **附件**：39 个分册 PDF + 合并册 + `验收报告.md` + `Python 3.15.2 文档 20261102.rar`。
-- 每次发布后会自动清掉本轮没有的附件（例如昨天那个带日期的 `.rar`），
-  保证"release 里的东西 == 这一次的产物"。
-- **下载**：进 Releases → 选版本 → 要单册就点文件名；要一次全拿走就下 RAR。
+- **附件命名必须是 ASCII**：GitHub 的 release 附件名只接受 ASCII，中文与空格会被
+  服务端换成 `.`（`01Python 3.15 有什么新变化.pdf` → `01Python.3.15.pdf`，
+  `验收报告.md` → `default.md`）。所以单个附件统一用 **`册号-英文标识.pdf`**：
+
+  ```
+  00-Python-3.15.2-docs-20261102.pdf   合并册
+  01-whatsnew.pdf  …  08-installing.pdf
+  0901-asyncio.pdf … 0929-abi3t-migration.pdf
+  10-faq.pdf  11-builtins.pdf          REPORT.md
+  ```
+
+  映射表在 `ci/linux/asset-names.tsv`（由主程序 `name_map` 生成）。
+  **中文文件名保留在压缩包内部**——压缩包是二进制，包内名不受此限。
+- **附件**：40 个 PDF（39 分册 + 合并册）+ `REPORT.md` + `Python-3.15.2-docs-20261102.rar`
+  （包内是中文原名，约 50 MB）。
+- **先清后传**：每次发布前先删掉"不在本轮名单里"的旧附件，再统一上传。
+  顺序不能反 —— 先传后清那版把刚传上去的 41 个附件全删了（拿中文名去比对
+  ASCII 化的服务端名，一个都匹配不上）。
+- **下载**：进 Releases → 选版本 → 要单册就点文件名；要一次全拿走就下压缩包。
 - **`old` 分支只存历史**：`old/v3.15.2/...`。它不会自动瘦身，嫌大可以手动删目录。
 - RAR 由 Ubuntu multiverse 里的 `rar`（RARLAB 免费 CLI）生成，压缩包注释里会有一行
-  `evaluation copy`，不影响解压；装不上时那一轮只发 PDF，不会挡住发布。
+  `evaluation copy`，不影响解压；装不上时会退回 `zip`，两者都失败才只发单个 PDF。
 
 ---
 

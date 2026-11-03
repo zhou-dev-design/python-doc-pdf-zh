@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 # 把 Sphinx 产出的英文 PDF 名重命名为参考目录的中文名（与参考样张的 命名.txt 一致）
 #
-#   ★ 2026-09-26：映射表已收敛到 `tools/name_map.py` 一处，本脚本只做转调。
+#   ★ 2026-09-26：映射表已收敛到主程序 `name_map` 段一处，本脚本只做转调。
 #     原来这里是**第二份**映射表（还有第三份在 GUI 里），三份必须手工同步，
 #     实测漏同步过两次（asyncio 名、版本的 0925）。现在只剩一处。
-#   ★ 2026-10-04：`tools/*.py` 也已内联进 `gui/pdf_builder_gui.py`，
-#     所以这里**再少一跳**：直接调主程序的 `--tool rename-pdf`
-#     （`tools/rename-pdf.py` 仍然可用，它只是等价的转发器）。
+#   ★ 2026-10-04：映射与实现都内联进 `gui/pdf_builder_gui.py`，本脚本直接调
+#     `--tool rename-pdf`。
+#   ★ 2026-11-03：`tools/*.py` 那批 18 行转发器（含 `tools/rename-pdf.py`）已删除 ——
+#     同一种能力有两个入口只会让人猜「哪份在跑」，统一走 `--tool <名字>`。
 #
 # 用法： bash rename-pdf.sh [PDF 目录] [版本号]
 #        VERSION=3.15 bash rename-pdf.sh [PDF 目录]
