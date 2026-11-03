@@ -137,7 +137,9 @@ sudo apt-get install -y \
 
 `.github/workflows/build-pdf-linux.yml`（仓库里**唯一**的流水线）：
 
-- **每天 UTC 04:00（北京时间 12:00）自动跑**，也可在 Actions 页面手动触发；
+- **每天 UTC 03:47（北京时间 11:47）自动跑**，也可在 Actions 页面手动触发；
+  取 03:47 而不是整点 04:00：整点是 cron 洪峰，GitHub 官方说明高负载时
+  scheduled run 会被延迟甚至**丢弃**（2026-11-03 的 12:00 那轮就这么没了）；
 - `versions` 拆成 matrix，**六个版本同时起跑**（`max-parallel: 6`，每个 job 一个独立 runner）；
 - 每步：装依赖 → `--preflight` → `selftest.py` → 构建 → 上传 artifact → **发布到 Releases**；
 - 产物**不进分支**：一个版本一个 release，同版本重跑原地更新（附件 `--clobber`）。
@@ -145,7 +147,7 @@ sudo apt-get install -y \
 ```yaml
 on:
   schedule:
-    - cron: "0 4 * * *"         # UTC 04:00 = 北京时间 12:00（UTC+8）
+    - cron: "47 3 * * *"        # UTC 03:47 = 北京时间 11:47（UTC+8）
   workflow_dispatch:            # 手动触发（可改 versions / jobs / merge / clean）
 ```
 
