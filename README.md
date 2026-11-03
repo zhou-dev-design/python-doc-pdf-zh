@@ -19,12 +19,12 @@
 ## 一、它每天做什么
 
 ```
-GitHub Actions（03:00 UTC → 北京 12:00）
+GitHub Actions（04:00 UTC → 北京 12:00，每天）
         │
    ┌────▼─────┐   prepare 读 versions → 拆成 matrix
-   │ prepare  │   （默认 3.13,3.14,3.15 三个 job 并行）
+   │ prepare  │   （默认 3.10~3.15 六个 job 并行，max-parallel: 6）
    └────┬─────┘
-        │  matrix: build ×3
+        │  matrix: build ×6
    ┌────▼──────────────────────────────────────────────┐
    │ 1 装 TeX Live / poppler / 中文字体 / cairo         │
    │ 2 装该版本 Python（actions/setup-python）          │
@@ -36,7 +36,7 @@ GitHub Actions（03:00 UTC → 北京 12:00）
    └────────────────────────────────────────────────────┘
 ```
 
-三个版本**互不影响**（`fail-fast: false`）：3.15 失败不会拦住 3.13 出稿。
+六个版本**互不影响**（`fail-fast: false`）：3.15 失败不会拦住 3.10 出稿。
 
 ---
 
@@ -50,8 +50,8 @@ GitHub Actions（03:00 UTC → 北京 12:00）
 # 最常用：构建一个版本，全套（含合并册）
 python3 ci/linux/pdf_builder_linux.py --versions 3.15 --jobs 4
 
-# 三版本并行（每个版本一个子进程）
-python3 ci/linux/pdf_builder_linux.py --versions 3.13,3.14,3.15 --jobs 4 --merge
+# 六版本并行（每个版本一个子进程）
+python3 ci/linux/pdf_builder_linux.py --versions 3.10,3.11,3.12,3.13,3.14,3.15 --jobs 4 --merge
 
 # 只重跑后半段（前面产物已在）
 python3 ci/linux/pdf_builder_linux.py --versions 3.15 --only 6,6b,7,7b,8,9
@@ -112,32 +112,28 @@ old 分支        ← 被新补丁版顶下来的旧版本，按 tag 建目录�
 |-|-|
 | 3.15.2 连跑两天 | `v3.15.2` 这个 release **原地更新**（附件 `--clobber` 覆盖），不会多出来一个 |
 | 3.15.2 → 3.15.3 | 先把 `v3.15.2` 的全部附件搬进 `old` 分支，**推成功之后**才删它的 release ⇒ 每条线永远只有一个 release |
-| 跑一年 | Releases 数量 = 版本线条数（3 个），体积不随天数增长 |
+| 跑一年 | Releases 数量 = 版本线条数（6 条：3.10~3.15），体积不随天数增长 |
 
 几个要点：
 
-- **tag 不带日期**：`v<完整版本>`（如 `v3.15.2`）。日期写在 release 标题
-  「Python 3.15.2 文档（20261102）」、正文和压缩包名里 —— 既带日期，
-  又不会一天一个 release。
-- **附件命名必须是 ASCII**：GitHub 的 release 附件名只接受 ASCII，中文与空格会被
-  服务端换成 `.`（`01Python 3.15 有什么新变化.pdf` → `01Python.3.15.pdf`，
-  `验收报告.md` → `default.md`）。所以单个附件统一用 **`册号-英文标识.pdf`**：
+- **tag 不带日期**：`v<完整版本>`（如 `v3.15.2`）。完整版本号的**口径是官方文档站标题**
+  （`docs.python.org/zh-cn/3.15/` 的 h1 = `Python 3.15.2 文档`），存在
+  `sphinx-pdf/version-titles.json`；`--tool titles` 抓官方、`--tool titles --write` 更新。
+  日期写在 release 标题「Python 3.15.2 文档（20261102）」、正文和压缩包名里 ——
+  既带日期，又不会一天一个 release。
+- **附件只有两个**：合并册 PDF + 全部分册的压缩包。
 
   ```
-  00-Python-3.15.2-docs-20261102.pdf   合并册
-  01-whatsnew.pdf  …  08-installing.pdf
-  0901-asyncio.pdf … 0929-abi3t-migration.pdf
-  10-faq.pdf  11-builtins.pdf          REPORT.md
+  Python-3.15.2-docs-20261102.pdf   合并册（单本，直接下）
+  Python-3.15.2-docs-20261102.rar   39 个分册 + 合并册 + 验收报告（中文原名）
   ```
 
-  映射表在 `ci/linux/asset-names.tsv`（由主程序 `name_map` 生成）。
-  **中文文件名保留在压缩包内部**——压缩包是二进制，包内名不受此限。
-- **附件**：40 个 PDF（39 分册 + 合并册）+ `REPORT.md` + `Python-3.15.2-docs-20261102.rar`
-  （包内是中文原名，约 50 MB）。
-- **先清后传**：每次发布前先删掉"不在本轮名单里"的旧附件，再统一上传。
-  顺序不能反 —— 先传后清那版把刚传上去的 41 个附件全删了（拿中文名去比对
-  ASCII 化的服务端名，一个都匹配不上）。
-- **下载**：进 Releases → 选版本 → 要单册就点文件名；要一次全拿走就下压缩包。
+  单册不再逐个挂：GitHub 的附件名只接受 ASCII，中文会被服务端换成 `.`
+  （`01Python 3.15 有什么新变化.pdf` → `01Python.3.15.pdf`），既认不出是哪一册，
+  还要额外维护一张映射表。**要单册就下压缩包解压**，包内是完整中文原名。
+- **先清后传**：每次发布前先删掉"不在本轮名单里"的旧附件（含早期那 40 个分册），
+  再统一上传；上传后核对附件数**恰好等于 2**，多一个少一个都报错。
+- **下载**：进 Releases → 选版本 → 要单册就下压缩包；只要整本就读合并册 PDF。
 - **`old` 分支只存历史**：`old/v3.15.2/...`。它不会自动瘦身，嫌大可以手动删目录。
 - **分支只有三根**：`main`（代码）、`ci-logs`（构建失败时的诊断证据，强推、永远 1 个提交）、
   `old`（首次补丁版升级才出现）。**分支里不放 PDF** —— 早期那批 `v3.15.2` 之类的
