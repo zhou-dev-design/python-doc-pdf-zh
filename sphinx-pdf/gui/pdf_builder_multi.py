@@ -5531,6 +5531,10 @@ TITLES: dict[str, str] = {
     #                                                  但 "/" 进不了文件名，参考样张的书签
     #                                                  与文件名都是无斜杠版，故统一取无斜杠
     "installing": "安装 Python 模块",
+    # ★ 只有 3.10 有这一册（3.11 起上游并进 installing 并删掉了目录）。
+    #   2026-11-03 实测：3.10 的验收报告「封面标题已中文化 26/27」，缺的就是它
+    #   —— 不在这张表里就只能保留上游的英文 "Distributing Python Modules"。
+    "distributing": "分发 Python 模块",
     "faq": "Python 常见问题",
     "builtins": "Python 内置参考手册",
     "howto-perf_profiling": "Python 对 Linux perf 性能分析器的支持",
