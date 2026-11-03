@@ -892,6 +892,43 @@ jobs:
 
           echo "✔ https://github.com/${GITHUB_REPOSITORY}/releases/tag/$TAG"
 
+      # ★ 产出这张表要的数据：小版本号 / 拉取 .po 的时刻 / 译文分支最后提交时间。
+      #   交给 summary job 汇总写回 README（本 job 只负责产出，不碰 README ——
+      #   五个版本并发改同一个文件必然打架）。
+      - name: 生成构建信息（供 summary 更新 README 表格）
+        if: success()
+        run: |
+          set -uo pipefail
+          ROOT="${{ steps.build.outputs.root }}"
+          [ -n "$ROOT" ] && [ -d "$ROOT" ] || {
+            echo "::warning::拿不到构建根，跳过"; exit 0; }
+          FULL="$(basename "$ROOT" | sed -E 's/^Python ([0-9]+\.[0-9]+\.[0-9]+) .*/\1/')"
+          MV="${FULL%.*}"
+          # ① PDF 构建时间 = 拉取 .po 的时刻：步骤 3 把 .po 铺进 Doc/locales，
+          #    所以那些文件的 mtime 就是 Po 被拉下来的时间（不是开始构建、也不是上传时间）
+          PO_T="—"
+          POF="$(find "$ROOT/cpython/Doc/locales" -name '*.po' -print -quit 2>/dev/null || true)"
+          if [ -n "$POF" ]; then
+            PO_T="$(TZ=Asia/Shanghai date -r "$POF" '+%Y-%m-%d %H:%M')"
+          fi
+          # ② 译文最后更新 = python-docs-zh-cn 对应分支的最后一次提交
+          ZH_T="—"
+          if [ -d "$ROOT/zh-cn/.git" ]; then
+            ISO="$(git -C "$ROOT/zh-cn" log -1 --format=%cI 2>/dev/null || true)"
+            [ -n "$ISO" ] && ZH_T="$(TZ=Asia/Shanghai date -d "$ISO" '+%Y-%m-%d %H:%M')"
+          fi
+          printf '{"version":"%s","full":"%s","po":"%s","zh":"%s"}\n' \
+            "$MV" "$FULL" "$PO_T" "$ZH_T" | tee "$RUNNER_TEMP/build-info.json"
+
+      - name: 上传构建信息
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-info-${{ matrix.version }}
+          path: ${{ runner.temp }}/build-info.json
+          retention-days: 7
+          if-no-files-found: warn
+
       - name: 汇总
         if: always()
         run: |
@@ -903,3 +940,56 @@ jobs:
           else
             echo "没有验收报告（构建可能提前失败，看上面的日志）" >> "$GITHUB_STEP_SUMMARY"
           fi
+
+  # ---------------------------------------------------------------- 汇总 README
+  # ★ 五个 build job 并发，谁都不该去改 README（同一文件必然打架）。
+  #   这里在全部 build 结束后统一收口：下载各版本的 build-info，只替换
+  #   README 里两个标记之间的表格（其余部分一个字不动）。
+  summary:
+    needs: build
+    # archive_only 时 build 被跳过，这里也就不必跑
+    if: always() && github.event.inputs.archive_only != 'true'
+    runs-on: ubuntu-22.04
+    steps:
+      - name: 取代码
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 1
+
+      - name: 取回各版本的构建信息
+        # 全部构建都失败时这里没有 artifact —— 那也不该让本 job 变红
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          pattern: build-info-*
+          path: infos
+          merge-multiple: true
+
+      - name: 更新 README 表格
+        run: |
+          set -uo pipefail
+          echo "拿到的 build-info："
+          ls -1 infos 2>/dev/null || echo "  （没有）"
+          python3 ci/linux/update_readme_table.py infos README.md
+
+      - name: 提交并推送
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -uo pipefail
+          if git diff --quiet -- README.md; then echo "README 无变化"; exit 0; fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git commit -q -m "docs(readme): 更新各版本构建/译文时间（$(date -u '+%Y-%m-%d') UTC）"
+          for i in 1 2 3; do
+            if git push -q \
+                 "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" \
+                 HEAD:main; then echo "✔ README 已更新"; exit 0; fi
+            echo "推送冲突，第 $i 次重试"
+            git pull -q --rebase --autostash \
+              "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" main || true
+            sleep 3
+          done
+          echo "::warning::README 推送失败（下次构建会再试）"
