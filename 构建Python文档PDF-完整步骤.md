@@ -3,7 +3,7 @@
 > 把 **CPython 官方 reST 文档** + **python-docs-zh-cn 中文译文** 编译成**中文分册 PDF**。
 >
 > 本文讲**手工命令**（想自己跑一遍、或排查 CI 时对照）。
-> 日常构建走 GitHub Actions（每天 11:47）或图形界面 ——
+> 日常构建走 GitHub Actions（每天北京 03:47 触发，约 11:35 出稿）或图形界面 ——
 > 见 [`README.md`](README.md) 与 [`sphinx-pdf/gui/README.md`](sphinx-pdf/gui/README.md)。
 
 ---

@@ -7,7 +7,7 @@
 | | |
 |-|-|
 | 构建版本 | **3.11 / 3.12 / 3.13 / 3.14 / 3.15**（3.10 已于 2026-10-31 EOL，见下） |
-| 触发 | 每天 `cron "47 3 * * *"`（UTC）= 北京时间 **11:47**；也可在 Actions 页手动 Run workflow |
+| 触发 | 每天 `cron "47 19 * * *"`（UTC 19:47 = 北京次日 03:47）→ 实测约 **11:35** 出稿；也可在 Actions 页手动 Run workflow |
 | 产物 | 每个版本 **2 个附件**：合并册 PDF + 全部分册的 RAR |
 | 落点 | **Releases**，tag = `v<完整版本>`（如 `v3.15.2`），同版本重跑原地更新 |
 | 历史 | **`old` 分支**：EOL 版本、被新补丁版顶下来的旧版，按 tag 存目录 |
@@ -58,7 +58,7 @@
 ## 一、每天做什么
 
 ```
-GitHub Actions（UTC 03:47 → 北京 11:47）
+GitHub Actions（UTC 19:47 = 北京 03:47 → 约 11:35 出稿）
         │
    ┌────▼─────┐  prepare：① 对着官方文档站刷新 version-titles.json（变了就提交）
    │ prepare  │           ② 读 versions → 拆 matrix（默认 3.11~3.15，五个 job 并行）
@@ -269,7 +269,7 @@ python sphinx-pdf/gui/pdf_builder_multi.py --tool check-pdf-gaps <某册.pdf>
 
 | 项 | 值 | 为什么 |
 |-|-|-|
-| `on.schedule` | `47 3 * * *` | GitHub cron 按 **UTC**，减 8 小时是北京 11:47。**别写整点** |
+| `on.schedule` | `47 19 * * *` | GitHub cron 按 **UTC**（19:47 = 北京次日 03:47）。故意比「想要的北京时间」提前 8 小时：实测延迟稳定在 7h48m 左右，「计划 + 延迟」≈ 北京 11:35 出稿。**别写整点** |
 | `on.workflow_dispatch` | 6 个输入 | `versions` / `jobs` / `merge` / `clean` / `push_branch` / `archive_only` |
 | `runs-on` | `ubuntu-22.04` | 需要系统 TeX Live；Ubuntu 上 sphinx 的 `-j` 才真正生效 |
 | `permissions` | `contents: write` | 建 Release、传附件、维护 `old` 分支 |
