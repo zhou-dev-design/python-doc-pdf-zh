@@ -424,18 +424,27 @@ PDF 还是旧中文」的静默失败 —— 正是这个项目最忌讳的失�
 
 1. **3.6 ~ 3.11 的文件名带补丁号，而且不是该版本最后一个补丁版**——停止发布之后的新版本没有 PDF。
    下载页上写的版本号会 404（例如 3.11 页面写 `3.11.18`，实际只有 `3.11.14`；3.9 页面写 `3.9.25`，实际只有 `3.9.24`）。
-2. **3.12 / 3.13 不带补丁号**，那是它们最后一次构建的快照。
+2. **3.12 / 3.13 的文件名不带补丁号**（`python-3.13-docs-pdf-a4.zip`），看着像「滚动的、永远最新」，其实是**固定快照**——实际版本见下表「包内实际版本」列。
 
-| 版本 | 中文版 A4（点开即下） | 大小 |
-|-|-|-|
-| 3.6 | [3.6.15-docs-pdf-a4.zip](https://docs.python.org/zh-cn/3.6/archives/python-3.6.15-docs-pdf-a4.zip) | 22.9 MB |
-| 3.7 | [3.7.13-docs-pdf-a4.zip](https://docs.python.org/zh-cn/3.7/archives/python-3.7.13-docs-pdf-a4.zip) | 23.6 MB |
-| 3.8 | [3.8.20-docs-pdf-a4.zip](https://docs.python.org/zh-cn/3.8/archives/python-3.8.20-docs-pdf-a4.zip) | 24.7 MB |
-| 3.9 | [3.9.24-docs-pdf-a4.zip](https://docs.python.org/zh-cn/3.9/archives/python-3.9.24-docs-pdf-a4.zip) | 25.4 MB |
-| 3.10 | [3.10.19-docs-pdf-a4.zip](https://docs.python.org/zh-cn/3.10/archives/python-3.10.19-docs-pdf-a4.zip) | 26.5 MB |
-| 3.11 | [3.11.14-docs-pdf-a4.zip](https://docs.python.org/zh-cn/3.11/archives/python-3.11.14-docs-pdf-a4.zip) | 27.1 MB |
-| 3.12 | [3.12-docs-pdf-a4.zip](https://docs.python.org/zh-cn/3.12/archives/python-3.12-docs-pdf-a4.zip) | 29.8 MB |
-| 3.13 | [3.13-docs-pdf-a4.zip](https://docs.python.org/zh-cn/3.13/archives/python-3.13-docs-pdf-a4.zip) | 32.9 MB |
+| 版本 | 中文版 A4（点开即下） | 大小 | **包内实际版本** | 本仓库最新 | 差距 |
+|-|-|-|-|-|-|
+| 3.6 | [3.6.15](https://docs.python.org/zh-cn/3.6/archives/python-3.6.15-docs-pdf-a4.zip) | 22.9 MB | 3.6.15 | — | 未收录 |
+| 3.7 | [3.7.13](https://docs.python.org/zh-cn/3.7/archives/python-3.7.13-docs-pdf-a4.zip) | 23.6 MB | 3.7.13 | — | 未收录 |
+| 3.8 | [3.8.20](https://docs.python.org/zh-cn/3.8/archives/python-3.8.20-docs-pdf-a4.zip) | 24.7 MB | 3.8.20 | — | 未收录 |
+| 3.9 | [3.9.24](https://docs.python.org/zh-cn/3.9/archives/python-3.9.24-docs-pdf-a4.zip) | 25.4 MB | 3.9.24 | — | 未收录 |
+| 3.10 | [3.10.19](https://docs.python.org/zh-cn/3.10/archives/python-3.10.19-docs-pdf-a4.zip) | 26.5 MB | 3.10.19 | 3.10.22（已 EOL） | 落后 **3** 个补丁版 |
+| 3.11 | [3.11.14](https://docs.python.org/zh-cn/3.11/archives/python-3.11.14-docs-pdf-a4.zip) | 27.1 MB | 3.11.14 | **3.11.18** | 落后 **4** 个补丁版 |
+| 3.12 | [3.12](https://docs.python.org/zh-cn/3.12/archives/python-3.12-docs-pdf-a4.zip) | 29.8 MB | **3.12.11** | **3.12.16** | 落后 **5** 个补丁版 |
+| 3.13 | [3.13](https://docs.python.org/zh-cn/3.13/archives/python-3.13-docs-pdf-a4.zip) | 32.9 MB | **3.13.7** | **3.13.18** | 落后 **11** 个补丁版 |
+
+> ⚠️ **这些官方 PDF 全都不是该版本线的最新补丁版**，别把它们当"官方最新"用。
+>
+> 2025-09 停止发布后官方就不再重建，而 3.10~3.13 之后各自又发了若干补丁版。
+> 尤其 3.12 / 3.13 的两个包**文件名不带版本号**，很容易被误认为是"滚动的、永远最新"的——
+> 实际内容是 **3.12.11** 和 **3.13.7**，比本仓库现在产出的 3.12.16 / 3.13.18
+> **落后 5 个和 11 个补丁版**（3.13 那份差了一年多：2025-10 → 2026-11）。
+>
+> 换句话说：它们只能当**版式参照**（看排版长什么样），要看**最新内容**得用本仓库 Releases 里的。
 
 > 以上 8 个链接在 2026-11-05 全部实测 HTTP 200。
 > 英文版把路径里的 `zh-cn/` 去掉即可（体积约小 1/3）；3.6 ~ 3.11 另有 `-pdf-letter.zip`（Letter 纸），
