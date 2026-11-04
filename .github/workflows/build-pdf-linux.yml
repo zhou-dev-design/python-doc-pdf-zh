@@ -3,10 +3,6 @@ name: 构建 Python 中文文档 PDF（Linux）
 # ★ 这是仓库里**唯一**的流水线（Windows 那条已于 2026-11-02 删除）。
 #   仓库是公开的 ⇒ Actions 分钟数不限，每天跑五个版本也没有额度问题。
 on:
-  # ⚠️⚠️ 临时通道（验完必须删）：只为补齐 3.11~3.14 的 README 表格 ——
-  #   2026-11-04 的 run #25 因 artifact 同名覆盖，只更新了 3.15。
-  push:
-    branches: [main]
   # ★ 触发时间：UTC 03:47 = 北京时间 **11:47**。
   #   为什么不是 "0 4 * * *"（北京 12:00 整）：
   #   ① **整点分钟最挤** —— 全世界写成 :00 的 cron 都挤在同一分钟，GitHub 官方文档
@@ -72,8 +68,7 @@ jobs:
         name: 解析版本列表 → matrix
         env:
           # 定时触发时没有 inputs（为空）→ 用下面的五版本默认值；手动触发则按填的来。
-          # 临时通道（push）只跑缺的那四个版本，补齐表格就停。
-          VERSIONS: ${{ github.event_name == 'push' && '3.11,3.12,3.13,3.14' || github.event.inputs.versions }}
+          VERSIONS: ${{ github.event.inputs.versions }}
         run: |
           python3 - <<'PY'
           import json, os
