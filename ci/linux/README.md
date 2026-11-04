@@ -98,7 +98,7 @@ sudo apt-get install -y \
 
 `.github/workflows/build-pdf-linux.yml`（仓库里**唯一**的流水线）：
 
-- **每天 UTC 03:47（北京时间 11:47）自动跑**，也可在 Actions 页面手动触发。
+- **每天 UTC 19:47（北京时间次日 03:47）自动跑**，实测约北京 11:35 出稿（延迟稳定在 7h48m 左右），也可在 Actions 页面手动触发。
   取 03:47 而不是整点 04:00：整点是 cron 洪峰，GitHub 高负载时 scheduled run
   会被延迟甚至**丢弃**；
 - `versions` 拆成 matrix，**五个版本同时起跑**（`max-parallel: 5`，每版一个独立 runner）；
