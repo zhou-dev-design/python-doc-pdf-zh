@@ -5,7 +5,7 @@
 > **为什么需要它**：Python 官方已于 **2025 年 9 月**决定停止发布文档 PDF——理由是使用率低，
 > 而 PDF 这类非 HTML 构建却消耗了文档构建的大部分算力（2025 年 5–7 月这批构建意外停了三个月，
 > **没有人发现**）。因此 **3.14 起不再提供预构建 PDF**（3.13 及更早的仍挂在 CDN 上，只是不再更新），
-> 官方改为在下载页教你用 `make dist-pdf` 自己编。详见
+> 官方改为在下载页教你用 `make dist-pdf` 自己编（旧版官方 PDF 的下载清单见文末附录）。详见
 > [官方讨论](https://discuss.python.org/t/101343)。
 >
 > 中文读者因此同时失去两样东西：官方 PDF，和中文 PDF。本项目补的就是这个位——
@@ -412,6 +412,34 @@ PDF 还是旧中文」的静默失败 —— 正是这个项目最忌讳的失�
 3. **定时不保证准点**（见上），最长见过数小时延迟。
 4. **旧版本要用它自己的工具链**：3.10 需要 `sphinx==3.4.3`、3.12 需要 `8.2`，
    ≤3.12 一律读该分支自己的 `Doc/requirements.txt`；一刀切装最新版必失败。
+
+---
+
+## 附：官方 PDF 下载（3.6 – 3.13）
+
+官方 2025-09 停止发布后，**旧文件仍挂在 CDN 上**（官方承诺不删），可作版式参照——
+本项目的中文分册与它们同源（同一套 Sphinx + LaTeX + `python-docs-theme`）。
+
+**两个坑**（都实测过）：
+
+1. **3.6 ~ 3.11 的文件名带补丁号，而且不是该版本最后一个补丁版**——停止发布之后的新版本没有 PDF。
+   下载页上写的版本号会 404（例如 3.11 页面写 `3.11.18`，实际只有 `3.11.14`；3.9 页面写 `3.9.25`，实际只有 `3.9.24`）。
+2. **3.12 / 3.13 不带补丁号**，那是它们最后一次构建的快照。
+
+| 版本 | 中文版 A4（点开即下） | 大小 |
+|-|-|-|
+| 3.6 | [3.6.15-docs-pdf-a4.zip](https://docs.python.org/zh-cn/3.6/archives/python-3.6.15-docs-pdf-a4.zip) | 22.9 MB |
+| 3.7 | [3.7.13-docs-pdf-a4.zip](https://docs.python.org/zh-cn/3.7/archives/python-3.7.13-docs-pdf-a4.zip) | 23.6 MB |
+| 3.8 | [3.8.20-docs-pdf-a4.zip](https://docs.python.org/zh-cn/3.8/archives/python-3.8.20-docs-pdf-a4.zip) | 24.7 MB |
+| 3.9 | [3.9.24-docs-pdf-a4.zip](https://docs.python.org/zh-cn/3.9/archives/python-3.9.24-docs-pdf-a4.zip) | 25.4 MB |
+| 3.10 | [3.10.19-docs-pdf-a4.zip](https://docs.python.org/zh-cn/3.10/archives/python-3.10.19-docs-pdf-a4.zip) | 26.5 MB |
+| 3.11 | [3.11.14-docs-pdf-a4.zip](https://docs.python.org/zh-cn/3.11/archives/python-3.11.14-docs-pdf-a4.zip) | 27.1 MB |
+| 3.12 | [3.12-docs-pdf-a4.zip](https://docs.python.org/zh-cn/3.12/archives/python-3.12-docs-pdf-a4.zip) | 29.8 MB |
+| 3.13 | [3.13-docs-pdf-a4.zip](https://docs.python.org/zh-cn/3.13/archives/python-3.13-docs-pdf-a4.zip) | 32.9 MB |
+
+> 以上 8 个链接在 2026-11-05 全部实测 HTTP 200。
+> 英文版把路径里的 `zh-cn/` 去掉即可（体积约小 1/3）；3.6 ~ 3.11 另有 `-pdf-letter.zip`（Letter 纸），
+> 3.12 起官方把 letter 版一并移除了。
 
 ---
 
