@@ -310,32 +310,33 @@ python3 sphinx-pdf/gui/pdf_builder_multi.py --tool check-pdf-gaps <合并册.pdf
 2. **跨册 `:ref:` 引用本来就是断的**（`LaTeX Warning: Reference ... undefined`），分册编译的固有限制。
 3. **旧版本要用它自己的工具链**：3.10 需要 `sphinx==3.4.3`、3.11 是 `7.2`、3.12 是 `8.2`；
    ≤3.12 一律读该分支自己的 `Doc/requirements.txt`，一刀切装最新版必失败。
-4. **TeX Live 版本不同有毫米级差异**：CI 是 Ubuntu 22.04 自带的 TeX Live 2022（`xelatex` 自报
-   `XeTeX 0.999993 (TeX Live 2022/dev/Debian)`），**官方 PDF 的构建机也是 2022 那一代**
-   （PDF 元数据：`Producer(xdvipdfmx (20220710))`，即 Debian 12 的系统包）。与本机 2025 相比，
-   114 册里 110 册页数完全一致、书签零差异，只有 2000 页以上的「标准库」「C API」漂 2~4 页，内容无差异。
+4. **排版引擎锁定 TeX Live 2022**：CI 是 Ubuntu 22.04 自带的 2022（`xelatex` 自报
+   `XeTeX 0.999993 (TeX Live 2022/dev/Debian)`），与官方 PDF 的构建机（Debian 12 的
+   `xdvipdfmx (20220710)`）同代 —— 版式因此对得上，换成别的 TeX Live 版本会有毫米级页数差异。
 
 ---
 
 ## 附：官方 PDF 下载（3.6 – 3.13）
 
-官方 2025-09 停发 PDF 后旧文件仍挂在 CDN 上，可作**版式参照**（与本项目同源：Sphinx + LaTeX + `python-docs-theme`）。
+官方 2025-09 停发 PDF 后旧文件仍挂在 CDN 上，可作**版式参照**——与本项目同源（Sphinx + LaTeX +
+`python-docs-theme`），连排版引擎都是同一代（3.8 起全是 TeX Live 2022）。
 
 **文件名里的版本号别信**：3.6~3.11 带补丁号但多数不是最后一版，3.12/3.13 干脆不带号（固定快照）。一切以下表「包内实际版本」为准。
 
-| 版本 | 中文版 A4 | 大小 | 出包日期 | 包内实际版本 | 官方最新 | 落后 |
-|-|-|-|-|-|-|-|
-| 3.6 | [3.6.15](https://docs.python.org/zh-cn/3.6/archives/python-3.6.15-docs-pdf-a4.zip) | 22.9 MB | 2021-09-06 | 3.6.15 | 3.6.15 | — |
-| 3.7 | [3.7.13](https://docs.python.org/zh-cn/3.7/archives/python-3.7.13-docs-pdf-a4.zip) | 23.6 MB | 2022-03-17 | 3.7.13 | 3.7.17 | 4 版 |
-| 3.8 | [3.8.20](https://docs.python.org/zh-cn/3.8/archives/python-3.8.20-docs-pdf-a4.zip) | 24.7 MB | 2024-12-10 | 3.8.20 | 3.8.20 | — |
-| 3.9 | [3.9.24](https://docs.python.org/zh-cn/3.9/archives/python-3.9.24-docs-pdf-a4.zip) | 25.4 MB | 2025-10-17 | 3.9.24 | 3.9.25 | 1 版 |
-| 3.10 | [3.10.19](https://docs.python.org/zh-cn/3.10/archives/python-3.10.19-docs-pdf-a4.zip) | 26.5 MB | 2025-10-16 | 3.10.19 | 3.10.22 | 3 版 |
-| 3.11 | [3.11.14](https://docs.python.org/zh-cn/3.11/archives/python-3.11.14-docs-pdf-a4.zip) | 27.1 MB | 2025-10-16 | 3.11.14 | 3.11.18 | 4 版 |
-| 3.12 | [3.12](https://docs.python.org/zh-cn/3.12/archives/python-3.12-docs-pdf-a4.zip) | 29.8 MB | 2025-09-30 | 3.12.11 | 3.12.16 | 5 版 |
-| 3.13 | [3.13](https://docs.python.org/zh-cn/3.13/archives/python-3.13-docs-pdf-a4.zip) | 32.9 MB | 2025-10-02 | 3.13.7 | 3.13.18 | 11 版 |
+| 版本 | 中文版 A4 | 大小 | 出包日期 | TeX | 包内实际版本 | 官方最新 | 落后 |
+|-|-|-|-|-|-|-|-|
+| 3.6 | [3.6.15](https://docs.python.org/zh-cn/3.6/archives/python-3.6.15-docs-pdf-a4.zip) | 22.9 MB | 2021-09-06 | 2020 | 3.6.15 | 3.6.15 | — |
+| 3.7 | [3.7.13](https://docs.python.org/zh-cn/3.7/archives/python-3.7.13-docs-pdf-a4.zip) | 23.6 MB | 2022-03-17 | 2020 | 3.7.13 | 3.7.17 | 4 版 |
+| 3.8 | [3.8.20](https://docs.python.org/zh-cn/3.8/archives/python-3.8.20-docs-pdf-a4.zip) | 24.7 MB | 2024-12-10 | 2022 | 3.8.20 | 3.8.20 | — |
+| 3.9 | [3.9.24](https://docs.python.org/zh-cn/3.9/archives/python-3.9.24-docs-pdf-a4.zip) | 25.4 MB | 2025-10-17 | 2022 | 3.9.24 | 3.9.25 | 1 版 |
+| 3.10 | [3.10.19](https://docs.python.org/zh-cn/3.10/archives/python-3.10.19-docs-pdf-a4.zip) | 26.5 MB | 2025-10-16 | 2022 | 3.10.19 | 3.10.22 | 3 版 |
+| 3.11 | [3.11.14](https://docs.python.org/zh-cn/3.11/archives/python-3.11.14-docs-pdf-a4.zip) | 27.1 MB | 2025-10-16 | 2022 | 3.11.14 | 3.11.18 | 4 版 |
+| 3.12 | [3.12](https://docs.python.org/zh-cn/3.12/archives/python-3.12-docs-pdf-a4.zip) | 29.8 MB | 2025-09-30 | 2022 | 3.12.11 | 3.12.16 | 5 版 |
+| 3.13 | [3.13](https://docs.python.org/zh-cn/3.13/archives/python-3.13-docs-pdf-a4.zip) | 32.9 MB | 2025-10-02 | 2022 | 3.13.7 | 3.13.18 | 11 版 |
 
 ⇒ **8 份里只有 3.6、3.8 是该版本线的最后一版**，其余看版式可以，看内容不行——要最新内容用本仓库 Releases。
 
+> 「TeX」列读自 PDF 元数据的 `Producer`：3.6/3.7 是 `XeTeX 0.99998`，3.8 起是 `xdvipdfmx (20220710)` = TeX Live 2022。
 > 出包日期取自 CDN 的 `Last-Modified`（北京时间），最晚一份是 2025-10-17，此后再无新 PDF。
 > 英文版去掉路径里的 `zh-cn/` 即可（体积小约 1/3）；查补丁版号认英文站或 [endoflife.date](https://endoflife.date/python)，中文站 3.7 还停在 `3.7.13`。
 
@@ -350,5 +351,4 @@ python3 sphinx-pdf/gui/pdf_builder_multi.py --tool check-pdf-gaps <合并册.pdf
 构建依赖：[Sphinx](https://www.sphinx-doc.org/) +
 [python-docs-theme](https://github.com/python/python-docs-theme) +
 [TeX Live](https://www.tug.org/texlive/) + [poppler](https://poppler.freedesktop.org/)。
-CI 用 Ubuntu 22.04 自带的 **TeX Live 2022**（`apt` 冻结版，`runs-on: ubuntu-22.04`）；
-本机用更新版 TeX Live 也能出，但页数会有毫米级差异（见「已知限制」）。
+CI 用 Ubuntu 22.04 自带的 **TeX Live 2022**（`apt` 冻结版），与官方 PDF 的构建机同代。
