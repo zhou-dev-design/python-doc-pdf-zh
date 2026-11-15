@@ -2,14 +2,12 @@
 
 把 **CPython 官方 reST 文档** 与 **python-docs-zh-cn 中文译文** 编译成**中文分册 PDF**。
 
-> **为什么需要它**：官方 2025-09 决定停止发布文档 PDF——理由是使用率低，而 PDF 这类非 HTML
-> 构建却占掉文档构建的大部分算力（2025 年 5–7 月这批构建意外停了三个月，**没有人发现**）。
-> 所以 **3.14 起不再提供预构建 PDF**，3.13 及更早的仍挂在 CDN 上、但不再更新。详见
+> **为什么需要它**：官方 2025-09 决定停止发布文档 PDF——使用率低，而 PDF 构建却占掉大部分算力。
+> 所以 **3.14 起不再提供预构建 PDF**，3.13 及更早的仍挂在 CDN 上但不再更新。详见
 > [官方讨论](https://discuss.python.org/t/101343)。
 >
-> 中文读者因此同时失去两样东西：官方 PDF 和中文 PDF。本项目补的就是这个位——沿用官方推荐的
-> Sphinx + LaTeX 流程（主题、字体、分册结构与官方 3.13 那份 PDF 一致），接上译文产出**中文分册**，
-> 并额外合成一册，每天自动发布到 Releases。
+> 中文读者因此同时失去官方 PDF 和中文 PDF。本项目沿用官方那套 Sphinx + LaTeX 流程
+> （主题、字体、分册结构与官方 3.13 一致），接上译文产出**中文分册**，并合成一册，每天自动发布。
 
 | | |
 |-|-|
@@ -43,13 +41,10 @@
 旧补丁版产物在 `old` 分支（`old/v3.15.2/`），历史不在这张表里堆积。
 **3.10 已 EOL**，那一行是它**最后一次构建**的定格数据，不再更新。
 
-口径：
-
-- **PDF 构建时间** = 拉取 `.po` 的时刻（步骤 3），不是开始构建、也不是上传 Release 的时间。
-- **译文最后更新** = `python-docs-zh-cn` 对应分支最后一次提交（`git log -1 --format=%cI`），不是 .po 的修改时间。
-- 两者都已换算成北京时间，读者不用再 +8。
-- 表格由 CI 自动改写（`summary` 只替换两个标记之间的内容，README 其余部分不动），手改会被下次构建覆盖；
-  某版本这轮没构建成功时**保留它上一行**，不会变成 `?`。
+口径：**PDF 构建时间** = 拉取 `.po` 的时刻（步骤 3），不是开始构建或上传 Release 的时间；
+**译文最后更新** = `python-docs-zh-cn` 对应分支最后一次提交（`git log -1 --format=%cI`），不是 `.po` 的 mtime。
+两者均已换算北京时间。表格由 CI 自动改写（只替换两个标记之间的内容），手改会被覆盖；
+某版本这轮没构建成功时**保留上一行**，不会变成 `?`。
 
 ---
 
@@ -83,8 +78,7 @@ GitHub Actions（每天自动一次）
 构建本身平均 **17 分钟**（14–19 分钟），所以**平均在北京 15:30 前后出稿**，早晚都在这 14:35–16:10 之间晃。
 
 > 计划时刻不会再往前挪：00:47 已经是最早能设的时刻，再早的话，一旦某天延迟变小，
-> 构建目录名里的日期就会比北京日期早一天。
-> 要立刻出稿：Actions 页 → Run workflow（同参数、同结果，只跳过排队）。
+> 构建目录名里的日期就会比北京日期早一天。想立刻拿：Actions 页 → Run workflow（不走队列）。
 
 ---
 
@@ -93,9 +87,7 @@ GitHub Actions（每天自动一次）
 ```
 Releases
 ├── v3.15.2   合并册 PDF + 全册 RAR      ← 同版本重跑原地更新
-├── v3.14.10
-├── v3.13.18
-├── v3.12.16
+├── v3.14.10 / v3.13.18 / v3.12.16
 └── v3.11.18
 old 分支
 └── v3.10.22/  ← EOL 归档：Python-3.10.22-docs-20261103.pdf + .rar
@@ -108,14 +100,11 @@ old 分支
 | 版本 EOL（如 3.10） | `archive-eol` 把它整条 release 搬进 `old/v3.10.22/`，再删 release 和 tag |
 | 跑一年 | Releases 数量 = 版本线条数（5 条），体积不随天数增长 |
 
-- **tag 不带日期**（`v<完整版本>`）。日期写在 release 标题「Python 3.15.2 文档（20261103）」、
-  正文和压缩包名里——既带日期，又不会一天一个 release。
-- **完整版本号的口径是官方文档站标题**（`docs.python.org/zh-cn/3.15/` 的 h1），缓存在
-  `sphinx-pdf/version-titles.json`。**不用解释器报告**：CI 的 `setup-python` 补丁版常落后于文档站，
-  跟着它走会「内容新、文件名旧」。
-- **每次构建都刷新这个缓存**（`prepare` 第一件事，`--tool titles --write`），有变化就自动
-  commit + push，build job 显式拉新值。缓存停在旧值时，新内容会被原地覆盖成旧名字、旧 release
-  也不会归档，**而且全程零报错**——所以 build job 里再核一次，与官方不一致硬失败。
+- **tag 不带日期**（`v<完整版本>`），日期只写进标题、正文和包名 —— 既带日期，又不一天一个 release。
+- **版本号取官方文档站标题**（`zh-cn/3.15/` 的 h1），缓存在 `sphinx-pdf/version-titles.json`；
+  不用解释器报告（CI 的 `setup-python` 补丁版常落后，会「内容新、文件名旧」）。
+- **每轮构建都刷新该缓存**并自动 commit，build job 拉新值后再核一次 —— 缓存停在旧值会让新内容
+  被覆盖成旧名字、旧 release 不归档，而且**零报错**。
 - **附件恰好 2 个**：
 
   ```
@@ -124,10 +113,9 @@ old 分支
   ```
 
   单册不逐个挂：GitHub 附件名只接受 ASCII，中文会被换成 `.`，还得额外维护映射表。**要单册就解压。**
-- **先清后传**：发布前先删「不在本轮名单里」的旧附件，再统一上传，最后核对数量**恰好 2 个**。
-- **压缩包打不出来就不发布**（`::error` 让 job 红）——只发单个 PDF 等于丢掉全部分册。
-- **只有三根分支**：`main`（代码）、`ci-logs`（失败诊断证据，强推、永远 1 个提交）、`old`（历史产物）。
-  分支里不放 PDF。
+- **先清后传**：发布前删掉不在本轮名单里的旧附件，再统一上传，最后核对**恰好 2 个**；
+  压缩包打不出来就不发布（`::error` 让 job 红）——只发单个 PDF 等于丢掉全部分册。
+- **三根分支**：`main`（代码）、`ci-logs`（失败诊断证据，强推、永远 1 个提交）、`old`（历史产物），都不放 PDF。
 
 ### EOL 机制
 
@@ -155,12 +143,10 @@ old 分支
 | ~~3.10~~ | 10 | 17 | ~~27~~ | **已 EOL**：多 `09分发 Python 模块`，无 builtins；产物在 `old` |
 
 真源是 **`sphinx-pdf/volumes.json`**（分册名 / 编号 / 书签标题 / 版本区间 / 合并顺序）。三种改法：
+界面「① 版本与目录」→「分册配置…」可视化编辑（行序 = 合并册一级顺序，带册数预览与自检）；
+`--tool name-map --dump volumes.json` 导出再改；或直接改文件后跑 `--tool name-map --check` 自检。
 
-1. **界面**：「① 版本与目录」→「分册配置…」，表格可视化编辑（行序 = 合并册一级顺序，带册数预览与自检）；
-2. **导出再改**：`--tool name-map --dump volumes.json`；
-3. **直接改文件**，改完 `--tool name-map --check` 自检。
-
-版本区间是**闭区间**：`distributing` 填 `max=3.10`、`builtins` 填 `min=3.13`，
+版本区间是**闭区间**（`distributing` 填 `max=3.10`、`builtins` 填 `min=3.13`），
 上游将来再删哪册，加一个 `max` 就行，不用改代码。
 
 ---
@@ -176,10 +162,9 @@ cd sphinx-pdf\gui
 启动PDF构建器.bat          :: 或 python pdf_builder_multi.py
 ```
 
-版本可多选、每版本一个独立日志面板、可只重跑某几步。
-打包成 exe：`python build_exe.py`（onefile → `dist/PDF构建器-多版本.exe`）。
-exe 只省「装 PyQt6 / 带一堆 .py」；`git`、TeX Live、一个 Python 解释器、网络一条都省不掉，
-验收要在「拷进空目录」里做。
+版本可多选、每版独立日志面板、可只重跑某几步。打包 exe：`python build_exe.py`
+（onefile → `dist/PDF构建器-多版本.exe`）。exe 只省「装 PyQt6 / 带一堆 .py」——
+`git`、TeX Live、Python 解释器、网络一条都省不掉，验收要在「拷进空目录」里做。
 
 ### B. 纯 bash 一键（无界面环境）
 
@@ -219,27 +204,23 @@ python3 ci/linux/pdf_builder_linux.py --preflight --versions 3.15            # �
 .github/workflows/build-pdf-linux.yml   # 唯一流水线（prepare / archive-eol / build）
 ci/linux/
   pdf_builder_linux.py                  # CI 入口：导入主程序 + 覆盖平台差异
-  selftest.py                           # 平台胶水层自检（不联网）
-  update_readme_table.py                # 汇总各版本构建信息，改写 README 表格
+  selftest.py / update_readme_table.py  # 胶水层自检 / 改写本文表格
   README.md                             # CI 侧细节与排错
 sphinx-pdf/
   gui/pdf_builder_multi.py              # ★ 唯一主程序：步骤 0~10 + PyQt6 界面 + 17 个内置工具
-  gui/build_exe.py / *.spec             # PyInstaller 打包（--entry 选入口）
-  gui/README.md                         # 界面说明
-  build-sphinx-pdf.sh                   # 纯 bash 一键（步骤 0~10，全走 --tool）
-  rename-pdf.sh                         # 英文 PDF → 中文名
+  gui/build_exe.py / *.spec / README.md # 打包脚本（--entry 选入口）/ 界面说明
+  build-sphinx-pdf.sh / rename-pdf.sh   # 纯 bash 一键（步骤 0~10）/ 英文 PDF 改名
   volumes.json                          # ★ 分册真源（可外置覆盖，读坏退回内置表）
   version-titles.json                   # 完整版本号缓存（来自官方文档站标题）
 构建Python文档PDF-完整步骤.md             # 逐步操作 + 故障排查表
 ```
 
-内置 17 个工具，用 `--tool` 调用（不带参数会列出全部）：
+内置 17 个工具，`--tool` 调用（不带参数列出全部）：
 
 ```bash
-python sphinx-pdf/gui/pdf_builder_multi.py --tool name-map --check
-python sphinx-pdf/gui/pdf_builder_multi.py --tool volumes --verify
-python sphinx-pdf/gui/pdf_builder_multi.py --tool titles --write
-python sphinx-pdf/gui/pdf_builder_multi.py --tool check-pdf-gaps <某册.pdf>
+python sphinx-pdf/gui/pdf_builder_multi.py --tool name-map --check        # 分册表自检
+python sphinx-pdf/gui/pdf_builder_multi.py --tool volumes --verify       # 联网核对官方册数
+python sphinx-pdf/gui/pdf_builder_multi.py --tool check-pdf-gaps <册.pdf> # 查成品缺页
 ```
 
 ---
@@ -283,10 +264,9 @@ python sphinx-pdf/gui/pdf_builder_multi.py --tool check-pdf-gaps <某册.pdf>
 <details>
 <summary><b>PDF 里正文是英文（封面却是中文）</b></summary>
 
-最隐蔽的一类失败：**0 条 warning、页数书签索引全正常、验收报告全绿**。
-老版本（3.10/3.11）的 `conf.py` 缺 `gettext_compact = False`，Sphinx 默认按「每个顶层目录一份 .mo」
-找，而译文是每页一份（`library/array.mo`），一个都匹配不上。步骤 6 现在会自动补这一行；
-`step6b` 也会在「整批汉字 < 2000 且过半册子无中文」时直接 `raise Fail`，不会再绿着发出去。
+最隐蔽的失败：**0 条 warning、页数书签索引全正常、验收报告全绿**。老版本（3.10/3.11）的 `conf.py`
+缺 `gettext_compact = False`，Sphinx 按「每个顶层目录一份 .mo」找，而译文是每页一份（`library/array.mo`），
+一个都匹配不上。步骤 6 会自动补这行，`step6b` 再兜底（整批汉字 < 2000 且过半册子无中文就 `raise Fail`）。
 </details>
 
 <details>
@@ -311,27 +291,27 @@ python3 sphinx-pdf/gui/pdf_builder_multi.py --tool check-pdf-gaps <合并册.pdf
 <details>
 <summary><b>Actions 分钟数会不会不够</b></summary>
 
-本仓库是**公开**仓库 ⇒ 免费且不限分钟数。改私有才需要算：5 版本 × 约 20 分钟 × 每天 ≈ 3000 分钟/月，
-会超 2000 的额度。
+本仓库是**公开**仓库 ⇒ 免费且不限分钟数。改私有才要算：5 版本 × 约 20 分钟 × 30 天 ≈ 3000 分钟/月，会超 2000 的额度。
 </details>
 
 <details>
 <summary><b>为什么不做 doctree 缓存来提速</b></summary>
 
-`environment.pickle` 不会因为 `.po` 更新而失效。复用缓存会出现「译文更新了、PDF 还是旧中文」的
-静默失败 —— 正是这个项目最忌讳的失败类型。所以每轮从零读入。
+`environment.pickle` 不会因为 `.po` 更新而失效，复用缓存就会出现「译文更新了、PDF 还是旧中文」的
+静默失败 —— 正是这个项目最忌讳的失败类型，所以每轮从零读入。
 </details>
 
 ---
 
 ## 八、已知限制
 
-1. **按册拆成 39 个独立工程并不会更快**：工作量约 61% 集中在「标准库」那一册，墙钟下限仍是它
+1. **按册拆成三四十个独立工程并不会更快**：工作量约 61% 集中在「标准库」那一册，墙钟下限仍是它
    自己的耗时；按篇并行的 `-j` 才是对的切法。
 2. **跨册 `:ref:` 引用本来就是断的**（`LaTeX Warning: Reference ... undefined`），分册编译的固有限制。
-3. **自动构建不保证准点**：GitHub 的定时只是「尽力而为」，见过晚一两个小时的。
-4. **旧版本要用它自己的工具链**：3.10 需要 `sphinx==3.4.3`、3.11 是 `7.2`、3.12 是 `8.2`；
+3. **旧版本要用它自己的工具链**：3.10 需要 `sphinx==3.4.3`、3.11 是 `7.2`、3.12 是 `8.2`；
    ≤3.12 一律读该分支自己的 `Doc/requirements.txt`，一刀切装最新版必失败。
+4. **TeX Live 版本不同有毫米级差异**：CI（2022）与本机（2025）逐册对比，114 册里 110 册页数完全一致、
+   书签零差异，只有 2000 页以上的「标准库」「C API」漂 2~4 页 —— 排版引擎差异，内容无差异。
 
 ---
 
@@ -354,9 +334,8 @@ python3 sphinx-pdf/gui/pdf_builder_multi.py --tool check-pdf-gaps <合并册.pdf
 
 ⇒ **8 份里只有 3.6、3.8 是该版本线的最后一版**，其余看版式可以，看内容不行——要最新内容用本仓库 Releases。
 
-> 出包日期取自 CDN 的 `Last-Modified`（北京时间），最晚一份是 3.9 的 2025-10-17；此后再无新 PDF 发布。
-> 英文版把路径里的 `zh-cn/` 去掉即可（体积小约 1/3）；3.6~3.11 另有 `-pdf-letter.zip`（Letter 纸），3.12 起官方取消。
-> 查补丁版号认英文站标题或 [endoflife.date](https://endoflife.date/python)——中文站 3.7 还停在 `3.7.13`。
+> 出包日期取自 CDN 的 `Last-Modified`（北京时间），最晚一份是 2025-10-17，此后再无新 PDF。
+> 英文版去掉路径里的 `zh-cn/` 即可（体积小约 1/3）；查补丁版号认英文站或 [endoflife.date](https://endoflife.date/python)，中文站 3.7 还停在 `3.7.13`。
 
 ---
 
@@ -364,4 +343,10 @@ python3 sphinx-pdf/gui/pdf_builder_multi.py --tool check-pdf-gaps <合并册.pdf
 
 文档内容来自 [CPython](https://github.com/python/cpython) 与
 [python-docs-zh-cn](https://github.com/python/python-docs-zh-cn)（均为 PSF License），
-本仓库只做构建与排版，不改变原文授权。构建依赖 Sphinx、python-docs-theme、TeX Live、poppler。
+本仓库只做构建与排版，不改变原文授权。
+
+构建依赖：[Sphinx](https://www.sphinx-doc.org/) +
+[python-docs-theme](https://github.com/python/python-docs-theme) +
+[TeX Live](https://www.tug.org/texlive/) + [poppler](https://poppler.freedesktop.org/)。
+CI 用 Ubuntu 22.04 自带的 **TeX Live 2022**（`apt` 冻结版，`runs-on: ubuntu-22.04`）；
+本机用更新版 TeX Live 也能出，但页数会有毫米级差异（见「已知限制」）。
