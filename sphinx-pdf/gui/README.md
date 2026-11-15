@@ -53,7 +53,7 @@ python pdf_builder_multi.py --tool name-map --check # 参数就是该工具自�
 |-|-|
 | `name-map` | 分册映射自检（编号撞车 / 重名 / slug 拼错 / 版本区间悬空）；`--dump` 导出 `volumes.json` |
 | `volumes` | 各版本册数；`--verify` 联网对着官方 `Doc/conf.py` + `Doc/howto` 逐条核对 |
-| `titles` | 完整版本号口径（官方文档站 h1）；`--write` 更新 `version-titles.json` |
+| `titles` | 完整版本号口径（中英文站 h1 取较新）；`--write` 更新 `version-titles.json` |
 | `check-doc-refs` | 查「Doc 引用了 Doc/ 之外的文件」缺哪些，`MISSINGKIND` 问 git 得类型 |
 | `alias-po` | 接回「上游搬了目录」的译文 + 大小写漂移 + 补「上游没译」的页 |
 | `localize-titles` | 把封面/页眉的英文标题换成中文（步骤 6b） |
@@ -234,7 +234,7 @@ sphinx-pdf/
 ├── build-sphinx-pdf.sh     一键 bash 脚本（步骤 0~10，全部走 --tool）
 ├── rename-pdf.sh           分册中文名映射（只转调 --tool rename-pdf）
 ├── volumes.json            分册真源（名称/编号/书签/版本区间/合并顺序）
-├── version-titles.json     完整版本号口径（官方文档站标题）
+├── version-titles.json     完整版本号口径（中英文站 h1 取较新）
 └── gui/
     ├── pdf_builder_multi.py  ★★ 唯一实现：流水线 + 17 个内置工具 + PyQt6 界面
     ├── 启动PDF构建器.bat / .sh

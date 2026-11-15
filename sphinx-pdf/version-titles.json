@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "_说明": "完整版本号口径：取自官方中文文档站各版本首页 h1（如 `Python 3.10.22 文档`）。文件名/文件夹名/Release 标题都以这里的 full 为准；由 `--tool titles --write` 生成。",
-  "_来源": "https://docs.python.org/zh-cn/<版本>/",
+  "_说明": "完整版本号口径：抓官方中英文站各版本首页 h1 的版本号，取较新者（英文站更新更快），title 统一拼成 `Python <full> 文档`。文件名/文件夹名/Release 标题都以这里的 full 为准；由 `--tool titles --write` 生成。",
+  "_来源": "https://docs.python.org/zh-cn/<版本>/ + https://docs.python.org/<版本>/",
   "titles": {
     "3.10": {
       "full": "3.10.22",

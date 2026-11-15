@@ -89,9 +89,10 @@ sudo apt-get install -y \
 
 需要 3.11 ~ 3.15 任意一个版本的解释器（Sphinx 用哪个版本编都行）。
 
-**完整版本号不靠解释器**：口径是官方文档站标题（`docs.python.org/zh-cn/3.13/` 的 h1
-= `Python 3.13.18 文档`），存在 `sphinx-pdf/version-titles.json`，由
-`--tool titles --write` 生成；解释器只在没有缓存时兜底。
+**完整版本号不靠解释器**：口径是官方文档站标题（`docs.python.org/zh-cn/3.13/` 与
+`docs.python.org/3.13/` 的 h1，**取较新者** = `Python 3.13.18 文档`），存在
+`sphinx-pdf/version-titles.json`，由 `--tool titles --write` 生成；解释器只在没有缓存时兜底。
+只认中文站不行：那边等翻译分支重建，滞后过（3.7 差 4 个补丁版）。
 各版本册数不同（3.11 29 册 … 3.15 39 册），真源是 `sphinx-pdf/volumes.json`。
 
 ## 5. CI

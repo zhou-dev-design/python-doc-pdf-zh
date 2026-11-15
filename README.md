@@ -101,8 +101,9 @@ old 分支
 | 跑一年 | Releases 数量 = 版本线条数（5 条），体积不随天数增长 |
 
 - **tag 不带日期**（`v<完整版本>`），日期只写进标题、正文和包名 —— 既带日期，又不一天一个 release。
-- **版本号取官方文档站标题**（`zh-cn/3.15/` 的 h1），缓存在 `sphinx-pdf/version-titles.json`；
-  不用解释器报告（CI 的 `setup-python` 补丁版常落后，会「内容新、文件名旧」）。
+- **版本号取官方文档站标题**（`zh-cn/3.15/` 和 `3.15/` 的 h1，**取较新者**），缓存在
+  `sphinx-pdf/version-titles.json`；不用解释器报告（CI 的 `setup-python` 补丁版常落后，会「内容新、
+  文件名旧」）。只认中文站也不行——那边等翻译分支重建，历史上滞后过（3.7 差 4 个补丁版）。
 - **每轮构建都刷新该缓存**并自动 commit，build job 拉新值后再核一次 —— 缓存停在旧值会让新内容
   被覆盖成旧名字、旧 release 不归档，而且**零报错**。
 - **附件恰好 2 个**：
@@ -211,7 +212,7 @@ sphinx-pdf/
   gui/build_exe.py / *.spec / README.md # 打包脚本（--entry 选入口）/ 界面说明
   build-sphinx-pdf.sh / rename-pdf.sh   # 纯 bash 一键（步骤 0~10）/ 英文 PDF 改名
   volumes.json                          # ★ 分册真源（可外置覆盖，读坏退回内置表）
-  version-titles.json                   # 完整版本号缓存（来自官方文档站标题）
+  version-titles.json                   # 完整版本号缓存（中英文站 h1 取较新）
 构建Python文档PDF-完整步骤.md             # 逐步操作 + 故障排查表
 ```
 

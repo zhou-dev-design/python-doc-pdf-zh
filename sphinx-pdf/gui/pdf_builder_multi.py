@@ -882,9 +882,10 @@ def interpreter_version(py: str) -> str:
     return ver
 
 
-#: 官方中文文档站的标题口径 —— 文件名/文件夹名/Release 标题里的**完整版本号认它**，
-#: 而不是「这台机器上碰巧装到的解释器」。来源是各版本首页 h1：
+#: 官方文档站的标题口径 —— 文件名/文件夹名/Release 标题里的**完整版本号认它**，
+#: 而不是「这台机器上碰巧装到的解释器」。来源是各版本首页 h1，**中英文站都抓、取较新者**：
 #:   https://docs.python.org/zh-cn/3.10/  → `Python 3.10.22 文档`
+#:   https://docs.python.org/3.10/       → `Python 3.10.22 documentation`
 #: 缓存文件 `version-titles.json` 由 `--tool titles` 生成（见本文件下半部分）。
 VERSION_TITLES_FILENAME = 'version-titles.json'
 _OFFICIAL_TITLES: dict[str, dict[str, str]] | None = None
@@ -945,10 +946,11 @@ def resolve_full_version(short: str, py: str = "") -> str:
     """`3.13` → `3.13.18`。
 
     ★ 优先级（为什么是这个顺序）：
-      1. `version-titles.json` —— **官方文档站 h1 的版本号**。用户点开
-         `docs.python.org/zh-cn/3.13/` 看到的就是 3.13.18，下载到的东西也该叫这个。
+      1. `version-titles.json` —— **官方文档站 h1 的版本号**（中英文站都抓、取较新者）。
+         用户点开 `docs.python.org/zh-cn/3.13/` 看到的就是 3.13.18，下载到的东西也该叫这个。
          CI 上 `setup-python` 给的补丁版可能落后于文档站，跟着解释器走就会出现
          「内容是新分支、文件名是老补丁版」的错位；本地换台机器也会变。
+         只认中文站也不行：那边等翻译分支重建，滞后过（3.7 差 4 个补丁版）。
       2. 问解释器 —— 本地手动跑、又没有缓存文件时最准。
       3. 本进程 / `.0` 兜底。
 
@@ -7867,11 +7869,15 @@ def vols_cli() -> int:
 #
 # 每个版本首页的 h1 就是「Python <完整版本> 文档」：
 #     https://docs.python.org/zh-cn/3.10/  →  Python 3.10.22 文档
-#     https://docs.python.org/zh-cn/3.15/  →  Python 3.15.2 文档
+#     https://docs.python.org/3.10/       →  Python 3.10.22 documentation
 # 抓下来存进 `sphinx-pdf/version-titles.json`，`resolve_full_version()` 优先用它。
 # ★ 为什么必须这样：CI 的 `setup-python` 只保证「3.13 某个补丁版」，不一定等于文档站
 #   的 3.13.18。命名跟着解释器走，就会「内容是新分支、文件名是老补丁版」；
 #   而用户对照的就是文档站标题那个号。
+# ★ 为什么两个站都抓：英文站每次补丁版发布后必重建，中文站要等翻译分支重建 ——
+#   中文站历史上滞后过（zh-cn/3.7 停在 3.7.13，英文站已是 3.7.17，差 4 个补丁版）。
+#   只认中文站，那边一旦滞后我们就会「内容新、文件名旧」，而且零报错。
+#   取两边**较新**的版本号；只抓到一边就用那一边；两边都抓不到才算失败。
 #
 # 用法：
 #     --tool titles                     抓六个版本，打印并与缓存比对（不写文件）
@@ -7880,17 +7886,18 @@ def vols_cli() -> int:
 # """
 
 DOCS_ZH_BASE = "https://docs.python.org/zh-cn/{v}/"
+DOCS_EN_BASE = "https://docs.python.org/{v}/"
 
 
-def fetch_official_title(v: str) -> tuple[str, str]:
-    """抓官方该版本首页 → `('Python 3.10.22 文档', '3.10.22')`。
+def _doc_site_version(v: str, base: str) -> str:
+    """从某个文档站首页抓完整版本号；抓不到抛异常。
 
     两套模板都要认：3.13 及更早是 `<h1>Python 3.10.22 文档</h1>`；
     3.14 起换了主题，`<h1>` 里可能带额外的 `<span>`（先剥标签再匹配）。
     `<title>` 作为兜底：3.10~3.13 写作 `3.10.22 Documentation`（没有 Python 前缀）。
     """
     from html import unescape
-    page = _http_text(DOCS_ZH_BASE.format(v=v))
+    page = _http_text(base.format(v=v))
     cands: list[str] = []
     for pat in (r"<h1[^>]*>(.*?)</h1>", r"<title[^>]*>(.*?)</title>"):
         m = re.search(pat, page, re.S)
@@ -7903,8 +7910,38 @@ def fetch_official_title(v: str) -> tuple[str, str]:
                     r"\b(\d+\.\d+\.\d+)\b"):
             m = re.search(pat, text, re.I)
             if m:
-                return text, m.group(1)
+                return m.group(1)
     raise ValueError("标题里找不到完整版本号")
+
+
+def _ver_key_num(v: str) -> tuple[int, ...]:
+    """`3.13.18` → `(3, 13, 18)`，用于比大小。"""
+    return tuple(int(x) for x in re.findall(r"\d+", v)[:3])
+
+
+def fetch_official_title(v: str) -> tuple[str, str]:
+    """抓官方该版本首页 → `('Python 3.10.22 文档', '3.10.22')`。
+
+    ★ 中英文站都抓，`full` 取**较新**的那个（理由见本段上方注释）。
+    ★ `title` 一律本地拼成 `Python <full> 文档`：英文站给的是 `documentation`，
+      直接拿会让封面和展示串成英文；中文站的措辞也不该成为依赖。
+    """
+    found: dict[str, str] = {}
+    errs: list[str] = []
+    for tag, base in (("zh", DOCS_ZH_BASE), ("en", DOCS_EN_BASE)):
+        try:
+            got = _doc_site_version(v, base)
+        except Exception as e:                      # noqa: BLE001 —— 网络抖动都算
+            errs.append(f"{base.format(v=v)}: {e}")
+            continue
+        if not got.startswith(v + "."):
+            errs.append(f"{base.format(v=v)}: 抓到 {got}，与本版本 {v} 不匹配")
+            continue
+        found[tag] = got
+    if not found:
+        raise ValueError("中英文站都取不到：" + "；".join(errs))
+    full = max(found.values(), key=_ver_key_num)
+    return f"Python {full} 文档", full
 
 
 def titles_cli() -> int:
@@ -7952,9 +7989,10 @@ def titles_cli() -> int:
         merged.update(titles)
         payload = {
             "schema": 1,
-            "_说明": "完整版本号口径：取自官方中文文档站各版本首页 h1（如 `Python 3.10.22 文档`）。"
-                     "文件名/文件夹名/Release 标题都以这里的 full 为准；由 `--tool titles --write` 生成。",
-            "_来源": "https://docs.python.org/zh-cn/<版本>/",
+            "_说明": "完整版本号口径：抓官方中英文站各版本首页 h1 的版本号，取较新者（英文站更新更快），"
+                     "title 统一拼成 `Python <full> 文档`。文件名/文件夹名/Release 标题都以这里的 full 为准；"
+                     "由 `--tool titles --write` 生成。",
+            "_来源": "https://docs.python.org/zh-cn/<版本>/ + https://docs.python.org/<版本>/",
             "titles": dict(sorted(merged.items(), key=lambda kv: _ver_key(kv[0]))),
         }
         tmp = p.with_suffix('.json.tmp')
