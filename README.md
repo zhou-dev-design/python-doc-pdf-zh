@@ -310,8 +310,10 @@ python3 sphinx-pdf/gui/pdf_builder_multi.py --tool check-pdf-gaps <合并册.pdf
 2. **跨册 `:ref:` 引用本来就是断的**（`LaTeX Warning: Reference ... undefined`），分册编译的固有限制。
 3. **旧版本要用它自己的工具链**：3.10 需要 `sphinx==3.4.3`、3.11 是 `7.2`、3.12 是 `8.2`；
    ≤3.12 一律读该分支自己的 `Doc/requirements.txt`，一刀切装最新版必失败。
-4. **TeX Live 版本不同有毫米级差异**：CI（2022）与本机（2025）逐册对比，114 册里 110 册页数完全一致、
-   书签零差异，只有 2000 页以上的「标准库」「C API」漂 2~4 页 —— 排版引擎差异，内容无差异。
+4. **TeX Live 版本不同有毫米级差异**：CI 是 Ubuntu 22.04 自带的 TeX Live 2022（`xelatex` 自报
+   `XeTeX 0.999993 (TeX Live 2022/dev/Debian)`），**官方 PDF 的构建机也是 2022 那一代**
+   （PDF 元数据：`Producer(xdvipdfmx (20220710))`，即 Debian 12 的系统包）。与本机 2025 相比，
+   114 册里 110 册页数完全一致、书签零差异，只有 2000 页以上的「标准库」「C API」漂 2~4 页，内容无差异。
 
 ---
 
