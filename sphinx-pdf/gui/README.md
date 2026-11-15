@@ -11,10 +11,6 @@
 | 产物 | 分册 PDF + 合并册（带完整书签树）+ `验收报告.md` |
 | 排版 | A4、Fandol 字体、目录带点线页码、索引可点、无非法 UTF-8 |
 
-![界面预览](界面预览.png)
-
-> 截图为早期版本，左侧配置面板后来精简成 **5 个可折叠区块**（见 §三），未重拍。
-
 ---
 
 ## 一、怎么启动
@@ -239,7 +235,6 @@ sphinx-pdf/
 ├── rename-pdf.sh           分册中文名映射（只转调 --tool rename-pdf）
 ├── volumes.json            分册真源（名称/编号/书签/版本区间/合并顺序）
 ├── version-titles.json     完整版本号口径（官方文档站标题）
-├── 命名.txt                参考样张命名表
 └── gui/
     ├── pdf_builder_multi.py  ★★ 唯一实现：流水线 + 17 个内置工具 + PyQt6 界面
     ├── 启动PDF构建器.bat / .sh
@@ -249,7 +244,6 @@ sphinx-pdf/
     ├── requirements.txt      GUI 依赖（PyQt6 / pypdf）
     ├── config-multi.json     运行时配置（含本机路径，已从 git 移除）
     ├── dist/                 打包产物
-    ├── 界面预览.png
     └── README.md             本文件
 ```
 
