@@ -348,7 +348,9 @@ python3 sphinx-pdf/gui/pdf_builder_multi.py --tool check-pdf-gaps <合并册.pdf
 [python-docs-zh-cn](https://github.com/python/python-docs-zh-cn)（均为 PSF License），
 本仓库只做构建与排版，不改变原文授权。
 
-构建依赖：[Sphinx](https://www.sphinx-doc.org/) +
+**构建**：[Sphinx](https://www.sphinx-doc.org/) +
 [python-docs-theme](https://github.com/python/python-docs-theme) +
-[TeX Live](https://www.tug.org/texlive/) + [poppler](https://poppler.freedesktop.org/)。
-CI 用 Ubuntu 22.04 自带的 **TeX Live 2022**（`apt` 冻结版），与官方 PDF 的构建机同代。
+[TeX Live](https://www.tug.org/texlive/)（CI 用 Ubuntu 22.04 自带的 2022，与官方 PDF 的构建机同代）。
+
+**验收**：[poppler](https://poppler.freedesktop.org/) —— `pdfinfo` 查页数与残片、
+`pdffonts` 查中文字体有没有真嵌进去、`pdftotext` 取封面标题。
