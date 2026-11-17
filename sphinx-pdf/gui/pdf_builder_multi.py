@@ -2905,6 +2905,52 @@ class Pipeline:
                          "（不加这行，逐页译文一个都匹配不上，正文会整册英文）",
                          level="warn")
 
+        # ★★ 让 ≥10 行的表格改用 longtable —— 否则会压到页脚（2026-11-17）★★
+        #   Sphinx 把「≤30 行 / 带 :widths: / 含 object description」的表格编成
+        #   tabular 或 tabulary，**这两个都不可跨页**。表格一旦高过一页，LaTeX 无处
+        #   可断，内容直接冲出页面底边、压在页脚和页码上。
+        #   实测 3.14 合并册有 9 页中招：264（下载选项）、270（4.1.15 故障排除）、
+        #   278（4.11.3 完整选项）、925（strftime）、1526（ctypes.wintypes）、
+        #   2651（初始化配置）、3611/3616（稳定 ABI）、3665（25.1 监控状态）。
+        #   longtable 能跨页并自动重复表头，是唯一正解。
+        #   ★ 为什么不用「给单个 rst 加 :class: longtable」：上游 windows.rst 早就
+        #     试过去掉 :widths:（注释写着 "Sphinx bug with text writer"），但去 widths
+        #     并不能解决分页；逐个文件打补丁又要跟着上游结构变化走。
+        #   ★ 为什么只改 ≥10 行：短表用 tabular 的观感更好（列宽贴合内容、不进浮动的
+        #     长表队列），没必要动。实测 9 处溢出表都在 10 行以上。
+        #   ★ 幂等：靠 conf.py 里的 PYPDF_FORCE_LONGTABLE 标记判断。
+        conf_txt = read_text_safe(conf)
+        if "PYPDF_FORCE_LONGTABLE" not in conf_txt:
+            hook = '    app.connect("builder-inited", _check_doctest_interpreter)'
+            if hook in conf_txt:
+                conf_txt = conf_txt.replace(
+                    hook,
+                    hook + '\n    app.connect("doctree-resolved", '
+                           '_force_longtable_tables)  # PYPDF_FORCE_LONGTABLE',
+                    1)
+                conf_txt += '''
+# ===== 由本工具补充（PYPDF_FORCE_LONGTABLE）=====
+# ≥10 行的表格改用 longtable：Sphinx 默认会把它们编成 tabular/tabulary，二者
+# 都不可跨页，表格高过一页时内容会冲出页面底边、压在页脚与页码上。
+# longtable 可跨页并自动重复表头。只动长表，短表保持原样。
+def _force_longtable_tables(app, doctree, docname):
+    if getattr(app.builder, "format", "") != "latex":
+        return
+    from docutils import nodes
+    for tbl in doctree.findall(nodes.table):
+        if "longtable" in tbl["classes"]:
+            continue
+        if len(list(tbl.findall(nodes.row))) >= 10:
+            tbl["classes"].append("longtable")
+'''
+                conf.write_text(conf_txt, encoding="utf-8")
+                self.rep.log("已在 conf.py 挂上 hook：≥10 行的表格改用 longtable"
+                             "（不挂的话长表无法跨页，会压在页脚上）", level="ok")
+            else:
+                self.rep.log("conf.py 里找不到 `def setup(app)` 的 connect 行，"
+                             "跳过 longtable hook（该版本的表格问题需另行处理）",
+                             level="warn")
+
         # ★★ 开编之前先确认「SVG → PDF」这条路真能走（2026-10-23 加）★★
         #   以前这里是裸跑 sphinx：CairoSVG 缺 cairo 运行库时，
         #   `cairosvgconverter.is_available()` 里 `import cairosvg` 抛的是 **OSError**
