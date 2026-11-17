@@ -2212,6 +2212,49 @@ class Pipeline:
                          + "（多为代理断流，重跑本步即可）", level="err")
         return done
 
+    #: 上游 rst 的定点补丁 —— (相对 Doc/ 的路径, 按 strip 后比对的锚点行, 要插入的选项)。
+    #: 幂等：已经有这行选项的跳过。按**行**插入并沿用原缩进，不写死空格数。
+    RST_FIXES: list[tuple[str, str, str]] = [
+        # ★ monitoring.rst 的表格为什么必须加 `:class: longtable`（2026-11-17）：
+        #   3.13+ 的「25.1 管理监控状态」有张 20 行的 list-table（宏 → 事件），
+        #   带 `:widths: 50 37`，单元格里又是 `.. c:macro::`（object description
+        #   = 列表类元素）。Sphinx 的规则是「≤30 行走 tabulary；含列表类元素时降级成
+        #   tabular/longtable」，实测四种写法：**只要不写 `:class: longtable`，
+        #   不管有没有 `:widths:`，出来的都是 `tabular` —— 不可跨页**。
+        #   这张表连表头 20 行、最后一行还是 4 行高的 `.. deprecated::` 说明，高度刚好
+        #   超过一页 ⇒ LaTeX 无处可断，直接冲出页面底边，和页脚、页码叠在一起
+        #   （实测 3.14.10 第 410 页；3.11~3.15 同理）。与本机/CI 的 TeX Live 版本无关。
+        #   Sphinx 没有"全局强制 longtable"的配置（latex_table_style 只管线型，不管环境），
+        #   所以只能在这一处补 class。
+        ("c-api/monitoring.rst", ":widths: 50 37", ":class: longtable"),
+    ]
+
+    def _ensure_rst_fixes(self, cpy: Path) -> None:
+        """给上游 rst 打定点补丁（幂等；找不到锚点只告警，不让构建失败）。"""
+        for rel, key, opt in self.RST_FIXES:
+            p = cpy / "Doc" / rel
+            if not p.is_file():
+                continue                    # 该版本没这篇（如 3.11/3.12）
+            txt = read_text_safe(p)
+            if any(ln.strip() == opt for ln in txt.splitlines()):
+                continue                    # 已经打过
+            out: list[str] = []
+            hit = False
+            for ln in txt.splitlines():
+                out.append(ln)
+                if not hit and ln.strip() == key:
+                    indent = ln[:len(ln) - len(ln.lstrip())]
+                    out.append(indent + opt)
+                    hit = True
+            if not hit:
+                self.rep.log(f"{rel}：找不到锚点 `{key}`，跳过表格补丁"
+                             f"（上游可能改了表结构，出稿后请核对那一页）", level="warn")
+                continue
+            p.write_text("\n".join(out) + "\n", encoding="utf-8")
+            self.rep.log(f"已给 {rel} 的表格补上 `{opt}`"
+                         f"（不补的话 20 行表格会被编成 tabular、无法跨页，会压到页脚）",
+                         level="ok")
+
     def step1(self) -> str:
         cpy = self.root / P_CPYTHON
         conf = cpy / "Doc" / "conf.py"
@@ -2236,6 +2279,9 @@ class Pipeline:
             #      Doc/Makefile 的 build 目标要的；Lib/profiling/sampling 见 SPARSE_PATHS）
             self._ensure_sparse(cpy)
             self._ensure_doc_ref_files(cpy)
+
+        # ★ 上游 rst 的定点补丁（表格分页等），见 RST_FIXES 注释
+        self._ensure_rst_fixes(cpy)
 
         # 验证 Include/patchlevel.h —— 上面那个坑的自检
         pl = cpy / "Include" / "patchlevel.h"
