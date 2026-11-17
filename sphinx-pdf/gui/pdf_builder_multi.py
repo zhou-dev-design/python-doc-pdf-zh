@@ -2906,28 +2906,6 @@ def _force_longtable_tables(app, doctree, docname):
                              "跳过 longtable hook（该版本的表格问题需另行处理）",
                              level="warn")
 
-        # ★ 不可断行的长串会画到纸外（2026-11-17）
-        #   文档里有大量长标识符、hex 串、语法项（`posonlyargcnt`、
-        #   `[parameter_list_no_posonly...]`、`'6ff843ba...'`）。它们在 p{} 列里
-        #   断不开，TeX 就直接 overfull —— 实测 3.15.2 合并册有 18 页正文越过版心，
-        #   最狠的第 2625 页画到 x=600.5pt（A4 只有 595.3pt，已经出纸）。
-        #   \emergencystretch 让 TeX 在放弃前多试几轮断行，能把一部分拉回来；
-        #   真正要根治得逐表调列宽（需要 .tex），这一步只是兜底。
-        conf_txt2 = read_text_safe(conf)
-        if "PYPDF_EMERGENCYSTRETCH" not in conf_txt2:
-            conf_txt2 += r'''
-# ===== 由本工具补充（PYPDF_EMERGENCYSTRETCH）=====
-# 长标识符 / hex 串 / 语法项在 p{} 列里无法断行，TeX 会 overfull 画到列外甚至纸外。
-# 让 TeX 在放弃断行前多试几轮。
-latex_elements = dict(latex_elements or {})
-latex_elements["preamble"] = latex_elements.get("preamble", "") + r"""
-\setlength{\emergencystretch}{3em}
-"""
-'''
-            conf.write_text(conf_txt2, encoding="utf-8")
-            self.rep.log("已在 conf.py 加 `\\emergencystretch=3em`"
-                         "（缓解长标识符/hex 串画出纸边）", level="ok")
-
         # ★★ 不可断长串的根治（2026-11-17，Sphinx 官方文档 + 源码核对）★★
         #   背景：\emergencystretch 只能救正文段落；表格单元格和 code-block 里的
         #   长标识符（`PyUnstable_ThreadState_ResetLock` 这类）还是断不开。
