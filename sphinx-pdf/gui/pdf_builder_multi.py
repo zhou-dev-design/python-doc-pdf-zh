@@ -2873,34 +2873,54 @@ class Pipeline:
         #     并不能解决分页；逐个文件打补丁又要跟着上游结构变化走。
         #   ★ 为什么只改 ≥10 行：短表用 tabular 的观感更好（列宽贴合内容、不进浮动的
         #     长表队列），没必要动。实测 9 处溢出表都在 10 行以上。
-        #   ★ 幂等：靠 conf.py 里的 PYPDF_FORCE_LONGTABLE 标记判断。
+        #   ★ 幂等：靠 conf.py 里的 PYPDF_FORCE_LONGTABLE_V2 标记判断。
         conf_txt = read_text_safe(conf)
-        if "PYPDF_FORCE_LONGTABLE" not in conf_txt:
+        if "PYPDF_FORCE_LONGTABLE_V2" not in conf_txt:
             hook = '    app.connect("builder-inited", _check_doctest_interpreter)'
             if hook in conf_txt:
                 conf_txt = conf_txt.replace(
                     hook,
                     hook + '\n    app.connect("doctree-resolved", '
-                           '_force_longtable_tables)  # PYPDF_FORCE_LONGTABLE',
+                           '_force_longtable_tables_v2)  '
+                           '# PYPDF_FORCE_LONGTABLE_V2',
                     1)
                 conf_txt += '''
-# ===== 由本工具补充（PYPDF_FORCE_LONGTABLE）=====
+# ===== 由本工具补充（PYPDF_FORCE_LONGTABLE_V2）=====
 # ≥10 行的表格改用 longtable：Sphinx 默认会把它们编成 tabular/tabulary，二者
 # 都不可跨页，表格高过一页时内容会冲出页面底边、压在页脚与页码上。
 # longtable 可跨页并自动重复表头。只动长表，短表保持原样。
-def _force_longtable_tables(app, doctree, docname):
+#
+# ★ 无 :widths: 的表必须补列宽（2026-11-18）：
+#   Sphinx 只给带 'colwidths-given' class 的表生成 \\X{a}{b} 比例列；没有这个
+#   class 时 longtable 退化成 {ll}（自然宽度、**不换行**）。中文长句没有断行点，
+#   整行直接撑到纸外 —— 实测 3.15.2 的管理配置表画到 603.7pt（A4 只有 595.28）。
+#   CPython 上游把这类表的 :widths: 注释掉了（注释写的是 "Sphinx bug with text
+#   writer; remove widths & caption temporarily"），所以它们全都没有
+#   colwidths-given。这里补上 class + 等宽 colwidth=1，让 Sphinx 生成
+#   \\X{1}{n}，宽度锁回 \\linewidth。
+def _force_longtable_tables_v2(app, doctree, docname):
     if getattr(app.builder, "format", "") != "latex":
         return
     from docutils import nodes
     for tbl in doctree.findall(nodes.table):
-        if "longtable" in tbl["classes"]:
-            continue
-        if len(list(tbl.findall(nodes.row))) >= 10:
+        if "longtable" not in tbl["classes"]:
+            if len(list(tbl.findall(nodes.row))) < 10:
+                continue
             tbl["classes"].append("longtable")
+        if "colwidths-given" in tbl["classes"]:
+            continue
+        tg = next(tbl.findall(nodes.tgroup), None)
+        if tg is None:
+            continue
+        tbl["classes"].append("colwidths-given")
+        for cs in tg.findall(nodes.colspec):
+            cs["colwidth"] = 1
 '''
                 conf.write_text(conf_txt, encoding="utf-8")
-                self.rep.log("已在 conf.py 挂上 hook：≥10 行的表格改用 longtable"
-                             "（不挂的话长表无法跨页，会压在页脚上）", level="ok")
+                self.rep.log("已在 conf.py 挂上 hook：≥10 行的表格改用 longtable，"
+                             "并给无 :widths: 的表补列宽"
+                             "（否则 {ll} 不换行，中文长句会画到纸外）",
+                             level="ok")
             else:
                 self.rep.log("conf.py 里找不到 `def setup(app)` 的 connect 行，"
                              "跳过 longtable hook（该版本的表格问题需另行处理）",
