@@ -2946,11 +2946,11 @@ def _force_longtable_tables_v2(app, doctree, docname):
         #        （UAX#14 无论 locale 都不在字母间断行），实测无效。
         #   实证（sphinx 8.2.3 + xelatex 最小项目）：120pt 超宽 → Overfull 0，
         #   长标识符在 `_` 处干净断行，短标识符不受影响，code 行硬折行带 `,→` 续行标。
-        #   ★ 幂等：靠 conf.py 里的 PYPDF_LINEBREAK 标记判断。
+        #   ★ 幂等：靠 conf.py 里的 PYPDF_LINEBREAK_V2 标记判断。
         conf_txt3 = read_text_safe(conf)
-        if "PYPDF_LINEBREAK" not in conf_txt3:
+        if "PYPDF_LINEBREAK_V2" not in conf_txt3:
             conf_txt3 += r'''
-# ===== 由本工具补充（PYPDF_LINEBREAK）=====
+# ===== 由本工具补充（PYPDF_LINEBREAK_V2）=====
 # ① code-block 里超宽的行强制硬折行（Sphinx >= 5.4 的官方机制）
 try:
     import re as _pypdf_re
@@ -2966,7 +2966,25 @@ except Exception:
 #    writer 把 _ 转义成 \_；在 code 宏内重定义 \_ = 字符直出 + \allowbreak。
 #    \char95 是下划线的字符码，不依赖 \_ 的原含义，两层包装嵌套也不会递归。
 #    只影响 code，正文英文单词的断行完全不变。
+# ③ 连续 5 位以上的字母数字串（hex 串、长数字、纯字母标识符）：
+#    每 5 位插一个 \allowbreak。Sphinx 只在 . , ; ? ! / \ 处给断点，
+#    46 位的 hex 串一个断点都没有 —— 实测画到 546.5pt（版心 523.3）。
+#    在 \sphinxupquote 的纯文本参数上用 l3regex 替换：控制序列（\textbackslash
+#    之类）是单个 token，不匹配 [A-Za-z0-9]，不会被破坏；None/True/self
+#    这类 4 字母词不足 5 位，完全不动。
 latex_elements["preamble"] += r"""
+\ExplSyntaxOn
+\cs_new_protected:Npn \pypdf_breaklong:n #1
+  {
+    \tl_set:Nn \l_tmpa_tl {#1}
+    \regex_replace_all:nnN
+      { ([A-Za-z0-9]{5}) }
+      { \1 \c{allowbreak} }
+      \l_tmpa_tl
+    \tl_use:N \l_tmpa_tl
+  }
+\cs_set_eq:NN \pypdfbreaklong \pypdf_breaklong:n
+\ExplSyntaxOff
 \makeatletter
 \let\spx@pypdf@sphinxcode\sphinxcode
 \protected\def\sphinxcode#1{{%
@@ -2975,13 +2993,14 @@ latex_elements["preamble"] += r"""
 \let\spx@pypdf@sphinxupquote\sphinxupquote
 \protected\def\sphinxupquote#1{{%
   \def\_{\char95\allowbreak}%
-  \spx@pypdf@sphinxupquote{#1}}}%
+  \spx@pypdf@sphinxupquote{\pypdfbreaklong{#1}}}}%
 \makeatother
 """
 '''
             conf.write_text(conf_txt3, encoding="utf-8")
-            self.rep.log("已在 conf.py 加长串断行补丁（PYPDF_LINEBREAK）：code-block "
-                         "硬折行 + 下划线断点（根治 18 页横向溢出）", level="ok")
+            self.rep.log("已在 conf.py 加长串断行补丁（PYPDF_LINEBREAK_V2）：code-block "
+                         "硬折行 + 下划线断点 + 字母数字串每 5 位断点"
+                         "（根治中文表格与 hex/长数字横向溢出）", level="ok")
 
         # ★★ 开编之前先确认「SVG → PDF」这条路真能走（2026-10-23 加）★★
         #   以前这里是裸跑 sphinx：CairoSVG 缺 cairo 运行库时，
