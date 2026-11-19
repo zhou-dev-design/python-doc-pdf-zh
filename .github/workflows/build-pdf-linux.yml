@@ -32,6 +32,9 @@ on:
       versions:
         description: "要构建的版本，逗号分隔（3.11~3.15 五个版本；3.10 已于 2026-10-31 EOL，不再构建）"
         default: "3.11,3.12,3.13,3.14,3.15"
+      books:
+        description: "只编这几册（.tex 文件名，逗号分隔，如 library,c-api；留空=全部）"
+        default: ""
       jobs:
         description: "并发数：步骤 6 的 sphinx -j 与步骤 7 的册级并发共用"
         default: "4"
@@ -444,6 +447,10 @@ jobs:
           mkdir -p "$BASE"
           MERGE_FLAG=""
           if [ "${{ github.event.inputs.merge }}" = "false" ]; then MERGE_FLAG="--no-merge"; fi
+          BOOKS_FLAG=""
+          if [ -n "${{ github.event.inputs.books || '' }}" ]; then
+            BOOKS_FLAG="--books ${{ github.event.inputs.books }}"
+          fi
           python ci/linux/pdf_builder_linux.py \
             --versions "${{ matrix.version }}" \
             --base "$BASE" \
@@ -452,7 +459,7 @@ jobs:
             --source github \
             --pip-index "https://pypi.org/simple" \
             --python-map "${{ matrix.version }}=$PY" \
-            $MERGE_FLAG
+            $MERGE_FLAG $BOOKS_FLAG
           # ★ 用 find 而不是 ls：构建根名字里有空格和中文，ls 在 set -e 下会误杀
           ROOT="$(find "$BASE" -maxdepth 1 -type d -name 'Python * PDF 文档 *' | sort | tail -1)"
           echo "root=$ROOT" >> "$GITHUB_OUTPUT"

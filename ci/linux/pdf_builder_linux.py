@@ -495,6 +495,7 @@ def build_config(args, base_dir: str) -> "M.Config":
     cfg.pip_index = (args.pip_index or "https://pypi.org/simple").strip()
     cfg.lang = args.lang
     cfg.jobs = args.jobs
+    cfg.books = args.books or ""      # 只编这几册（步骤 7 用；空=全部）
 
     cfg.only_steps = args.only or ""
     cfg.from_step = args.from_step or 0
@@ -747,6 +748,9 @@ def main(argv: list[str] | None = None) -> int:
                     help="从第几步开始（步骤号 0~10）")
     ap.add_argument("--jobs", type=int, default=4,
                     help="并发数：步骤 6 的 sphinx -j 与步骤 7 的册级并发共用（默认 4）")
+    ap.add_argument("--books", default="",
+                    help="只编这几册（.tex 文件名，逗号分隔，如 library,c-api；"
+                         "留空=全部）。排查单册问题时能省掉整轮 20 分钟")
     ap.add_argument("--parallel", type=int, default=0,
                     help="多版本时同时跑几个（默认全部同时）")
     ap.add_argument("--lang", default="zh_CN", help="目标语言（默认 zh_CN）")
