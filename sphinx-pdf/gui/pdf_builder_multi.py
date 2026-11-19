@@ -2860,86 +2860,17 @@ class Pipeline:
                          "（不加这行，逐页译文一个都匹配不上，正文会整册英文）",
                          level="warn")
 
-        # ★★ 让 ≥10 行的表格改用 longtable —— 否则会压到页脚（2026-11-17）★★
-        #   Sphinx 把「≤30 行 / 带 :widths: / 含 object description」的表格编成
-        #   tabular 或 tabulary，**这两个都不可跨页**。表格一旦高过一页，LaTeX 无处
-        #   可断，内容直接冲出页面底边、压在页脚和页码上。
-        #   实测 3.14 合并册有 9 页中招：264（下载选项）、270（4.1.15 故障排除）、
-        #   278（4.11.3 完整选项）、925（strftime）、1526（ctypes.wintypes）、
-        #   2651（初始化配置）、3611/3616（稳定 ABI）、3665（25.1 监控状态）。
-        #   longtable 能跨页并自动重复表头，是唯一正解。
-        #   ★ 为什么不用「给单个 rst 加 :class: longtable」：上游 windows.rst 早就
-        #     试过去掉 :widths:（注释写着 "Sphinx bug with text writer"），但去 widths
-        #     并不能解决分页；逐个文件打补丁又要跟着上游结构变化走。
-        #   ★ 为什么只改 ≥10 行：短表用 tabular 的观感更好（列宽贴合内容、不进浮动的
-        #     长表队列），没必要动。实测 9 处溢出表都在 10 行以上。
-        #   ★ 幂等：靠 conf.py 里的 PYPDF_FORCE_LONGTABLE_V3 标记判断。
-        conf_txt = read_text_safe(conf)
-        if "PYPDF_FORCE_LONGTABLE_V3" not in conf_txt:
-            hook = '    app.connect("builder-inited", _check_doctest_interpreter)'
-            if hook in conf_txt:
-                conf_txt = conf_txt.replace(
-                    hook,
-                    hook + '\n    app.connect("doctree-resolved", '
-                           '_force_longtable_tables_v3)  '
-                           '# PYPDF_FORCE_LONGTABLE_V3',
-                    1)
-                conf_txt += '''
-# ===== 由本工具补充（PYPDF_FORCE_LONGTABLE_V3）=====
-# ≥10 行的表格改用 longtable：Sphinx 默认会把它们编成 tabular/tabulary，二者
-# 都不可跨页，表格高过一页时内容会冲出页面底边、压在页脚与页码上。
-# longtable 可跨页并自动重复表头。只动长表，短表保持原样。
-#
-# ★ 无 :widths: 的表必须补列宽（2026-11-18）：
-#   Sphinx 只给带 'colwidths-given' class 的表生成 \\X{a}{b} 比例列；没有这个
-#   class 时 longtable 退化成 {ll}（自然宽度、**不换行**）。中文长句没有断行点，
-#   整行直接撑到纸外 —— 实测 3.15.2 的管理配置表画到 603.7pt（A4 只有 595.28）。
-#   CPython 上游把这类表的 :widths: 注释掉了（注释写的是 "Sphinx bug with text
-#   writer; remove widths & caption temporarily"），所以它们全都没有
-#   colwidths-given。这里补上 class + 等宽 colwidth=1，让 Sphinx 生成
-#   \\X{1}{n}，宽度锁回 \\linewidth。
-#
-# ★ longtable 列宽漂移（2026-11-19）：
-#   \\X 用 \\linewidth 算列宽，而 \\linewidth 在长表里每遍可能不同，longtable
-#   于是每遍都报 "Table widths have changed. Rerun LaTeX."，latexmk 跑到上限
-#   仍不收敛 → 退出码 12，PDF 停在第一遍（目录空、书签 0、满屏 undefined）。
-#   11-19 的 3.15 就是这样丢掉 library / c-api 两册 2189 / 392 个书签的。
-#   在 \\begin{longtable} 之前把 \\linewidth 钉回 \\textwidth，列宽恒定。
-latex_elements = dict(latex_elements or {})
-latex_elements["preamble"] = latex_elements.get("preamble", "") + r"""
-\\makeatletter
-\\let\\spx@pypdf@als\\sphinxatlongtablestart
-\\def\\sphinxatlongtablestart{\\setlength{\\linewidth}{\\textwidth}\\spx@pypdf@als}
-\\makeatother
-"""
-
-def _force_longtable_tables_v3(app, doctree, docname):
-    if getattr(app.builder, "format", "") != "latex":
-        return
-    from docutils import nodes
-    for tbl in doctree.findall(nodes.table):
-        if "longtable" not in tbl["classes"]:
-            if len(list(tbl.findall(nodes.row))) < 10:
-                continue
-            tbl["classes"].append("longtable")
-        if "colwidths-given" in tbl["classes"]:
-            continue
-        tg = next(tbl.findall(nodes.tgroup), None)
-        if tg is None:
-            continue
-        tbl["classes"].append("colwidths-given")
-        for cs in tg.findall(nodes.colspec):
-            cs["colwidth"] = 1
-'''
-                conf.write_text(conf_txt, encoding="utf-8")
-                self.rep.log("已在 conf.py 挂上 hook：≥10 行的表格改用 longtable、"
-                             "给无 :widths: 的表补列宽，并把 \\linewidth 钉回 "
-                             "\\textwidth（防表宽漂移导致 latexmk 不收敛、书签丢失）",
-                             level="ok")
-            else:
-                self.rep.log("conf.py 里找不到 `def setup(app)` 的 connect 行，"
-                             "跳过 longtable hook（该版本的表格问题需另行处理）",
-                             level="warn")
+        # ★★ 表格不再强制 longtable（2026-11-19 回滚）★★
+        #   2026-11-17 曾加过一个 hook：≥10 行的表格一律改 longtable，用来修
+        #   9 处「表格压页脚」。它确实修好了压页脚，但把 library / c-api 两册的
+        #   书签全弄丢了 —— 日志里 longtable 每遍都报
+        #   "Table widths have changed. Rerun LaTeX."，latexmk 跑到上限不收敛、
+        #   退出码 12，PDF 停在第一遍（目录空、书签 0、2270 页全 undefined）。
+        #   已试过两种修法（给无 :widths: 的表补列宽 / 把 \linewidth 钉回
+        #   \textwidth），真实文档里都不收敛，所以回到 Sphinx 默认的
+        #   tabular/tabulary：书签优先。
+        #   压页脚那 9 处改用逐表 :class: longtable（只动那几张表，不全局改），
+        #   详见 2026-11-19 的工作日志。
 
         # ★★ 不可断长串的根治（2026-11-17，Sphinx 官方文档 + 源码核对）★★
         #   背景：\emergencystretch 只能救正文段落；表格单元格和 code-block 里的
