@@ -1,0 +1,1495 @@
+ 293686.
+
+
+LaTeX Warning: Hyper reference `library/venv:module-venv' on page 2240 undefine
+d on input line 293693.
+
+
+LaTeX Warning: Hyper reference `glossary:term-bytecode' on page 2240 undefined 
+on input line 293697.
+
+
+LaTeX Warning: Hyper reference `glossary:term-abstract-base-class' on page 2240
+ undefined on input line 293702.
+
+
+LaTeX Warning: Hyper reference `library/abc:abc.ABCMeta.register' on page 2240 
+undefined on input line 293704.
+
+[2240]
+Appendix B.
+[2241
+
+] [2242
+
+]
+Appendix C.
+[2243]
+
+LaTeX Warning: Hyper reference `license:bsd0' on page 2244 undefined on input l
+ine 294034.
+
+
+LaTeX Warning: Hyper reference `license:otherlicenses' on page 2244 undefined o
+n input line 294037.
+
+[2244] [2245] [2246]
+
+LaTeX Warning: Hyper reference `library/random:module-random' on page 2247 unde
+fined on input line 294246.
+
+[2247]
+
+LaTeX Warning: Hyper reference `library/socket:module-socket' on page 2248 unde
+fined on input line 294295.
+
+
+Overfull \vbox (2.1092pt too high) detected at line 294353
+ []
+
+[2248]
+
+LaTeX Warning: Hyper reference `library/http.cookies:module-http.cookies' on pa
+ge 2249 undefined on input line 294359.
+
+
+LaTeX Warning: Hyper reference `library/trace:module-trace' on page 2249 undefi
+ned on input line 294389.
+
+
+Overfull \vbox (1.01921pt too high) detected at line 294418
+ []
+
+[2249]
+
+LaTeX Warning: Hyper reference `library/xmlrpc.client:module-xmlrpc.client' on 
+page 2250 undefined on input line 294456.
+
+[2250]
+
+LaTeX Warning: Hyper reference `library/select:module-select' on page 2251 unde
+fined on input line 294520.
+
+[2251]
+
+LaTeX Warning: Hyper reference `library/hashlib:module-hashlib' on page 2252 un
+defined on input line 294609.
+
+
+LaTeX Warning: Hyper reference `library/posix:module-posix' on page 2252 undefi
+ned on input line 294609.
+
+
+LaTeX Warning: Hyper reference `library/ssl:module-ssl' on page 2252 undefined 
+on input line 294609.
+
+[2252]
+Underfull \vbox (badness 10000) detected at line 294788
+ []
+
+
+Underfull \vbox (badness 10000) detected at line 294788
+ []
+
+[2253]
+Underfull \vbox (badness 10000) detected at line 294788
+ []
+
+
+Underfull \vbox (badness 10000) detected at line 294788
+ []
+
+[2254]
+
+LaTeX Warning: Hyper reference `library/pyexpat:module-xml.parsers.expat' on pa
+ge 2255 undefined on input line 294794.
+
+[2255]
+
+LaTeX Warning: Hyper reference `library/ctypes:module-ctypes' on page 2256 unde
+fined on input line 294824.
+
+
+LaTeX Warning: Hyper reference `library/zlib:module-zlib' on page 2256 undefine
+d on input line 294854.
+
+
+Overfull \vbox (2.1992pt too high) detected at line 294879
+ []
+
+[2256]
+
+LaTeX Warning: Hyper reference `library/tracemalloc:module-tracemalloc' on page
+ 2257 undefined on input line 294885.
+
+
+LaTeX Warning: Hyper reference `library/decimal:module-decimal' on page 2257 un
+defined on input line 294927.
+
+
+Overfull \vbox (2.1992pt too high) detected at line 294954
+ []
+
+[2257]
+
+LaTeX Warning: Hyper reference `library/test:module-test' on page 2258 undefine
+d on input line 294960.
+
+
+Overfull \vbox (1.01917pt too high) detected at line 295018
+ []
+
+[2258]
+
+LaTeX Warning: Hyper reference `library/asyncio:module-asyncio' on page 2259 un
+defined on input line 295024.
+
+
+Overfull \vbox (1.08916pt too high) detected at line 295078
+ []
+
+[2259] [2260]
+
+LaTeX Warning: Hyper reference `library/unicodedata:module-unicodedata' on page
+ 2261 undefined on input line 295193.
+
+
+Overfull \vbox (2.02916pt too high) detected at line 295235
+ []
+
+[2261] [2262]
+Appendix D.
+
+LaTeX Warning: Hyper reference `license:history-and-license' on page 2263 undef
+ined on input line 295260.
+
+[2263
+
+] [2264
+
+] [2265
+
+] [2266
+
+]
+
+LaTeX Warning: Reference `library/__future__:module-__future__' on page 2267 un
+defined on input line 295276.
+
+
+LaTeX Warning: Reference `library/__main__:module-__main__' on page 2267 undefi
+ned on input line 295277.
+
+
+LaTeX Warning: Reference `library/_thread:module-_thread' on page 2267 undefine
+d on input line 295278.
+
+
+LaTeX Warning: Reference `library/tkinter:module-_tkinter' on page 2267 undefin
+ed on input line 295279.
+
+
+LaTeX Warning: Reference `library/abc:module-abc' on page 2267 undefined on inp
+ut line 295282.
+
+
+LaTeX Warning: Reference `library/aifc:module-aifc' on page 2267 undefined on i
+nput line 295283.
+
+
+LaTeX Warning: Reference `library/annotationlib:module-annotationlib' on page 2
+267 undefined on input line 295284.
+
+
+LaTeX Warning: Reference `library/argparse:module-argparse' on page 2267 undefi
+ned on input line 295285.
+
+
+LaTeX Warning: Reference `library/array:module-array' on page 2267 undefined on
+ input line 295286.
+
+
+LaTeX Warning: Reference `library/ast:module-ast' on page 2267 undefined on inp
+ut line 295287.
+
+
+LaTeX Warning: Reference `library/asynchat:module-asynchat' on page 2267 undefi
+ned on input line 295288.
+
+
+LaTeX Warning: Reference `library/asyncio:module-asyncio' on page 2267 undefine
+d on input line 295289.
+
+
+LaTeX Warning: Reference `library/asyncore:module-asyncore' on page 2267 undefi
+ned on input line 295290.
+
+
+LaTeX Warning: Reference `library/atexit:module-atexit' on page 2267 undefined 
+on input line 295291.
+
+
+LaTeX Warning: Reference `library/audioop:module-audioop' on page 2267 undefine
+d on input line 295292.
+
+
+LaTeX Warning: Reference `library/base64:module-base64' on page 2267 undefined 
+on input line 295295.
+
+
+LaTeX Warning: Reference `library/bdb:module-bdb' on page 2267 undefined on inp
+ut line 295296.
+
+
+LaTeX Warning: Reference `library/binascii:module-binascii' on page 2267 undefi
+ned on input line 295297.
+
+
+LaTeX Warning: Reference `library/bisect:module-bisect' on page 2267 undefined 
+on input line 295298.
+
+
+LaTeX Warning: Reference `library/builtins:module-builtins' on page 2267 undefi
+ned on input line 295299.
+
+
+LaTeX Warning: Reference `library/bz2:module-bz2' on page 2267 undefined on inp
+ut line 295300.
+
+
+LaTeX Warning: Reference `library/calendar:module-calendar' on page 2267 undefi
+ned on input line 295303.
+
+
+LaTeX Warning: Reference `library/cgi:module-cgi' on page 2267 undefined on inp
+ut line 295304.
+
+
+LaTeX Warning: Reference `library/cgitb:module-cgitb' on page 2267 undefined on
+ input line 295305.
+
+
+LaTeX Warning: Reference `library/chunk:module-chunk' on page 2267 undefined on
+ input line 295306.
+
+
+LaTeX Warning: Reference `library/cmath:module-cmath' on page 2267 undefined on
+ input line 295307.
+
+
+LaTeX Warning: Reference `library/cmd:module-cmd' on page 2267 undefined on inp
+ut line 295308.
+
+
+LaTeX Warning: Reference `library/code:module-code' on page 2267 undefined on i
+nput line 295309.
+
+
+LaTeX Warning: Reference `library/codecs:module-codecs' on page 2267 undefined 
+on input line 295310.
+
+
+LaTeX Warning: Reference `library/codeop:module-codeop' on page 2267 undefined 
+on input line 295311.
+
+
+LaTeX Warning: Reference `library/collections:module-collections' on page 2267 
+undefined on input line 295312.
+
+
+LaTeX Warning: Reference `library/collections.abc:module-collections.abc' on pa
+ge 2267 undefined on input line 295313.
+
+
+LaTeX Warning: Reference `library/colorsys:module-colorsys' on page 2267 undefi
+ned on input line 295314.
+
+
+LaTeX Warning: Reference `library/compileall:module-compileall' on page 2267 un
+defined on input line 295315.
+
+
+LaTeX Warning: Reference `library/compression:module-compression' on page 2267 
+undefined on input line 295316.
+
+
+LaTeX Warning: Reference `library/compression.zstd:module-compression.zstd' on 
+page 2267 undefined on input line 295317.
+
+
+LaTeX Warning: Reference `library/concurrent.futures:module-concurrent.futures'
+ on page 2267 undefined on input line 295318.
+
+
+LaTeX Warning: Reference `library/concurrent.interpreters:module-concurrent.int
+erpreters' on page 2267 undefined on input line 295319.
+
+
+LaTeX Warning: Reference `library/configparser:module-configparser' on page 226
+7 undefined on input line 295320.
+
+
+LaTeX Warning: Reference `library/contextlib:module-contextlib' on page 2267 un
+defined on input line 295321.
+
+
+LaTeX Warning: Reference `library/contextvars:module-contextvars' on page 2267 
+undefined on input line 295322.
+
+
+LaTeX Warning: Reference `library/copy:module-copy' on page 2267 undefined on i
+nput line 295323.
+
+
+LaTeX Warning: Reference `library/copyreg:module-copyreg' on page 2267 undefine
+d on input line 295324.
+
+
+LaTeX Warning: Reference `library/crypt:module-crypt' on page 2267 undefined on
+ input line 295325.
+
+
+LaTeX Warning: Reference `library/csv:module-csv' on page 2267 undefined on inp
+ut line 295326.
+
+
+LaTeX Warning: Reference `library/ctypes:module-ctypes' on page 2267 undefined 
+on input line 295327.
+
+
+LaTeX Warning: Reference `library/ctypes:module-ctypes.wintypes' on page 2267 u
+ndefined on input line 295328.
+
+
+LaTeX Warning: Reference `library/curses:module-curses' on page 2267 undefined 
+on input line 295329.
+
+
+LaTeX Warning: Reference `library/curses.ascii:module-curses.ascii' on page 226
+7 undefined on input line 295330.
+
+
+LaTeX Warning: Reference `library/curses.panel:module-curses.panel' on page 226
+7 undefined on input line 295331.
+
+
+LaTeX Warning: Reference `library/curses:module-curses.textpad' on page 2267 un
+defined on input line 295332.
+
+
+LaTeX Warning: Reference `library/dataclasses:module-dataclasses' on page 2267 
+undefined on input line 295335.
+
+
+LaTeX Warning: Reference `library/datetime:module-datetime' on page 2267 undefi
+ned on input line 295336.
+
+
+LaTeX Warning: Reference `library/dbm:module-dbm' on page 2267 undefined on inp
+ut line 295337.
+
+
+LaTeX Warning: Reference `library/dbm:module-dbm.dumb' on page 2267 undefined o
+n input line 295338.
+
+
+LaTeX Warning: Reference `library/dbm:module-dbm.gnu' on page 2267 undefined on
+ input line 295339.
+
+
+LaTeX Warning: Reference `library/dbm:module-dbm.ndbm' on page 2267 undefined o
+n input line 295340.
+
+
+LaTeX Warning: Reference `library/dbm:module-dbm.sqlite3' on page 2267 undefine
+d on input line 295341.
+
+
+LaTeX Warning: Reference `library/decimal:module-decimal' on page 2267 undefine
+d on input line 295342.
+
+
+LaTeX Warning: Reference `library/difflib:module-difflib' on page 2267 undefine
+d on input line 295343.
+
+
+LaTeX Warning: Reference `library/dis:module-dis' on page 2267 undefined on inp
+ut line 295344.
+
+
+LaTeX Warning: Reference `library/distutils:module-distutils' on page 2267 unde
+fined on input line 295345.
+
+
+LaTeX Warning: Reference `library/doctest:module-doctest' on page 2267 undefine
+d on input line 295346.
+
+
+LaTeX Warning: Reference `library/email:module-email' on page 2267 undefined on
+ input line 295349.
+
+
+LaTeX Warning: Reference `library/email.charset:module-email.charset' on page 2
+267 undefined on input line 295350.
+
+
+LaTeX Warning: Reference `library/email.contentmanager:module-email.contentmana
+ger' on page 2267 undefined on input line 295351.
+
+
+LaTeX Warning: Reference `library/email.encoders:module-email.encoders' on page
+ 2267 undefined on input line 295352.
+
+
+LaTeX Warning: Reference `library/email.errors:module-email.errors' on page 226
+7 undefined on input line 295353.
+
+
+LaTeX Warning: Reference `library/email.generator:module-email.generator' on pa
+ge 2267 undefined on input line 295354.
+
+
+LaTeX Warning: Reference `library/email.header:module-email.header' on page 226
+7 undefined on input line 295355.
+
+
+LaTeX Warning: Reference `library/email.headerregistry:module-email.headerregis
+try' on page 2267 undefined on input line 295356.
+
+
+LaTeX Warning: Reference `library/email.iterators:module-email.iterators' on pa
+ge 2267 undefined on input line 295357.
+
+
+LaTeX Warning: Reference `library/email.message:module-email.message' on page 2
+267 undefined on input line 295358.
+
+
+LaTeX Warning: Reference `library/email.mime:module-email.mime' on page 2267 un
+defined on input line 295359.
+
+
+LaTeX Warning: Reference `library/email.mime:module-email.mime.application' on 
+page 2267 undefined on input line 295360.
+
+
+LaTeX Warning: Reference `library/email.mime:module-email.mime.audio' on page 2
+267 undefined on input line 295361.
+
+
+LaTeX Warning: Reference `library/email.mime:module-email.mime.base' on page 22
+67 undefined on input line 295362.
+
+[2267
+
+]
+
+LaTeX Warning: Reference `library/email.mime:module-email.mime.image' on page 2
+268 undefined on input line 295363.
+
+
+LaTeX Warning: Reference `library/email.mime:module-email.mime.message' on page
+ 2268 undefined on input line 295364.
+
+
+LaTeX Warning: Reference `library/email.mime:module-email.mime.multipart' on pa
+ge 2268 undefined on input line 295365.
+
+
+LaTeX Warning: Reference `library/email.mime:module-email.mime.nonmultipart' on
+ page 2268 undefined on input line 295366.
+
+
+LaTeX Warning: Reference `library/email.mime:module-email.mime.text' on page 22
+68 undefined on input line 295367.
+
+
+LaTeX Warning: Reference `library/email.parser:module-email.parser' on page 226
+8 undefined on input line 295368.
+
+
+LaTeX Warning: Reference `library/email.policy:module-email.policy' on page 226
+8 undefined on input line 295369.
+
+
+LaTeX Warning: Reference `library/email.utils:module-email.utils' on page 2268 
+undefined on input line 295370.
+
+
+LaTeX Warning: Reference `library/codecs:module-encodings' on page 2268 undefin
+ed on input line 295371.
+
+
+LaTeX Warning: Reference `library/codecs:module-encodings.idna' on page 2268 un
+defined on input line 295372.
+
+
+LaTeX Warning: Reference `library/codecs:module-encodings.mbcs' on page 2268 un
+defined on input line 295373.
+
+
+LaTeX Warning: Reference `library/codecs:module-encodings.utf_8_sig' on page 22
+68 undefined on input line 295374.
+
+
+LaTeX Warning: Reference `library/ensurepip:module-ensurepip' on page 2268 unde
+fined on input line 295375.
+
+
+LaTeX Warning: Reference `library/enum:module-enum' on page 2268 undefined on i
+nput line 295376.
+
+
+LaTeX Warning: Reference `library/errno:module-errno' on page 2268 undefined on
+ input line 295377.
+
+
+LaTeX Warning: Reference `library/faulthandler:module-faulthandler' on page 226
+8 undefined on input line 295380.
+
+
+LaTeX Warning: Reference `library/fcntl:module-fcntl' on page 2268 undefined on
+ input line 295381.
+
+
+LaTeX Warning: Reference `library/filecmp:module-filecmp' on page 2268 undefine
+d on input line 295382.
+
+
+LaTeX Warning: Reference `library/fileinput:module-fileinput' on page 2268 unde
+fined on input line 295383.
+
+
+LaTeX Warning: Reference `library/fnmatch:module-fnmatch' on page 2268 undefine
+d on input line 295384.
+
+
+LaTeX Warning: Reference `library/fractions:module-fractions' on page 2268 unde
+fined on input line 295385.
+
+
+LaTeX Warning: Reference `library/ftplib:module-ftplib' on page 2268 undefined 
+on input line 295386.
+
+
+LaTeX Warning: Reference `library/functools:module-functools' on page 2268 unde
+fined on input line 295387.
+
+
+LaTeX Warning: Reference `library/gc:module-gc' on page 2268 undefined on input
+ line 295390.
+
+
+LaTeX Warning: Reference `library/getopt:module-getopt' on page 2268 undefined 
+on input line 295391.
+
+
+LaTeX Warning: Reference `library/getpass:module-getpass' on page 2268 undefine
+d on input line 295392.
+
+
+LaTeX Warning: Reference `library/gettext:module-gettext' on page 2268 undefine
+d on input line 295393.
+
+
+LaTeX Warning: Reference `library/glob:module-glob' on page 2268 undefined on i
+nput line 295394.
+
+
+LaTeX Warning: Reference `library/graphlib:module-graphlib' on page 2268 undefi
+ned on input line 295395.
+
+
+LaTeX Warning: Reference `library/grp:module-grp' on page 2268 undefined on inp
+ut line 295396.
+
+
+LaTeX Warning: Reference `library/gzip:module-gzip' on page 2268 undefined on i
+nput line 295397.
+
+
+LaTeX Warning: Reference `library/hashlib:module-hashlib' on page 2268 undefine
+d on input line 295400.
+
+
+LaTeX Warning: Reference `library/heapq:module-heapq' on page 2268 undefined on
+ input line 295401.
+
+
+LaTeX Warning: Reference `library/hmac:module-hmac' on page 2268 undefined on i
+nput line 295402.
+
+
+LaTeX Warning: Reference `library/html:module-html' on page 2268 undefined on i
+nput line 295403.
+
+
+LaTeX Warning: Reference `library/html.entities:module-html.entities' on page 2
+268 undefined on input line 295404.
+
+
+LaTeX Warning: Reference `library/html.parser:module-html.parser' on page 2268 
+undefined on input line 295405.
+
+
+LaTeX Warning: Reference `library/http:module-http' on page 2268 undefined on i
+nput line 295406.
+
+
+LaTeX Warning: Reference `library/http.client:module-http.client' on page 2268 
+undefined on input line 295407.
+
+
+LaTeX Warning: Reference `library/http.cookiejar:module-http.cookiejar' on page
+ 2268 undefined on input line 295408.
+
+
+LaTeX Warning: Reference `library/http.cookies:module-http.cookies' on page 226
+8 undefined on input line 295409.
+
+
+LaTeX Warning: Reference `library/http.server:module-http.server' on page 2268 
+undefined on input line 295410.
+
+
+LaTeX Warning: Reference `library/idle:module-idlelib' on page 2268 undefined o
+n input line 295413.
+
+
+LaTeX Warning: Reference `library/imaplib:module-imaplib' on page 2268 undefine
+d on input line 295414.
+
+
+LaTeX Warning: Reference `library/imghdr:module-imghdr' on page 2268 undefined 
+on input line 295415.
+
+
+LaTeX Warning: Reference `library/imp:module-imp' on page 2268 undefined on inp
+ut line 295416.
+
+
+LaTeX Warning: Reference `library/importlib:module-importlib' on page 2268 unde
+fined on input line 295417.
+
+
+LaTeX Warning: Reference `library/importlib:module-importlib.abc' on page 2268 
+undefined on input line 295418.
+
+
+LaTeX Warning: Reference `library/importlib:module-importlib.machinery' on page
+ 2268 undefined on input line 295419.
+
+
+LaTeX Warning: Reference `library/importlib.metadata:module-importlib.metadata'
+ on page 2268 undefined on input line 295420.
+
+
+LaTeX Warning: Reference `library/importlib.resources:module-importlib.resource
+s' on page 2268 undefined on input line 295421.
+
+
+LaTeX Warning: Reference `library/importlib.resources.abc:module-importlib.reso
+urces.abc' on page 2268 undefined on input line 295422.
+
+
+LaTeX Warning: Reference `library/importlib:module-importlib.util' on page 2268
+ undefined on input line 295423.
+
+
+LaTeX Warning: Reference `library/inspect:module-inspect' on page 2268 undefine
+d on input line 295424.
+
+
+LaTeX Warning: Reference `library/io:module-io' on page 2268 undefined on input
+ line 295425.
+
+
+LaTeX Warning: Reference `library/ipaddress:module-ipaddress' on page 2268 unde
+fined on input line 295426.
+
+
+LaTeX Warning: Reference `library/itertools:module-itertools' on page 2268 unde
+fined on input line 295427.
+
+
+LaTeX Warning: Reference `library/json:module-json' on page 2268 undefined on i
+nput line 295430.
+
+
+LaTeX Warning: Reference `library/json:module-json.tool' on page 2268 undefined
+ on input line 295431.
+
+
+LaTeX Warning: Reference `library/keyword:module-keyword' on page 2268 undefine
+d on input line 295434.
+
+
+LaTeX Warning: Reference `library/linecache:module-linecache' on page 2268 unde
+fined on input line 295437.
+
+
+LaTeX Warning: Reference `library/locale:module-locale' on page 2268 undefined 
+on input line 295438.
+
+
+LaTeX Warning: Reference `library/logging:module-logging' on page 2268 undefine
+d on input line 295439.
+
+
+LaTeX Warning: Reference `library/logging.config:module-logging.config' on page
+ 2268 undefined on input line 295440.
+
+
+LaTeX Warning: Reference `library/logging.handlers:module-logging.handlers' on 
+page 2268 undefined on input line 295441.
+
+
+LaTeX Warning: Reference `library/lzma:module-lzma' on page 2268 undefined on i
+nput line 295442.
+
+
+LaTeX Warning: Reference `library/mailbox:module-mailbox' on page 2268 undefine
+d on input line 295445.
+
+
+LaTeX Warning: Reference `library/mailcap:module-mailcap' on page 2268 undefine
+d on input line 295446.
+
+
+LaTeX Warning: Reference `library/marshal:module-marshal' on page 2268 undefine
+d on input line 295447.
+
+
+LaTeX Warning: Reference `library/math:module-math' on page 2268 undefined on i
+nput line 295448.
+
+
+LaTeX Warning: Reference `library/math.integer:module-math.integer' on page 226
+8 undefined on input line 295449.
+
+
+LaTeX Warning: Reference `library/mimetypes:module-mimetypes' on page 2268 unde
+fined on input line 295450.
+
+
+LaTeX Warning: Reference `library/mmap:module-mmap' on page 2268 undefined on i
+nput line 295451.
+
+
+LaTeX Warning: Reference `library/modulefinder:module-modulefinder' on page 226
+8 undefined on input line 295452.
+
+
+LaTeX Warning: Reference `library/msilib:module-msilib' on page 2268 undefined 
+on input line 295453.
+
+
+LaTeX Warning: Reference `library/msvcrt:module-msvcrt' on page 2268 undefined 
+on input line 295454.
+
+
+LaTeX Warning: Reference `library/multiprocessing:module-multiprocessing' on pa
+ge 2268 undefined on input line 295455.
+
+
+LaTeX Warning: Reference `library/multiprocessing:module-multiprocessing.connec
+tion' on page 2268 undefined on input line 295456.
+
+
+LaTeX Warning: Reference `library/multiprocessing:module-multiprocessing.dummy'
+ on page 2268 undefined on input line 295457.
+
+
+LaTeX Warning: Reference `library/multiprocessing:module-multiprocessing.manage
+rs' on page 2268 undefined on input line 295458.
+
+
+LaTeX Warning: Reference `library/multiprocessing:module-multiprocessing.pool' 
+on page 2268 undefined on input line 295459.
+
+
+LaTeX Warning: Reference `library/multiprocessing.shared_memory:module-multipro
+cessing.shared_memory' on page 2268 undefined on input line 295460.
+
+
+LaTeX Warning: Reference `library/multiprocessing:module-multiprocessing.shared
+ctypes' on page 2268 undefined on input line 295461.
+
+
+LaTeX Warning: Reference `library/netrc:module-netrc' on page 2268 undefined on
+ input line 295464.
+
+
+LaTeX Warning: Reference `library/nis:module-nis' on page 2268 undefined on inp
+ut line 295465.
+
+
+LaTeX Warning: Reference `library/nntplib:module-nntplib' on page 2268 undefine
+d on input line 295466.
+
+
+LaTeX Warning: Reference `library/numbers:module-numbers' on page 2268 undefine
+d on input line 295467.
+
+
+LaTeX Warning: Reference `library/operator:module-operator' on page 2268 undefi
+ned on input line 295470.
+
+
+LaTeX Warning: Reference `library/optparse:module-optparse' on page 2268 undefi
+ned on input line 295471.
+
+
+LaTeX Warning: Reference `library/os:module-os' on page 2268 undefined on input
+ line 295472.
+
+
+LaTeX Warning: Reference `library/os.path:module-os.path' on page 2268 undefine
+d on input line 295473.
+
+
+LaTeX Warning: Reference `library/ossaudiodev:module-ossaudiodev' on page 2268 
+undefined on input line 295474.
+
+
+LaTeX Warning: Reference `library/pathlib:module-pathlib' on page 2268 undefine
+d on input line 295477.
+
+
+LaTeX Warning: Reference `library/pathlib:module-pathlib.types' on page 2268 un
+defined on input line 295478.
+
+
+LaTeX Warning: Reference `library/pdb:module-pdb' on page 2268 undefined on inp
+ut line 295479.
+
+[2268]
+
+LaTeX Warning: Reference `library/pickle:module-pickle' on page 2269 undefined 
+on input line 295480.
+
+
+LaTeX Warning: Reference `library/pickletools:module-pickletools' on page 2269 
+undefined on input line 295481.
+
+
+LaTeX Warning: Reference `library/pipes:module-pipes' on page 2269 undefined on
+ input line 295482.
+
+
+LaTeX Warning: Reference `library/pkgutil:module-pkgutil' on page 2269 undefine
+d on input line 295483.
+
+
+LaTeX Warning: Reference `library/platform:module-platform' on page 2269 undefi
+ned on input line 295484.
+
+
+LaTeX Warning: Reference `library/plistlib:module-plistlib' on page 2269 undefi
+ned on input line 295485.
+
+
+LaTeX Warning: Reference `library/poplib:module-poplib' on page 2269 undefined 
+on input line 295486.
+
+
+LaTeX Warning: Reference `library/posix:module-posix' on page 2269 undefined on
+ input line 295487.
+
+
+LaTeX Warning: Reference `library/pprint:module-pprint' on page 2269 undefined 
+on input line 295488.
+
+
+LaTeX Warning: Reference `library/profile:module-profile' on page 2269 undefine
+d on input line 295489.
+
+
+LaTeX Warning: Reference `library/profiling:module-profiling' on page 2269 unde
+fined on input line 295490.
+
+
+LaTeX Warning: Reference `library/profiling.sampling:module-profiling.sampling'
+ on page 2269 undefined on input line 295491.
+
+
+LaTeX Warning: Reference `library/profiling.tracing:module-profiling.tracing' o
+n page 2269 undefined on input line 295492.
+
+
+LaTeX Warning: Reference `library/pstats:module-pstats' on page 2269 undefined 
+on input line 295493.
+
+
+LaTeX Warning: Reference `library/pty:module-pty' on page 2269 undefined on inp
+ut line 295494.
+
+
+LaTeX Warning: Reference `library/pwd:module-pwd' on page 2269 undefined on inp
+ut line 295495.
+
+
+LaTeX Warning: Reference `library/py_compile:module-py_compile' on page 2269 un
+defined on input line 295496.
+
+
+LaTeX Warning: Reference `library/pyclbr:module-pyclbr' on page 2269 undefined 
+on input line 295497.
+
+
+LaTeX Warning: Reference `library/pydoc:module-pydoc' on page 2269 undefined on
+ input line 295498.
+
+
+LaTeX Warning: Reference `library/queue:module-queue' on page 2269 undefined on
+ input line 295501.
+
+
+LaTeX Warning: Reference `library/quopri:module-quopri' on page 2269 undefined 
+on input line 295502.
+
+
+LaTeX Warning: Reference `library/random:module-random' on page 2269 undefined 
+on input line 295505.
+
+
+LaTeX Warning: Reference `library/re:module-re' on page 2269 undefined on input
+ line 295506.
+
+
+LaTeX Warning: Reference `library/readline:module-readline' on page 2269 undefi
+ned on input line 295507.
+
+
+LaTeX Warning: Reference `library/reprlib:module-reprlib' on page 2269 undefine
+d on input line 295508.
+
+
+LaTeX Warning: Reference `library/resource:module-resource' on page 2269 undefi
+ned on input line 295509.
+
+
+LaTeX Warning: Reference `library/rlcompleter:module-rlcompleter' on page 2269 
+undefined on input line 295510.
+
+
+LaTeX Warning: Reference `library/runpy:module-runpy' on page 2269 undefined on
+ input line 295511.
+
+
+LaTeX Warning: Reference `library/sched:module-sched' on page 2269 undefined on
+ input line 295514.
+
+
+LaTeX Warning: Reference `library/secrets:module-secrets' on page 2269 undefine
+d on input line 295515.
+
+
+LaTeX Warning: Reference `library/select:module-select' on page 2269 undefined 
+on input line 295516.
+
+
+LaTeX Warning: Reference `library/selectors:module-selectors' on page 2269 unde
+fined on input line 295517.
+
+
+LaTeX Warning: Reference `library/shelve:module-shelve' on page 2269 undefined 
+on input line 295518.
+
+
+LaTeX Warning: Reference `library/shlex:module-shlex' on page 2269 undefined on
+ input line 295519.
+
+
+LaTeX Warning: Reference `library/shutil:module-shutil' on page 2269 undefined 
+on input line 295520.
+
+
+LaTeX Warning: Reference `library/signal:module-signal' on page 2269 undefined 
+on input line 295521.
+
+
+LaTeX Warning: Reference `library/site:module-site' on page 2269 undefined on i
+nput line 295522.
+
+
+LaTeX Warning: Reference `library/site:module-sitecustomize' on page 2269 undef
+ined on input line 295523.
+
+
+LaTeX Warning: Reference `library/smtpd:module-smtpd' on page 2269 undefined on
+ input line 295524.
+
+
+LaTeX Warning: Reference `library/smtplib:module-smtplib' on page 2269 undefine
+d on input line 295525.
+
+
+LaTeX Warning: Reference `library/sndhdr:module-sndhdr' on page 2269 undefined 
+on input line 295526.
+
+
+LaTeX Warning: Reference `library/socket:module-socket' on page 2269 undefined 
+on input line 295527.
+
+
+LaTeX Warning: Reference `library/socketserver:module-socketserver' on page 226
+9 undefined on input line 295528.
+
+
+LaTeX Warning: Reference `library/spwd:module-spwd' on page 2269 undefined on i
+nput line 295529.
+
+
+LaTeX Warning: Reference `library/sqlite3:module-sqlite3' on page 2269 undefine
+d on input line 295530.
+
+
+LaTeX Warning: Reference `library/ssl:module-ssl' on page 2269 undefined on inp
+ut line 295531.
+
+
+LaTeX Warning: Reference `library/stat:module-stat' on page 2269 undefined on i
+nput line 295532.
+
+
+LaTeX Warning: Reference `library/statistics:module-statistics' on page 2269 un
+defined on input line 295533.
+
+
+LaTeX Warning: Reference `library/string:module-string' on page 2269 undefined 
+on input line 295534.
+
+
+LaTeX Warning: Reference `library/string.templatelib:module-string.templatelib'
+ on page 2269 undefined on input line 295535.
+
+
+LaTeX Warning: Reference `library/stringprep:module-stringprep' on page 2269 un
+defined on input line 295536.
+
+
+LaTeX Warning: Reference `library/struct:module-struct' on page 2269 undefined 
+on input line 295537.
+
+
+LaTeX Warning: Reference `library/subprocess:module-subprocess' on page 2269 un
+defined on input line 295538.
+
+
+LaTeX Warning: Reference `library/sunau:module-sunau' on page 2269 undefined on
+ input line 295539.
+
+
+LaTeX Warning: Reference `library/symtable:module-symtable' on page 2269 undefi
+ned on input line 295540.
+
+
+LaTeX Warning: Reference `library/sys:module-sys' on page 2269 undefined on inp
+ut line 295541.
+
+
+LaTeX Warning: Reference `library/sys.monitoring:module-sys.monitoring' on page
+ 2269 undefined on input line 295542.
+
+
+LaTeX Warning: Reference `library/sysconfig:module-sysconfig' on page 2269 unde
+fined on input line 295543.
+
+
+LaTeX Warning: Reference `library/syslog:module-syslog' on page 2269 undefined 
+on input line 295544.
+
+
+LaTeX Warning: Reference `library/tabnanny:module-tabnanny' on page 2269 undefi
+ned on input line 295547.
+
+
+LaTeX Warning: Reference `library/tarfile:module-tarfile' on page 2269 undefine
+d on input line 295548.
+
+
+LaTeX Warning: Reference `library/telnetlib:module-telnetlib' on page 2269 unde
+fined on input line 295549.
+
+
+LaTeX Warning: Reference `library/tempfile:module-tempfile' on page 2269 undefi
+ned on input line 295550.
+
+
+LaTeX Warning: Reference `library/termios:module-termios' on page 2269 undefine
+d on input line 295551.
+
+
+LaTeX Warning: Reference `library/test:module-test' on page 2269 undefined on i
+nput line 295552.
+
+
+LaTeX Warning: Reference `library/test:module-test.regrtest' on page 2269 undef
+ined on input line 295553.
+
+
+LaTeX Warning: Reference `library/test:module-test.support' on page 2269 undefi
+ned on input line 295554.
+
+
+LaTeX Warning: Reference `library/test:module-test.support.bytecode_helper' on 
+page 2269 undefined on input line 295555.
+
+
+LaTeX Warning: Reference `library/test:module-test.support.import_helper' on pa
+ge 2269 undefined on input line 295556.
+
+
+LaTeX Warning: Reference `library/test:module-test.support.os_helper' on page 2
+269 undefined on input line 295557.
+
+
+LaTeX Warning: Reference `library/test:module-test.support.script_helper' on pa
+ge 2269 undefined on input line 295558.
+
+
+LaTeX Warning: Reference `library/test:module-test.support.socket_helper' on pa
+ge 2269 undefined on input line 295559.
+
+
+LaTeX Warning: Reference `library/test:module-test.support.threading_helper' on
+ page 2269 undefined on input line 295560.
+
+
+LaTeX Warning: Reference `library/test:module-test.support.warnings_helper' on 
+page 2269 undefined on input line 295561.
+
+
+LaTeX Warning: Reference `library/textwrap:module-textwrap' on page 2269 undefi
+ned on input line 295562.
+
+
+LaTeX Warning: Reference `library/threading:module-threading' on page 2269 unde
+fined on input line 295563.
+
+
+LaTeX Warning: Reference `library/time:module-time' on page 2269 undefined on i
+nput line 295564.
+
+
+LaTeX Warning: Reference `library/timeit:module-timeit' on page 2269 undefined 
+on input line 295565.
+
+
+LaTeX Warning: Reference `library/tkinter:module-tkinter' on page 2269 undefine
+d on input line 295566.
+
+
+LaTeX Warning: Reference `library/tkinter.colorchooser:module-tkinter.colorchoo
+ser' on page 2269 undefined on input line 295567.
+
+
+LaTeX Warning: Reference `library/dialog:module-tkinter.commondialog' on page 2
+269 undefined on input line 295568.
+
+
+LaTeX Warning: Reference `library/dialog:module-tkinter.dialog' on page 2269 un
+defined on input line 295569.
+
+
+LaTeX Warning: Reference `library/tkinter.dnd:module-tkinter.dnd' on page 2269 
+undefined on input line 295570.
+
+
+LaTeX Warning: Reference `library/dialog:module-tkinter.filedialog' on page 226
+9 undefined on input line 295571.
+
+
+LaTeX Warning: Reference `library/tkinter.font:module-tkinter.font' on page 226
+9 undefined on input line 295572.
+
+
+LaTeX Warning: Reference `library/tkinter.messagebox:module-tkinter.messagebox'
+ on page 2269 undefined on input line 295573.
+
+
+LaTeX Warning: Reference `library/tkinter.scrolledtext:module-tkinter.scrolledt
+ext' on page 2269 undefined on input line 295574.
+
+
+LaTeX Warning: Reference `library/dialog:module-tkinter.simpledialog' on page 2
+269 undefined on input line 295575.
+
+
+LaTeX Warning: Reference `library/tkinter.ttk:module-tkinter.ttk' on page 2269 
+undefined on input line 295576.
+
+
+LaTeX Warning: Reference `library/token:module-token' on page 2269 undefined on
+ input line 295577.
+
+
+LaTeX Warning: Reference `library/tokenize:module-tokenize' on page 2269 undefi
+ned on input line 295578.
+
+
+LaTeX Warning: Reference `library/tomllib:module-tomllib' on page 2269 undefine
+d on input line 295579.
+
+
+LaTeX Warning: Reference `library/trace:module-trace' on page 2269 undefined on
+ input line 295580.
+
+
+LaTeX Warning: Reference `library/traceback:module-traceback' on page 2269 unde
+fined on input line 295581.
+
+
+LaTeX Warning: Reference `library/tracemalloc:module-tracemalloc' on page 2269 
+undefined on input line 295582.
+
+
+LaTeX Warning: Reference `library/tty:module-tty' on page 2269 undefined on inp
+ut line 295583.
+
+
+LaTeX Warning: Reference `library/turtle:module-turtle' on page 2269 undefined 
+on input line 295584.
+
+
+LaTeX Warning: Reference `library/turtle:module-turtledemo' on page 2269 undefi
+ned on input line 295585.
+
+
+LaTeX Warning: Reference `library/types:module-types' on page 2269 undefined on
+ input line 295586.
+
+
+LaTeX Warning: Reference `library/typing:module-typing' on page 2269 undefined 
+on input line 295587.
+
+
+LaTeX Warning: Reference `library/unicodedata:module-unicodedata' on page 2269 
+undefined on input line 295590.
+
+
+LaTeX Warning: Reference `library/unittest:module-unittest' on page 2269 undefi
+ned on input line 295591.
+
+
+LaTeX Warning: Reference `library/unittest.mock:module-unittest.mock' on page 2
+269 undefined on input line 295592.
+
+
+LaTeX Warning: Reference `library/urllib:module-urllib' on page 2269 undefined 
+on input line 295593.
+
+
+LaTeX Warning: Reference `library/urllib.error:module-urllib.error' on page 226
+9 undefined on input line 295594.
+
+[2269]
+
+LaTeX Warning: Reference `library/urllib.parse:module-urllib.parse' on page 227
+0 undefined on input line 295595.
+
+
+LaTeX Warning: Reference `library/urllib.request:module-urllib.request' on page
+ 2270 undefined on input line 295596.
+
+
+LaTeX Warning: Reference `library/urllib.request:module-urllib.response' on pag
+e 2270 undefined on input line 295597.
+
+
+LaTeX Warning: Reference `library/urllib.robotparser:module-urllib.robotparser'
+ on page 2270 undefined on input line 295598.
+
+
+LaTeX Warning: Reference `library/site:module-usercustomize' on page 2270 undef
+ined on input line 295599.
+
+
+LaTeX Warning: Reference `library/uu:module-uu' on page 2270 undefined on input
+ line 295600.
+
+
+LaTeX Warning: Reference `library/uuid:module-uuid' on page 2270 undefined on i
+nput line 295601.
+
+
+LaTeX Warning: Reference `library/venv:module-venv' on page 2270 undefined on i
+nput line 295604.
+
+
+LaTeX Warning: Reference `library/warnings:module-warnings' on page 2270 undefi
+ned on input line 295607.
+
+
+LaTeX Warning: Reference `library/wave:module-wave' on page 2270 undefined on i
+nput line 295608.
+
+
+LaTeX Warning: Reference `library/weakref:module-weakref' on page 2270 undefine
+d on input line 295609.
+
+
+LaTeX Warning: Reference `library/webbrowser:module-webbrowser' on page 2270 un
+defined on input line 295610.
+
+
+LaTeX Warning: Reference `library/winreg:module-winreg' on page 2270 undefined 
+on input line 295611.
+
+
+LaTeX Warning: Reference `library/winsound:module-winsound' on page 2270 undefi
+ned on input line 295612.
+
+
+LaTeX Warning: Reference `library/wsgiref:module-wsgiref' on page 2270 undefine
+d on input line 295613.
+
+
+LaTeX Warning: Reference `library/wsgiref:module-wsgiref.handlers' on page 2270
+ undefined on input line 295614.
+
+
+LaTeX Warning: Reference `library/wsgiref:module-wsgiref.headers' on page 2270 
+undefined on input line 295615.
+
+
+LaTeX Warning: Reference `library/wsgiref:module-wsgiref.simple_server' on page
+ 2270 undefined on input line 295616.
+
+
+LaTeX Warning: Reference `library/wsgiref:module-wsgiref.types' on page 2270 un
+defined on input line 295617.
+
+
+LaTeX Warning: Reference `library/wsgiref:module-wsgiref.util' on page 2270 und
+efined on input line 295618.
+
+
+LaTeX Warning: Reference `library/wsgiref:module-wsgiref.validate' on page 2270
+ undefined on input line 295619.
+
+
+LaTeX Warning: Reference `library/xdrlib:module-xdrlib' on page 2270 undefined 
+on input line 295622.
+
+
+LaTeX Warning: Reference `library/xml:module-xml' on page 2270 undefined on inp
+ut line 295623.
+
+
+LaTeX Warning: Reference `library/xml.dom:module-xml.dom' on page 2270 undefine
+d on input line 295624.
+
+
+LaTeX Warning: Reference `library/xml.dom.minidom:module-xml.dom.minidom' on pa
+ge 2270 undefined on input line 295625.
+
+
+LaTeX Warning: Reference `library/xml.dom.pulldom:module-xml.dom.pulldom' on pa
+ge 2270 undefined on input line 295626.
+
+
+LaTeX Warning: Reference `library/xml.etree.elementtree:module-xml.etree.Elemen
+tInclude' on page 2270 undefined on input line 295627.
+
+
+LaTeX Warning: Reference `library/xml.etree.elementtree:module-xml.etree.Elemen
+tTree' on page 2270 undefined on input line 295628.
+
+
+LaTeX Warning: Reference `library/pyexpat:module-xml.parsers.expat' on page 227
+0 undefined on input line 295629.
+
+
+LaTeX Warning: Reference `library/pyexpat:module-xml.parsers.expat.errors' on p
+age 2270 undefined on input line 295630.
+
+
+LaTeX Warning: Reference `library/pyexpat:module-xml.parsers.expat.model' on pa
+ge 2270 undefined on input line 295631.
+
+
+LaTeX Warning: Reference `library/xml.sax:module-xml.sax' on page 2270 undefine
+d on input line 295632.
+
+
+LaTeX Warning: Reference `library/xml.sax.handler:module-xml.sax.handler' on pa
+ge 2270 undefined on input line 295633.
+
+
+LaTeX Warning: Reference `library/xml.sax.utils:module-xml.sax.saxutils' on pag
+e 2270 undefined on input line 295634.
+
+
+LaTeX Warning: Reference `library/xml.sax.reader:module-xml.sax.xmlreader' on p
+age 2270 undefined on input line 295635.
+
+
+LaTeX Warning: Reference `library/xmlrpc:module-xmlrpc' on page 2270 undefined 
+on input line 295636.
+
+
+LaTeX Warning: Reference `library/xmlrpc.client:module-xmlrpc.client' on page 2
+270 undefined on input line 295637.
+
+
+LaTeX Warning: Reference `library/xmlrpc.server:module-xmlrpc.server' on page 2
+270 undefined on input line 295638.
+
+
+LaTeX Warning: Reference `library/zipapp:module-zipapp' on page 2270 undefined 
+on input line 295641.
+
+
+LaTeX Warning: Reference `library/zipfile:module-zipfile' on page 2270 undefine
+d on input line 295642.
+
+
+LaTeX Warning: Reference `library/zipimport:module-zipimport' on page 2270 unde
+fined on input line 295643.
+
+
+LaTeX Warning: Reference `library/zlib:module-zlib' on page 2270 undefined on i
+nput line 295644.
+
+
+LaTeX Warning: Reference `library/zoneinfo:module-zoneinfo' on page 2270 undefi
+ned on input line 295645.
+
+[2270
+
+]
+No file library.ind.
+
+Package longtable Warning: Table widths have changed. Rerun LaTeX.
+
+(./library.aux)
+
+LaTeX Font Warning: Some font shapes were not available, defaults substituted.
+
+
+LaTeX Warning: There were undefined references.
+
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
+
+Package rerunfilecheck Warning: File `library.out' has changed.
+(rerunfilecheck)                Rerun to get outlines right
+(rerunfilecheck)                or use package `bookmark'.
+
+Package rerunfilecheck Info: Checksums for `library.out':
+(rerunfilecheck)             Before: <no file>
+(rerunfilecheck)             After:  1B0AF1117F7C51010F2AD71AAE66A2F2;299400.
+ ) 
+Here is how much of TeX's memory you used:
+ 37280 strings out of 478179
+ 1153141 string characters out of 5854279
+ 1209337 words of memory out of 5000000
+ 57428 multiletter control sequences out of 15000+600000
+ 478747 words of font info for 148 fonts, out of 8000000 for 9000
+ 15 hyphenation exceptions out of 8191
+ 70i,17n,85p,2798b,15471s stack positions out of 5000i,500n,10000p,200000b,80000s
+
+Output written on library.pdf (2274 pages).
