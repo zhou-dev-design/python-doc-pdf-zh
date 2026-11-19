@@ -1017,8 +1017,10 @@ jobs:
   summary:
     # 也依赖 prepare：要靠它的 matrix 算出「这轮应该有几个版本」
     needs: [prepare, build]
-    # archive_only 时 build 被跳过，这里也就不必跑
-    if: always() && github.event.inputs.archive_only != 'true'
+    # archive_only 时 build 被跳过，这里也就不必跑。
+    # 普通 push（没有 [ci-run]）时 prepare/build 都会 skipped，这里也必须一起跳过：
+    # 否则它会拿不到构建产物，在「更新 README 表格」一步失败，把整次 run 染成红色。
+    if: always() && github.event.inputs.archive_only != 'true' && (github.event_name != 'push' || contains(github.event.head_commit.message, '[ci-run]'))
     runs-on: ubuntu-22.04
     steps:
       - name: 取代码
