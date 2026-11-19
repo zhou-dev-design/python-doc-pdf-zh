@@ -2873,19 +2873,19 @@ class Pipeline:
         #     并不能解决分页；逐个文件打补丁又要跟着上游结构变化走。
         #   ★ 为什么只改 ≥10 行：短表用 tabular 的观感更好（列宽贴合内容、不进浮动的
         #     长表队列），没必要动。实测 9 处溢出表都在 10 行以上。
-        #   ★ 幂等：靠 conf.py 里的 PYPDF_FORCE_LONGTABLE_V2 标记判断。
+        #   ★ 幂等：靠 conf.py 里的 PYPDF_FORCE_LONGTABLE_V3 标记判断。
         conf_txt = read_text_safe(conf)
-        if "PYPDF_FORCE_LONGTABLE_V2" not in conf_txt:
+        if "PYPDF_FORCE_LONGTABLE_V3" not in conf_txt:
             hook = '    app.connect("builder-inited", _check_doctest_interpreter)'
             if hook in conf_txt:
                 conf_txt = conf_txt.replace(
                     hook,
                     hook + '\n    app.connect("doctree-resolved", '
-                           '_force_longtable_tables_v2)  '
-                           '# PYPDF_FORCE_LONGTABLE_V2',
+                           '_force_longtable_tables_v3)  '
+                           '# PYPDF_FORCE_LONGTABLE_V3',
                     1)
                 conf_txt += '''
-# ===== 由本工具补充（PYPDF_FORCE_LONGTABLE_V2）=====
+# ===== 由本工具补充（PYPDF_FORCE_LONGTABLE_V3）=====
 # ≥10 行的表格改用 longtable：Sphinx 默认会把它们编成 tabular/tabulary，二者
 # 都不可跨页，表格高过一页时内容会冲出页面底边、压在页脚与页码上。
 # longtable 可跨页并自动重复表头。只动长表，短表保持原样。
@@ -2898,7 +2898,22 @@ class Pipeline:
 #   writer; remove widths & caption temporarily"），所以它们全都没有
 #   colwidths-given。这里补上 class + 等宽 colwidth=1，让 Sphinx 生成
 #   \\X{1}{n}，宽度锁回 \\linewidth。
-def _force_longtable_tables_v2(app, doctree, docname):
+#
+# ★ longtable 列宽漂移（2026-11-19）：
+#   \\X 用 \\linewidth 算列宽，而 \\linewidth 在长表里每遍可能不同，longtable
+#   于是每遍都报 "Table widths have changed. Rerun LaTeX."，latexmk 跑到上限
+#   仍不收敛 → 退出码 12，PDF 停在第一遍（目录空、书签 0、满屏 undefined）。
+#   11-19 的 3.15 就是这样丢掉 library / c-api 两册 2189 / 392 个书签的。
+#   在 \\begin{longtable} 之前把 \\linewidth 钉回 \\textwidth，列宽恒定。
+latex_elements = dict(latex_elements or {})
+latex_elements["preamble"] = latex_elements.get("preamble", "") + r"""
+\\makeatletter
+\\let\\spx@pypdf@als\\sphinxatlongtablestart
+\\def\\sphinxatlongtablestart{\\setlength{\\linewidth}{\\textwidth}\\spx@pypdf@als}
+\\makeatother
+"""
+
+def _force_longtable_tables_v3(app, doctree, docname):
     if getattr(app.builder, "format", "") != "latex":
         return
     from docutils import nodes
@@ -2917,9 +2932,9 @@ def _force_longtable_tables_v2(app, doctree, docname):
             cs["colwidth"] = 1
 '''
                 conf.write_text(conf_txt, encoding="utf-8")
-                self.rep.log("已在 conf.py 挂上 hook：≥10 行的表格改用 longtable，"
-                             "并给无 :widths: 的表补列宽"
-                             "（否则 {ll} 不换行，中文长句会画到纸外）",
+                self.rep.log("已在 conf.py 挂上 hook：≥10 行的表格改用 longtable、"
+                             "给无 :widths: 的表补列宽，并把 \\linewidth 钉回 "
+                             "\\textwidth（防表宽漂移导致 latexmk 不收敛、书签丢失）",
                              level="ok")
             else:
                 self.rep.log("conf.py 里找不到 `def setup(app)` 的 connect 行，"
