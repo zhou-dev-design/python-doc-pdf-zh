@@ -465,7 +465,9 @@ jobs:
           BOOKS_FLAG=""
           BOOKS="${{ github.event.inputs.books }}"
           if [ -z "$BOOKS" ]; then
-            BOOKS=$(printf '%s' "$COMMIT_MSG" | sed -n 's/.*\[books:\([^]]*\)\].*/\1/p')
+            # 用 Python 提取：sed 的 [^]] 在部分 sed 上会报
+            # "unknown option to `s'"，配合 set -e 直接 exit 2（实测踩过）
+            BOOKS=$(python -c 'import os,re; m=re.search(r"\[books:([^\]]+)\]", os.environ.get("COMMIT_MSG","")); print(m.group(1) if m else "")')
           fi
           if [ -n "$BOOKS" ]; then
             BOOKS_FLAG="--books $BOOKS"
