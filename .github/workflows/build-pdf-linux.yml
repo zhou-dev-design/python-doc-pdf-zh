@@ -59,6 +59,14 @@ on:
         options: ["false", "true"]
         default: "false"
 
+  # ★ 2026-11-19：GitHub 没有 SSH/CLI 触发接口（workflow_dispatch 必须 token），
+  #   所以加了这个 push 事件，让 `git push` 能直接触发一次验证构建。
+  #   门禁放在 job 的 if 里：只有 commit message 含 [ci-run] 才真的跑，
+  #   平时推送只会显示 skipped。可在 message 里带
+  #   [versions:3.15] 和 [books:library,c-api] 缩小范围。
+  push:
+    branches: [main]
+
 permissions:
   contents: write               # 要往仓库推分支
 
@@ -69,6 +77,7 @@ concurrency:
 jobs:
   # ---------------------------------------------------------------- 拆版本 + 刷新版本号
   prepare:
+    if: github.event_name != 'push' || contains(github.event.head_commit.message, '[ci-run]')
     runs-on: ubuntu-22.04
     outputs:
       matrix: ${{ steps.m.outputs.matrix }}
@@ -84,12 +93,17 @@ jobs:
         env:
           # 定时触发时没有 inputs（为空）→ 用下面的五版本默认值；手动触发则按填的来。
           VERSIONS: ${{ github.event.inputs.versions }}
+          COMMIT_MSG: ${{ github.event.head_commit.message }}
         run: |
           python3 - <<'PY'
-          import json, os
+          import json, os, re
           # ★ 3.10 已于 2026-10-31 EOL：不再构建，它的 release 由 archive-eol 归档到 old 分支
           DEFAULT = ["3.11", "3.12", "3.13", "3.14", "3.15"]
           raw = os.environ.get("VERSIONS") or ""
+          if not raw:
+              m = re.search(r"\[versions:([^\]]+)\]", os.environ.get("COMMIT_MSG") or "")
+              if m:
+                  raw = m.group(1)
           vs = [v.strip() for v in raw.split(",") if v.strip()]
           if not vs:
               vs = DEFAULT
@@ -238,7 +252,7 @@ jobs:
   build:
     needs: prepare
     # 手动触发时勾了「只做归档」就跳过构建（定时触发没有这个 input，永远构建）
-    if: github.event.inputs.archive_only != 'true'
+    if: github.event.inputs.archive_only != 'true' && (github.event_name != 'push' || contains(github.event.head_commit.message, '[ci-run]'))
     runs-on: ubuntu-22.04
     timeout-minutes: 360
     strategy:
@@ -440,6 +454,7 @@ jobs:
         id: build
         env:
           GIT_TERMINAL_PROMPT: "0"
+          COMMIT_MSG: ${{ github.event.head_commit.message }}
         run: |
           set -euo pipefail
           PY="$(python -c 'import sys;print(sys.executable)')"
@@ -448,8 +463,12 @@ jobs:
           MERGE_FLAG=""
           if [ "${{ github.event.inputs.merge }}" = "false" ]; then MERGE_FLAG="--no-merge"; fi
           BOOKS_FLAG=""
-          if [ -n "${{ github.event.inputs.books || '' }}" ]; then
-            BOOKS_FLAG="--books ${{ github.event.inputs.books }}"
+          BOOKS="${{ github.event.inputs.books }}"
+          if [ -z "$BOOKS" ]; then
+            BOOKS=$(printf '%s' "$COMMIT_MSG" | sed -n 's/.*\[books:\([^]]*\)\].*/\1/p')
+          fi
+          if [ -n "$BOOKS" ]; then
+            BOOKS_FLAG="--books $BOOKS"
           fi
           python ci/linux/pdf_builder_linux.py \
             --versions "${{ matrix.version }}" \
@@ -711,7 +730,7 @@ jobs:
             && echo "✔ 已推到 ci-logs 分支" || echo "✘ 推 ci-logs 失败（不影响其它步骤）"
 
       - name: 发布到 Releases（同版本原地更新；旧补丁版归档到 old 分支）
-        if: success() && github.event.inputs.push_branch != 'false'
+        if: success() && github.event.inputs.push_branch != 'false' && github.event_name != 'push'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TOKEN: ${{ secrets.GITHUB_TOKEN }}
