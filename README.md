@@ -322,16 +322,17 @@ python3 sphinx-pdf/gui/pdf_builder_multi.py --tool check-pdf-gaps <合并册.pdf
 2. **跨册 `:ref:` 引用本来就是断的**（`LaTeX Warning: Reference ... undefined`），分册编译的固有限制。
 3. **旧版本要用它自己的工具链**：3.10 需要 `sphinx==3.4.3`、3.11 是 `7.2`、3.12 是 `8.2`；
    ≤3.12 一律读该分支自己的 `Doc/requirements.txt`，一刀切装最新版必失败。
-4. **排版引擎锁定 TeX Live 2022**：CI 是 Ubuntu 22.04 自带的 2022（`xelatex` 自报
-   `XeTeX 0.999993 (TeX Live 2022/dev/Debian)`），与官方 PDF 的构建机（Debian 12 的
-   `xdvipdfmx (20220710)`）同代 —— 版式因此对得上，换成别的 TeX Live 版本会有毫米级页数差异。
+4. **排版引擎：CI 是 2021 快照，官方是 2022**：本项目 CI 用 Ubuntu 22.04 apt 的 TeX Live
+   （包名 `texlive-binaries 2021.20210626`），真正生成 PDF 的 `xdvipdfmx` 报 `20210609`；
+   官方 PDF 报 `20220710`（TeX Live 2022）。两者差一个版本周期，实测版式几乎一致 ——
+   决定版式的是 xdvipdfmx 的版本，不是 `xelatex` 自报的 `TeX Live 2022/dev/Debian` 字符串。
 
 ---
 
 ## 附：官方 PDF 下载（3.6 – 3.14，全部停在 2025-10）
 
-官方 2025-09 停发 PDF 后，旧文件仍挂在 CDN 上，可作**版式参照**（与本项目同源，3.8 起同为
-TeX Live 2022；包内也是分册，3.14 共 37 个 PDF）。
+官方 2025-09 停发 PDF 后，旧文件仍挂在 CDN 上，可作**版式参照**（官方 3.8 起用 TeX Live 2022；
+本项目 CI 是 2021 快照，版式差异止于毫米级；包内也是分册，3.14 共 37 个 PDF）。
 
 **3.15 没有官方 PDF**；3.13 / 3.14 都停在 2025-10-02——3.14 那份是 rc3（2025-09-18）到
 final（2025-10-07）之间的快照（[PEP 745](https://peps.python.org/pep-0745/)）。
@@ -367,7 +368,7 @@ final（2025-10-07）之间的快照（[PEP 745](https://peps.python.org/pep-074
 
 **构建**：[Sphinx](https://www.sphinx-doc.org/) +
 [python-docs-theme](https://github.com/python/python-docs-theme) +
-[TeX Live](https://www.tug.org/texlive/)（CI 用 Ubuntu 22.04 自带的 2022，与官方 PDF 的构建机同代）。
+[TeX Live](https://www.tug.org/texlive/)（官方 PDF 用 2022，本项目 CI 是 Ubuntu 22.04 apt 的 2021 快照）。
 
 **验收**：[poppler](https://poppler.freedesktop.org/) —— `pdfinfo` 查页数与残片、
 `pdffonts` 查中文字体有没有真嵌进去、`pdftotext` 取封面标题。
