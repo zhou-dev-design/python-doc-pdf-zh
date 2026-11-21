@@ -2860,6 +2860,27 @@ class Pipeline:
                          "（不加这行，逐页译文一个都匹配不上，正文会整册英文）",
                          level="warn")
 
+        # ★★ papersize 归一化：3.11 的 conf.py 写的是 'a4'，LaTeX 不认 ★★
+        #   Sphinx 把 latex_elements['papersize'] **原样**拼进文档类：
+        #       \documentclass[a4,10pt]{sphinxmanual}
+        #   而合法的纸张选项是 a4paper / letterpaper / a5paper…… `a4` 不是。
+        #   LaTeX 不报错，只丢一句 `Unused global option(s): [a4]`（日志里几乎看不见），
+        #   然后按文档类默认的 **letterpaper** 排完整册。
+        #   实测：3.11.18 的成品是 612×792pt（Letter），版心中位 540pt；
+        #         3.12 及以后是 595×842pt（A4），版心中位 523.3pt。
+        #   上游 3.12 已自己改成 'a4paper'（注释也从 ('letter' or 'a4') 改了），
+        #   所以这里只在遇到旧写法时补 paper 后缀，其余版本原样不动。
+        #   注意：改纸型会让 3.11 整册重排（页数/页码/溢出台账全变），属预期。
+        txt_paper = read_text_safe(conf)
+        mp = re.search(r"""('papersize'\s*:\s*')([A-Za-z0-9]+)(')""", txt_paper)
+        if mp and not mp.group(2).endswith("paper"):
+            conf.write_text(
+                txt_paper[:mp.start(2)] + mp.group(2) + "paper" + txt_paper[mp.end(2):],
+                encoding="utf-8")
+            self.rep.log(f"conf.py：papersize '{mp.group(2)}' → '{mp.group(2)}paper'"
+                         "（原值不是 LaTeX 纸张选项，会被静默忽略，整册回落成 Letter）",
+                         level="ok")
+
         # ★★ 表格不再强制 longtable（2026-11-19 回滚）★★
         #   2026-11-17 曾加过一个 hook：≥10 行的表格一律改 longtable，用来修
         #   9 处「表格压页脚」。它确实修好了压页脚，但把 library / c-api 两册的
@@ -2947,6 +2968,93 @@ latex_elements["preamble"] += r"""
             self.rep.log("已在 conf.py 加长串断行补丁（PYPDF_LINEBREAK_V2）：code-block "
                          "硬折行 + 下划线断点 + 字母数字串每 5 位断点"
                          "（根治中文表格与 hex/长数字横向溢出）", level="ok")
+
+        # ★★ 没有 :widths: 的表：补列宽，让它们能折行（2026-11-21）★★
+        #   11-21 那批实测：剩下的「出纸」页几乎全是**表格**——HTTP 状态码表的
+        #   (Experimental)、cr_* 属性表的 sys.set_coroutine_origin_tracking_depth()、
+        #   内置函数参数表被切成 sta / nlocals。它们在 PDF 里都是**一整行冲出纸外、
+        #   连中文都不换行**，因为 Sphinx 对没有 :widths: 的表生成 {ll}：
+        #   l 列取内容自然宽度、整行不换行，\allowbreak 断点对这种列完全无效
+        #   （实测连 `_` 都不断）。
+        #   修法：doctree 层补 'colwidths-given' class + 列宽 → Sphinx 生成 \X{a}{b}
+        #   （p{} 列，可折行）。列宽按单元格文字长度估（CJK 记 2、ASCII 记 1），
+        #   每列至少 10%，免得第一列被压成一条。
+        #   ★ 绝不加 'longtable'：longtable 要把实测列宽写进 .aux 并多遍收敛，
+        #     表宽一漂 latexmk 就退 12、PDF 停在第一遍、书签全丢（2026-11-19
+        #     library/c-api 事故）。tabular 不写 LT@ 记录，不存在这个问题。
+        conf_txt4 = read_text_safe(conf)
+        if "PYPDF_TABLE_WIDTHS" not in conf_txt4:
+            conf_txt4 += r'''
+# ===== 由本工具补充（PYPDF_TABLE_WIDTHS）=====
+# 没有 :widths: 的表会被编成 {ll}：列宽取内容自然宽度、整行不换行。中文长句和长
+# 标识符没有断行点，会直接画到纸外；\allowbreak 断点对 l 列无效。这里补上
+# 'colwidths-given' + 列宽，Sphinx 就会生成 \X{a}{b}（p{} 列，可折行）。
+# 绝不加 'longtable'：它要把实测列宽写进 .aux 并多遍收敛，表宽一漂 latexmk 就退 12，
+# PDF 停在第一遍、书签全丢（2026-11-19 事故）。tabular 不写 LT@ 记录，无此问题。
+from docutils import nodes as _pypdf_nodes
+
+
+def _pypdf_table_weights(tbl, ncols):
+    """按单元格文字长度估列宽（CJK 记 2、其余记 1），每列至少占 10%。"""
+    weights = [0] * ncols
+    for row in tbl.findall(_pypdf_nodes.row):
+        for i, entry in enumerate(row.findall(_pypdf_nodes.entry)):
+            if i >= ncols:
+                break
+            width = 0
+            for ch in entry.astext()[:400]:
+                width += 2 if ord(ch) > 0x2E7F else 1
+            if width > weights[i]:
+                weights[i] = width
+    total = sum(weights)
+    if not total:
+        return [1] * ncols
+    floor = max(8, total // 10)
+    return [max(w, floor) for w in weights]
+
+
+def _pypdf_fix_table_widths(app, doctree, docname):
+    if getattr(app.builder, "format", "") != "latex":
+        return
+    for tbl in doctree.findall(_pypdf_nodes.table):
+        classes = tbl["classes"]
+        if "colwidths-given" in classes or "longtable" in classes:
+            continue
+        # 嵌在别的表里就跳过：在 p{} 单元格里再按版心全宽排，只会更糟
+        parent = tbl.parent
+        while parent is not None:
+            if isinstance(parent, (_pypdf_nodes.entry, _pypdf_nodes.table)):
+                break
+            parent = parent.parent
+        if parent is not None:
+            continue
+        ncols = tbl.get("cols") or 0
+        if not ncols:
+            rows = list(tbl.findall(_pypdf_nodes.row))
+            if not rows:
+                continue
+            ncols = len(list(rows[0].findall(_pypdf_nodes.entry)))
+        if not ncols:
+            continue
+        classes.append("colwidths-given")
+        tbl["colwidths"] = _pypdf_table_weights(tbl, ncols)
+
+
+try:
+    _pypdf_orig_setup = setup
+except NameError:
+    _pypdf_orig_setup = None
+
+
+def setup(app):
+    if _pypdf_orig_setup is not None:
+        _pypdf_orig_setup(app)
+    app.connect("doctree-resolved", _pypdf_fix_table_widths)
+'''
+            conf.write_text(conf_txt4, encoding="utf-8")
+            self.rep.log("已在 conf.py 挂上表格列宽补丁（PYPDF_TABLE_WIDTHS）："
+                         "没有 :widths: 的表补列宽 → 生成可折行的 \\X{a}{b} 列"
+                         "（不转 longtable，避免 latexmk 不收敛）", level="ok")
 
         # ★★ 开编之前先确认「SVG → PDF」这条路真能走（2026-10-23 加）★★
         #   以前这里是裸跑 sphinx：CairoSVG 缺 cairo 运行库时，

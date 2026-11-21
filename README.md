@@ -2,12 +2,21 @@
 
 把 **CPython 官方 reST 文档** 与 **python-docs-zh-cn 中文译文** 编译成**中文分册 PDF**。
 
-> **为什么需要它**：官方 2025-09 决定停止发布文档 PDF——使用率低，而 PDF 构建却占掉大部分算力。
-> 所以 **3.14 起不再提供预构建 PDF**，3.13 及更早的仍挂在 CDN 上但不再更新。详见
-> [官方讨论](https://discuss.python.org/t/101343)。
+> **为什么需要它**：官方 2025-09 起停止发布文档 PDF——使用率低，而 PDF 构建却占掉大部分算力
+> （[官方讨论](https://discuss.python.org/t/101343)）。3.14 的下载页现在明确写着
+> “We no longer provide pre-built PDFs of the documentation”
+> （见 [docs.python.org/3.14/download.html](https://docs.python.org/3.14/download.html)）。
 >
-> 中文读者因此同时失去官方 PDF 和中文 PDF。本项目沿用官方那套 Sphinx + LaTeX 流程
-> （主题、字体、分册结构与官方 3.13 一致），接上译文产出**中文分册**，并合成一册，每天自动发布。
+> 官方 CDN 上确实还留着一份现成的 **`python-3.14-docs-pdf-a4.zip`**
+> （[archives 目录](https://docs.python.org/3.14/archives/)），但它的时间戳停在
+> **2025-10-01**——那是 3.14.0rc3（2025-09-18）到 3.14.0 final（2025-10-07）之间的
+> 最后一次构建（日程见 [PEP 745](https://peps.python.org/pep-0745/)），此后没再更新过。
+> 同一目录里 html / text / texinfo / epub 都还在随文档刷新，只有 PDF 冻在那一刻。
+> 所以那份 PDF 只适合当**排版对照**，不能当“最新文档”。
+>
+> 中文读者因此两头都缺：**没有中文 PDF，也没有跟进 3.14.x 的英文 PDF**。本项目沿用官方
+> 那套 Sphinx + LaTeX 流程（主题、字体、分册结构与官方 3.13 一致），接上译文产出
+> **中文分册**，并合成一册，每天自动发布。
 
 | | |
 |-|-|
@@ -19,6 +28,10 @@
 | 历史 | **`old` 分支**：EOL 版本、被新补丁版顶下来的旧版，按 tag 存目录 |
 | 入口 | CI：`ci/linux/pdf_builder_linux.py`；本机：`sphinx-pdf/gui/pdf_builder_multi.py` |
 
+> 纸张统一 **A4（595×842pt）**。3.11 的上游 `Doc/conf.py` 把 `papersize` 写成 `'a4'`——
+> 那不是 LaTeX 的纸张选项，会被静默忽略、整册按默认的 Letter（612×792pt）排；构建时
+> 已自动纠正为 `a4paper`（3.12 起上游自己写对了）。
+>
 > 要图形界面、要在本机 Windows 上跑，见 [`sphinx-pdf/gui/README.md`](sphinx-pdf/gui/README.md)。
 > 要逐步操作与排错清单，见 [`构建Python文档PDF-完整步骤.md`](构建Python文档PDF-完整步骤.md)。
 
