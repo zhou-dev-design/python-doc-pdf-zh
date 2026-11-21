@@ -345,19 +345,20 @@ final（2025-10-07）之间的快照（[PEP 745](https://peps.python.org/pep-074
 |-|-|-|-|-|-|-|-|
 | 3.6 | [3.6.15](https://docs.python.org/zh-cn/3.6/archives/python-3.6.15-docs-pdf-a4.zip) | 22.9 MB | 2021-09-06 | 2020 | 3.6.15 | 3.6.15 | — |
 | 3.7 | [3.7.13](https://docs.python.org/zh-cn/3.7/archives/python-3.7.13-docs-pdf-a4.zip) | 23.6 MB | 2022-03-17 | 2020 | 3.7.13 | 3.7.17 | 4 版 |
-| 3.8 | [3.8.20](https://docs.python.org/zh-cn/3.8/archives/python-3.8.20-docs-pdf-a4.zip) | 24.7 MB | 2024-12-10 | 2022 | 3.8.20 | 3.8.20 | — |
-| 3.9 | [3.9.24](https://docs.python.org/zh-cn/3.9/archives/python-3.9.24-docs-pdf-a4.zip) | 25.4 MB | 2025-10-17 | 2022 | 3.9.24 | 3.9.25 | 1 版 |
-| 3.10 | [3.10.19](https://docs.python.org/zh-cn/3.10/archives/python-3.10.19-docs-pdf-a4.zip) | 26.5 MB | 2025-10-16 | 2022 | 3.10.19 | 3.10.22 | 3 版 |
-| 3.11 | [3.11.14](https://docs.python.org/zh-cn/3.11/archives/python-3.11.14-docs-pdf-a4.zip) | 27.1 MB | 2025-10-16 | 2022 | 3.11.14 | 3.11.18 | 4 版 |
-| 3.12 | [3.12](https://docs.python.org/zh-cn/3.12/archives/python-3.12-docs-pdf-a4.zip) | 29.8 MB | 2025-09-30 | 2022 | 3.12.11 | 3.12.16 | 5 版 |
-| 3.13 | [3.13](https://docs.python.org/zh-cn/3.13/archives/python-3.13-docs-pdf-a4.zip) | 32.9 MB | 2025-10-02 | 2022 | 3.13.7 | 3.13.18 | 11 版 |
-| 3.14 | [3.14](https://docs.python.org/zh-cn/3.14/archives/python-3.14-docs-pdf-a4.zip) | 34.2 MB | 2025-10-02 | 2022 | 3.14.0rc3 | 3.14.10 | 11 版 |
+| 3.8 | [3.8.20](https://docs.python.org/zh-cn/3.8/archives/python-3.8.20-docs-pdf-a4.zip) | 24.7 MB | 2024-12-10 | 2023 | 3.8.20 | 3.8.20 | — |
+| 3.9 | [3.9.24](https://docs.python.org/zh-cn/3.9/archives/python-3.9.24-docs-pdf-a4.zip) | 25.4 MB | 2025-10-17 | 2023 | 3.9.24 | 3.9.25 | 1 版 |
+| 3.10 | [3.10.19](https://docs.python.org/zh-cn/3.10/archives/python-3.10.19-docs-pdf-a4.zip) | 26.5 MB | 2025-10-16 | 2023 | 3.10.19 | 3.10.22 | 3 版 |
+| 3.11 | [3.11.14](https://docs.python.org/zh-cn/3.11/archives/python-3.11.14-docs-pdf-a4.zip) | 27.1 MB | 2025-10-16 | 2023 | 3.11.14 | 3.11.18 | 4 版 |
+| 3.12 | [3.12](https://docs.python.org/zh-cn/3.12/archives/python-3.12-docs-pdf-a4.zip) | 29.8 MB | 2025-09-30 | 2023 | 3.12.11 | 3.12.16 | 5 版 |
+| 3.13 | [3.13](https://docs.python.org/zh-cn/3.13/archives/python-3.13-docs-pdf-a4.zip) | 32.9 MB | 2025-10-02 | 2023 | 3.13.7 | 3.13.18 | 11 版 |
+| 3.14 | [3.14](https://docs.python.org/zh-cn/3.14/archives/python-3.14-docs-pdf-a4.zip) | 34.2 MB | 2025-10-02 | 2023 | 3.14.0rc3 | 3.14.10 | 11 版 |
 
 ⇒ **9 份里只有 3.6、3.8 是该版本线的最后一版**，其余看版式可以，看内容不行——要最新内容用本仓库 Releases。
 
-> 「TeX」列读自 PDF 元数据的 `Producer`：3.6/3.7 是 `XeTeX 0.99998`（TL2019/2020），
+> 「TeX」列 = PDF 元数据 `Producer` 的引擎所属发行版：3.6/3.7 是 `XeTeX 0.99998`（TL2020 代），
 > 3.8 起 276 册**全部**是 `xdvipdfmx (20220710)` —— 该戳属 **TeX Live 2023**（2022-07 编译），
-> 不是 TL2022（其 xdvipdfmx 是 20211117）。出包日期取自 CDN 的 `Last-Modified`；
+> 而不是字面年份 TL2022（TL2022 的戳是 20211117）。注意引擎可跨版升级，宏包层无元数据可查，
+> 此列只代表 xdvipdfmx 归属，不等于整套工具链版本。出包日期取自 CDN 的 `Last-Modified`；
 > 该列表按 **UTC** 显示，表内已换算成北京时间。
 > 英文版去掉路径里的 `zh-cn/` 即可（体积小约 1/3）；查补丁版号认英文站或 [endoflife.date](https://endoflife.date/python)，中文站 3.7 还停在 `3.7.13`。
 
