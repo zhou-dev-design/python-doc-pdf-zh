@@ -9,17 +9,17 @@
 >
 > 官方（含中文站）的 archives 目录里确实还留着现成的 PDF，但都停在 **2025-10**：
 >
-> | 版本 | 官方中文 PDF | 时间戳 | 大小 |
+> | 版本 | 官方中文 PDF | 时间戳（北京时间） | 大小 |
 > |-|-|-|-|
-> | 3.14 | [python-3.14-docs-pdf-a4.zip](https://docs.python.org/zh-cn/3.14/archives/python-3.14-docs-pdf-a4.zip) | **2025-10-01** | 34 MB |
-> | 3.13 | [python-3.13-docs-pdf-a4.zip](https://docs.python.org/zh-cn/3.13/archives/python-3.13-docs-pdf-a4.zip) | **2025-10-02** | 33 MB |
+> | 3.14 | [python-3.14-docs-pdf-a4.zip](https://docs.python.org/zh-cn/3.14/archives/python-3.14-docs-pdf-a4.zip) | **2025-10-02 01:13** | 34 MB |
+> | 3.13 | [python-3.13-docs-pdf-a4.zip](https://docs.python.org/zh-cn/3.13/archives/python-3.13-docs-pdf-a4.zip) | **2025-10-02 08:55** | 33 MB |
 > | 3.15 | 没有 | — | — |
 >
-> 同一个 archives 目录里，html / text / texinfo / epub 都还在随文档刷新（3.14 中文站是
-> 2026-11-20），只有 PDF 冻在那一刻。所以 3.14 那份是 3.14.0rc3（2025-09-18）到
-> 3.14.0 final（2025-10-07）之间的快照：**3.14.0 正式版之后的所有 3.14.x 修订、以及整个
-> 3.15，都没有官方中文 PDF**（发布日程见 [PEP 745](https://peps.python.org/pep-0745/)）。
-> 英文站同样是这个日期，两边一起停的。
+> 同一个 archives 目录里，html / text / texinfo / epub 都还在随文档刷新（3.14 中文站的
+> html 包是北京时间 11-20 20:48），只有 PDF 冻在那一刻——两份 PDF 其实是**同一天**停的。
+> 所以 3.14 那份是 3.14.0rc3（2025-09-18）到 3.14.0 final（2025-10-07）之间的快照：
+> **3.14.0 正式版之后的所有 3.14.x 修订、以及整个 3.15，都没有官方中文 PDF**
+> （发布日程见 [PEP 745](https://peps.python.org/pep-0745/)）。英文站也是同一天停的。
 >
 > 中文读者手里因此只有一份一年多前的旧快照，此后的修订一条都拿不到。本项目沿用官方那套
 > Sphinx + LaTeX 流程（主题、字体、分册结构与官方 3.13 一致），接上最新译文产出
