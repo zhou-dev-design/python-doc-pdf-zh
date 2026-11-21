@@ -322,17 +322,18 @@ python3 sphinx-pdf/gui/pdf_builder_multi.py --tool check-pdf-gaps <合并册.pdf
 2. **跨册 `:ref:` 引用本来就是断的**（`LaTeX Warning: Reference ... undefined`），分册编译的固有限制。
 3. **旧版本要用它自己的工具链**：3.10 需要 `sphinx==3.4.3`、3.11 是 `7.2`、3.12 是 `8.2`；
    ≤3.12 一律读该分支自己的 `Doc/requirements.txt`，一刀切装最新版必失败。
-4. **排版引擎：CI 是 2021 快照，官方是 2022**：本项目 CI 用 Ubuntu 22.04 apt 的 TeX Live
-   （包名 `texlive-binaries 2021.20210626`），真正生成 PDF 的 `xdvipdfmx` 报 `20210609`；
-   官方 PDF 报 `20220710`（TeX Live 2022）。两者差一个版本周期，实测版式几乎一致 ——
-   决定版式的是 xdvipdfmx 的版本，不是 `xelatex` 自报的 `TeX Live 2022/dev/Debian` 字符串。
+4. **排版引擎以 xdvipdfmx 为准**：官方 PDF 的 Producer 是 `xdvipdfmx (20220710)`，属
+   **TeX Live 2023**（戳里的 2022 是编译日期，不是发行版年；TL2022 的戳是 20211117）。
+   本项目 CI 用 Ubuntu 22.04 apt 的 TeX Live，原本报 `20210609`，现已替换成同一二进制
+   `20220710`，与官方引擎一致 —— 决定版式的是 xdvipdfmx，不是 `xelatex` 自报的
+   `TeX Live 2022/dev/Debian` 字符串。
 
 ---
 
 ## 附：官方 PDF 下载（3.6 – 3.14，全部停在 2025-10）
 
-官方 2025-09 停发 PDF 后，旧文件仍挂在 CDN 上，可作**版式参照**（官方 3.8 起用 TeX Live 2022；
-本项目 CI 是 2021 快照，版式差异止于毫米级；包内也是分册，3.14 共 37 个 PDF）。
+官方 2025-09 停发 PDF 后，旧文件仍挂在 CDN 上，可作**版式参照**（官方 3.8 起 276 册引擎全是
+`xdvipdfmx 20220710`＝TL2023；本项目 CI 已替换成同一引擎；包内也是分册，3.14 共 37 个 PDF）。
 
 **3.15 没有官方 PDF**；3.13 / 3.14 都停在 2025-10-02——3.14 那份是 rc3（2025-09-18）到
 final（2025-10-07）之间的快照（[PEP 745](https://peps.python.org/pep-0745/)）。
@@ -354,8 +355,10 @@ final（2025-10-07）之间的快照（[PEP 745](https://peps.python.org/pep-074
 
 ⇒ **9 份里只有 3.6、3.8 是该版本线的最后一版**，其余看版式可以，看内容不行——要最新内容用本仓库 Releases。
 
-> 「TeX」列读自 PDF 元数据的 `Producer`：3.6/3.7 是 `XeTeX 0.99998`，3.8 起是 `xdvipdfmx (20220710)`
-> = TeX Live 2022。出包日期取自 CDN 的 `Last-Modified`；该列表按 **UTC** 显示，表内已换算成北京时间。
+> 「TeX」列读自 PDF 元数据的 `Producer`：3.6/3.7 是 `XeTeX 0.99998`（TL2019/2020），
+> 3.8 起 276 册**全部**是 `xdvipdfmx (20220710)` —— 该戳属 **TeX Live 2023**（2022-07 编译），
+> 不是 TL2022（其 xdvipdfmx 是 20211117）。出包日期取自 CDN 的 `Last-Modified`；
+> 该列表按 **UTC** 显示，表内已换算成北京时间。
 > 英文版去掉路径里的 `zh-cn/` 即可（体积小约 1/3）；查补丁版号认英文站或 [endoflife.date](https://endoflife.date/python)，中文站 3.7 还停在 `3.7.13`。
 
 ---
@@ -368,7 +371,7 @@ final（2025-10-07）之间的快照（[PEP 745](https://peps.python.org/pep-074
 
 **构建**：[Sphinx](https://www.sphinx-doc.org/) +
 [python-docs-theme](https://github.com/python/python-docs-theme) +
-[TeX Live](https://www.tug.org/texlive/)（官方 PDF 用 2022，本项目 CI 是 Ubuntu 22.04 apt 的 2021 快照）。
+[TeX Live](https://www.tug.org/texlive/)（官方 PDF 的 xdvipdfmx 戳为 20220710＝TL2023，本项目 CI 已替换为同一引擎）。
 
 **验收**：[poppler](https://poppler.freedesktop.org/) —— `pdfinfo` 查页数与残片、
 `pdffonts` 查中文字体有没有真嵌进去、`pdftotext` 取封面标题。
