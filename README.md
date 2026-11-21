@@ -7,23 +7,12 @@
 > “We no longer provide pre-built PDFs of the documentation”
 > （见 [docs.python.org/3.14/download.html](https://docs.python.org/3.14/download.html)）。
 >
-> 官方（含中文站）的 archives 目录里确实还留着现成的 PDF，但都停在 **2025-10**：
+> 所以中文读者手里只剩一份 2025-10 的旧快照：**3.14.0 正式版之后的所有 3.14.x 修订、
+> 以及整个 3.15，都没有官方中文 PDF**。本项目沿用官方那套 Sphinx + LaTeX 流程
+> （主题、字体、分册结构与官方 3.13 一致），接上最新译文产出**中文分册**，并合成一册，
+> 每天自动发布。
 >
-> | 版本 | 官方中文 PDF | 时间戳（北京时间） | 大小 |
-> |-|-|-|-|
-> | 3.14 | [python-3.14-docs-pdf-a4.zip](https://docs.python.org/zh-cn/3.14/archives/python-3.14-docs-pdf-a4.zip) | **2025-10-02 01:13** | 34 MB |
-> | 3.13 | [python-3.13-docs-pdf-a4.zip](https://docs.python.org/zh-cn/3.13/archives/python-3.13-docs-pdf-a4.zip) | **2025-10-02 08:55** | 33 MB |
-> | 3.15 | 没有 | — | — |
->
-> 同一个 archives 目录里，html / text / texinfo / epub 都还在随文档刷新（3.14 中文站的
-> html 包是北京时间 11-20 20:48），只有 PDF 冻在那一刻——两份 PDF 其实是**同一天**停的。
-> 所以 3.14 那份是 3.14.0rc3（2025-09-18）到 3.14.0 final（2025-10-07）之间的快照：
-> **3.14.0 正式版之后的所有 3.14.x 修订、以及整个 3.15，都没有官方中文 PDF**
-> （发布日程见 [PEP 745](https://peps.python.org/pep-0745/)）。英文站也是同一天停的。
->
-> 中文读者手里因此只有一份一年多前的旧快照，此后的修订一条都拿不到。本项目沿用官方那套
-> Sphinx + LaTeX 流程（主题、字体、分册结构与官方 3.13 一致），接上最新译文产出
-> **中文分册**，并合成一册，每天自动发布。
+> 官方各版 PDF 的下载链接、大小与冻结日期，见文末「附：官方 PDF 下载」。
 
 | | |
 |-|-|
@@ -340,10 +329,15 @@ python3 sphinx-pdf/gui/pdf_builder_multi.py --tool check-pdf-gaps <合并册.pdf
 
 ---
 
-## 附：官方 PDF 下载（3.6 – 3.13）
+## 附：官方 PDF 下载（3.6 – 3.14，全部停在 2025-10）
 
 官方 2025-09 停发 PDF 后旧文件仍挂在 CDN 上，可作**版式参照**——与本项目同源（Sphinx + LaTeX +
 `python-docs-theme`），连排版引擎都是同一代（3.8 起全是 TeX Live 2022）。
+
+**3.15 一份都没有**：`archives/` 里只有 html / text / texinfo / epub，而且仍在随文档刷新
+（3.14 中文站的 html 包是北京时间 11-20 20:48）。冻住的只有 PDF——3.13 和 3.14 两份都是
+**2025-10-02** 停的（分别为 08:55、01:13）。所以 3.14 那份是 3.14.0rc3（2025-09-18）到
+3.14.0 final（2025-10-07）之间的快照（日程见 [PEP 745](https://peps.python.org/pep-0745/)）。
 
 **文件名里的版本号别信**：3.6~3.11 带补丁号但多数不是最后一版，3.12/3.13 干脆不带号（固定快照）。一切以下表「包内实际版本」为准。
 
@@ -357,11 +351,14 @@ python3 sphinx-pdf/gui/pdf_builder_multi.py --tool check-pdf-gaps <合并册.pdf
 | 3.11 | [3.11.14](https://docs.python.org/zh-cn/3.11/archives/python-3.11.14-docs-pdf-a4.zip) | 27.1 MB | 2025-10-16 | 2022 | 3.11.14 | 3.11.18 | 4 版 |
 | 3.12 | [3.12](https://docs.python.org/zh-cn/3.12/archives/python-3.12-docs-pdf-a4.zip) | 29.8 MB | 2025-09-30 | 2022 | 3.12.11 | 3.12.16 | 5 版 |
 | 3.13 | [3.13](https://docs.python.org/zh-cn/3.13/archives/python-3.13-docs-pdf-a4.zip) | 32.9 MB | 2025-10-02 | 2022 | 3.13.7 | 3.13.18 | 11 版 |
+| 3.14 | [3.14](https://docs.python.org/zh-cn/3.14/archives/python-3.14-docs-pdf-a4.zip) | 34.2 MB | 2025-10-02 | — | 3.14.0rc3 | 3.14.10 | 11 版 |
 
-⇒ **8 份里只有 3.6、3.8 是该版本线的最后一版**，其余看版式可以，看内容不行——要最新内容用本仓库 Releases。
+⇒ **9 份里只有 3.6、3.8 是该版本线的最后一版**，其余看版式可以，看内容不行——要最新内容用本仓库 Releases。
 
 > 「TeX」列读自 PDF 元数据的 `Producer`：3.6/3.7 是 `XeTeX 0.99998`，3.8 起是 `xdvipdfmx (20220710)` = TeX Live 2022。
-> 出包日期取自 CDN 的 `Last-Modified`（北京时间），最晚一份是 2025-10-17，此后再无新 PDF。
+> 3.14 那行是「—」：手上那份 PDF 的元数据被重写过（Author 变成了本地用户、没有 Producer），读不出来。
+> 出包日期取自 CDN 的 `Last-Modified`。**目录列表按 UTC 显示**（用 HTTP 头核对过：`Last-Modified` 与列表逐字一致），
+> 表里已换算成北京时间（+8）。最晚的一份是 3.9 的 2025-10-17；3.13/3.14 停在 2025-10-02。
 > 英文版去掉路径里的 `zh-cn/` 即可（体积小约 1/3）；查补丁版号认英文站或 [endoflife.date](https://endoflife.date/python)，中文站 3.7 还停在 `3.7.13`。
 
 ---
