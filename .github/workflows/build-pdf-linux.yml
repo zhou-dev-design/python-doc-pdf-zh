@@ -330,6 +330,39 @@ jobs:
             fi
           done
 
+      # ★ 让 CI 的 PDF 输出引擎与官方 PDF 同为 xdvipdfmx 20220710（TeX Live 2022）。
+      #   apt 的 `texlive-binaries 2021.20210626` 里那个报 20210609（2021 快照），
+      #   只差 PDF 落盘驱动；LaTeX 宏包/字体/xelatex 全部保留 apt 版即可，版式即与官方对齐。
+      #   该二进制只依赖 libc/libm（kpathsea 静态链接、无 /usr/local/texlive 硬编码），
+      #   故单独替换安全。下载失败/校验不过 → 沿用 apt 版并告警，不阻塞构建。
+      - name: 替换 xdvipdfmx 为 TL2022（20220710，与官方 PDF 同引擎）
+        run: |
+          set -e
+          URL="https://ftp.math.utah.edu/pub/tex/historic/systems/texlive/2022/tlnet-final/archive/dvipdfmx.x86_64-linux.r62187.tar.xz"
+          SHA="f37e1c5f97de9a2333c05e25d07bb6e65baf41d7a2340c7af7f224fa189fe41d"
+          echo "替换前: $(xdvipdfmx --version 2>&1 | head -1)"
+          TMPD="$(mktemp -d)"
+          # 下载带重试（海外 runner 访问 utah 快；失败可换清华镜像）
+          if ! curl -fsSL -m 120 "$URL" -o "$TMPD/pkg.tar.xz"; then
+            ALT="https://mirrors.tuna.tsinghua.edu.cn/tex-historic-archive/systems/texlive/2022/tlnet-final/archive/dvipdfmx.x86_64-linux.r62187.tar.xz"
+            curl -fsSL -m 120 "$ALT" -o "$TMPD/pkg.tar.xz" \
+              || { echo "::warning::下载 TL2022 xdvipdfmx 失败，沿用 apt 版"; exit 0; }
+          fi
+          ACTUAL="$(sha256sum "$TMPD/pkg.tar.xz" | awk '{print $1}')"
+          if [ "$ACTUAL" != "$SHA" ]; then
+            echo "::warning::SHA256 不符（$ACTUAL），沿用 apt 版"; exit 0
+          fi
+          tar -xf "$TMPD/pkg.tar.xz" -C "$TMPD"
+          BIN="$TMPD/bin/x86_64-linux/xdvipdfmx"
+          VER="$( "$BIN" --version 2>&1 | head -1 )"
+          echo "新二进制: $VER"
+          echo "$VER" | grep -q 20220710 \
+            || { echo "::warning::版本不是 20220710（$VER），沿用 apt 版"; exit 0; }
+          XDVIPATH="$(command -v xdvipdfmx)"
+          sudo install -m 755 "$BIN" "$XDVIPATH"
+          hash -r
+          echo "替换后: $(xdvipdfmx --version 2>&1 | head -1)"
+
       # ★ 发布时要打 RAR 包。Ubuntu 的 `rar` 在 multiverse 里（RARLAB 免费 CLI 版，
       #   压缩包注释里会带一行「evaluation copy」，不影响使用）。
       #   单独一步、装不上只警告：RAR 是**附加**产物，不能因为它挡掉整个发布。
