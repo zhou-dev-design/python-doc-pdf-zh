@@ -76,7 +76,7 @@ concurrency:
 jobs:
   # ---------------------------------------------------------------- 拆版本 + 刷新版本号
   prepare:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     outputs:
       matrix: ${{ steps.m.outputs.matrix }}
       versions: ${{ steps.m.outputs.versions }}
@@ -168,7 +168,7 @@ jobs:
   #   加一个版本：往 EOL_TAGS 里添一个 tag 即可。
   archive-eol:
     needs: prepare
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     continue-on-error: true          # 归档失败不该拦住建 PDF
     steps:
       - name: 把停止支持的版本归档到 old 分支
@@ -246,7 +246,10 @@ jobs:
     needs: prepare
     # 手动触发时勾了「只做归档」就跳过构建（定时触发没有这个 input，永远构建）
     if: github.event.inputs.archive_only != 'true'
-    runs-on: ubuntu-22.04
+    # ★ 24.04 不是随手升级（2026-11-22 换）：它的 apt TeX 就是官方 PDF 那一套
+    #   （texlive-binaries 2023.20230311 → xdvipdfmx 20220710，字体也是官方同款），
+    #   于是不再需要下载替换二进制。22.04 的 texlive-binaries 是 2021 快照。
+    runs-on: ubuntu-24.04
     timeout-minutes: 360
     strategy:
       fail-fast: false
@@ -330,41 +333,18 @@ jobs:
             fi
           done
 
-      # ★ 让 CI 的 PDF 输出引擎与官方 PDF 同为 xdvipdfmx 20220710。
-      #   apt 的 `texlive-binaries 2021.20210626` 里那个报 20210609（2021 快照）。
-      #   ★ 20220710 不在 TL2022 仓库里（TL2022 出厂/冻结版都是 20211117），
-      #     它属于 **TeX Live 2023** 的 dvipdfmx（2022-07 编译，TL2023 冻结前）——
-      #     官方 PDF 出自 Debian 12：TL2022 宏包 + 更新过的 xdvipdfmx 20220710，
-      #     所以我们取 TL2023 仓库里这个二进制即可精确对齐。
-      #   该二进制只依赖 libc/libm（kpathsea 静态链接、无 /usr/local/texlive 硬编码），
-      #   故单独替换安全。下载失败/校验不过 → 沿用 apt 版并告警，不阻塞构建。
-      - name: 替换 xdvipdfmx 为 20220710（与官方 PDF 同引擎）
+      # ★ 无需下载替换二进制：Ubuntu 24.04 的 apt `texlive-binaries 2023.20230311` 里
+      #   那个 xdvipdfmx 就是**官方 PDF 报的 20220710**（2026-11-22 从 deb 里 strings 查证）。
+      #   官方构建机同样是 PSF 规范的 Ubuntu 24.04 + 发行版 texlive 包，所以这里从
+      #   「打补丁对齐」变成了「本来就一致」；只留一条断言，镜像哪天回退能在日志里看见。
+      #   （旧做法：apt 是 2021.20210626→20210609，故从 TL2023 historic archive 下
+      #     dvipdfmx r65877 覆盖安装；那个 URL 属历史归档，已随本次切换移除。）
+      - name: 确认排版引擎为 xdvipdfmx 20220710
         run: |
-          set -e
-          URL="https://ftp.math.utah.edu/pub/tex/historic/systems/texlive/2023/tlnet-final/archive/dvipdfmx.x86_64-linux.r65877.tar.xz"
-          SHA="ef95edea32e4a26d89fbe2ce556382f9d9b49a7105c3ec8a08dc7fcae9c8b570"
-          echo "替换前: $(xdvipdfmx --version 2>&1 | head -1)"
-          TMPD="$(mktemp -d)"
-          # 下载带重试（海外 runner 访问 utah 快；失败可换清华镜像）
-          if ! curl -fsSL -m 120 "$URL" -o "$TMPD/pkg.tar.xz"; then
-            ALT="https://mirrors.tuna.tsinghua.edu.cn/tex-historic-archive/systems/texlive/2023/tlnet-final/archive/dvipdfmx.x86_64-linux.r65877.tar.xz"
-            curl -fsSL -m 120 "$ALT" -o "$TMPD/pkg.tar.xz" \
-              || { echo "::warning::下载 xdvipdfmx 20220710 失败，沿用 apt 版"; exit 0; }
-          fi
-          ACTUAL="$(sha256sum "$TMPD/pkg.tar.xz" | awk '{print $1}')"
-          if [ "$ACTUAL" != "$SHA" ]; then
-            echo "::warning::SHA256 不符（$ACTUAL），沿用 apt 版"; exit 0
-          fi
-          tar -xf "$TMPD/pkg.tar.xz" -C "$TMPD"
-          BIN="$TMPD/bin/x86_64-linux/xdvipdfmx"
-          VER="$( "$BIN" --version 2>&1 | head -1 )"
-          echo "新二进制: $VER"
+          VER="$(xdvipdfmx --version 2>&1 | head -1)"
+          echo "xdvipdfmx: $VER"
           echo "$VER" | grep -q 20220710 \
-            || { echo "::warning::版本不是 20220710（$VER），沿用 apt 版"; exit 0; }
-          XDVIPATH="$(command -v xdvipdfmx)"
-          sudo install -m 755 "$BIN" "$XDVIPATH"
-          hash -r
-          echo "替换后: $(xdvipdfmx --version 2>&1 | head -1)"
+            || echo "::warning::引擎不是 20220710（$VER），与官方 PDF 不同；版式差异为毫米级"
 
       # ★ 发布时要打 RAR 包。Ubuntu 的 `rar` 在 multiverse 里（RARLAB 免费 CLI 版，
       #   压缩包注释里会带一行「evaluation copy」，不影响使用）。
@@ -1043,7 +1023,7 @@ jobs:
     # archive_only 时 build 被跳过，这里也就不必跑（build 跳过后拿不到构建信息，
     # 「更新 README 表格」那一步会失败）。
     if: always() && github.event.inputs.archive_only != 'true'
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - name: 取代码
         uses: actions/checkout@v4

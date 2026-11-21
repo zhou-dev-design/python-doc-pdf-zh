@@ -339,8 +339,9 @@ class LinuxPipeline(M.Pipeline):
     def _fix_report_texlive_year(self) -> None:
         """把验收报告里那行「TeX Live 2025」改成**实测**年份。
 
-        ★ 主程序的报告模板把年份写死成 2025（作者本机是 TeX Live 2025），而 CI 用
-          apt 装的其实是 `TeX Live 2022/dev/Debian`（Ubuntu 22.04 那份 2021 树）。
+        ★ 主程序的报告模板把年份写死成 2025（作者本机是 TeX Live 2025），而 CI 跑的是
+          **Ubuntu 24.04** apt 的 TeX Live 2023（22.04 时代则是 `2022/dev/Debian` 的贴牌字符串，
+          实际二进制是 2021 树）。
           报告是要存档、以后用来对数的，年份写错会让人以为两次构建用了同一套工具链
           —— 而「同一份内容差 0~4 页」的差异恰恰就是工具链版本造成的，这行必须准。
         """
