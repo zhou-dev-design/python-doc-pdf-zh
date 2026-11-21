@@ -330,23 +330,26 @@ jobs:
             fi
           done
 
-      # ★ 让 CI 的 PDF 输出引擎与官方 PDF 同为 xdvipdfmx 20220710（TeX Live 2022）。
-      #   apt 的 `texlive-binaries 2021.20210626` 里那个报 20210609（2021 快照），
-      #   只差 PDF 落盘驱动；LaTeX 宏包/字体/xelatex 全部保留 apt 版即可，版式即与官方对齐。
+      # ★ 让 CI 的 PDF 输出引擎与官方 PDF 同为 xdvipdfmx 20220710。
+      #   apt 的 `texlive-binaries 2021.20210626` 里那个报 20210609（2021 快照）。
+      #   ★ 20220710 不在 TL2022 仓库里（TL2022 出厂/冻结版都是 20211117），
+      #     它属于 **TeX Live 2023** 的 dvipdfmx（2022-07 编译，TL2023 冻结前）——
+      #     官方 PDF 出自 Debian 12：TL2022 宏包 + 更新过的 xdvipdfmx 20220710，
+      #     所以我们取 TL2023 仓库里这个二进制即可精确对齐。
       #   该二进制只依赖 libc/libm（kpathsea 静态链接、无 /usr/local/texlive 硬编码），
       #   故单独替换安全。下载失败/校验不过 → 沿用 apt 版并告警，不阻塞构建。
-      - name: 替换 xdvipdfmx 为 TL2022（20220710，与官方 PDF 同引擎）
+      - name: 替换 xdvipdfmx 为 20220710（与官方 PDF 同引擎）
         run: |
           set -e
-          URL="https://ftp.math.utah.edu/pub/tex/historic/systems/texlive/2022/tlnet-final/archive/dvipdfmx.x86_64-linux.r62187.tar.xz"
-          SHA="f37e1c5f97de9a2333c05e25d07bb6e65baf41d7a2340c7af7f224fa189fe41d"
+          URL="https://ftp.math.utah.edu/pub/tex/historic/systems/texlive/2023/tlnet-final/archive/dvipdfmx.x86_64-linux.r65877.tar.xz"
+          SHA="ef95edea32e4a26d89fbe2ce556382f9d9b49a7105c3ec8a08dc7fcae9c8b570"
           echo "替换前: $(xdvipdfmx --version 2>&1 | head -1)"
           TMPD="$(mktemp -d)"
           # 下载带重试（海外 runner 访问 utah 快；失败可换清华镜像）
           if ! curl -fsSL -m 120 "$URL" -o "$TMPD/pkg.tar.xz"; then
-            ALT="https://mirrors.tuna.tsinghua.edu.cn/tex-historic-archive/systems/texlive/2022/tlnet-final/archive/dvipdfmx.x86_64-linux.r62187.tar.xz"
+            ALT="https://mirrors.tuna.tsinghua.edu.cn/tex-historic-archive/systems/texlive/2023/tlnet-final/archive/dvipdfmx.x86_64-linux.r65877.tar.xz"
             curl -fsSL -m 120 "$ALT" -o "$TMPD/pkg.tar.xz" \
-              || { echo "::warning::下载 TL2022 xdvipdfmx 失败，沿用 apt 版"; exit 0; }
+              || { echo "::warning::下载 xdvipdfmx 20220710 失败，沿用 apt 版"; exit 0; }
           fi
           ACTUAL="$(sha256sum "$TMPD/pkg.tar.xz" | awk '{print $1}')"
           if [ "$ACTUAL" != "$SHA" ]; then
