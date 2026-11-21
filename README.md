@@ -4,8 +4,8 @@
 
 > **为什么需要它**：官方 2025-09 起停止发布文档 PDF——使用率低，而 PDF 构建却占掉大部分算力
 > （[官方讨论](https://discuss.python.org/t/101343)）。3.14 的下载页现在明确写着
-> “We no longer provide pre-built PDFs of the documentation”
-> （见 [docs.python.org/3.14/download.html](https://docs.python.org/3.14/download.html)）。
+> “我们不再提供文档的预构建 PDF”
+> （[docs.python.org/zh-cn/3.14/download.html](https://docs.python.org/zh-cn/3.14/download.html)）。
 >
 > 所以中文读者手里只剩一份 2025-10 的旧快照：**3.14.0 正式版之后的所有 3.14.x 修订、
 > 以及整个 3.15，都没有官方中文 PDF**。本项目沿用官方那套 Sphinx + LaTeX 流程
