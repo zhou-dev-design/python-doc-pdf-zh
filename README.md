@@ -322,18 +322,17 @@ python3 sphinx-pdf/gui/pdf_builder_multi.py --tool check-pdf-gaps <合并册.pdf
 2. **跨册 `:ref:` 引用本来就是断的**（`LaTeX Warning: Reference ... undefined`），分册编译的固有限制。
 3. **旧版本要用它自己的工具链**：3.10 需要 `sphinx==3.4.3`、3.11 是 `7.2`、3.12 是 `8.2`；
    ≤3.12 一律读该分支自己的 `Doc/requirements.txt`，一刀切装最新版必失败。
-4. **排版引擎以 xdvipdfmx 为准**：官方 PDF 的 Producer 是 `xdvipdfmx (20220710)`，属
-   **TeX Live 2023**（戳里的 2022 是编译日期，不是发行版年；TL2022 的戳是 20211117）。
-   本项目 CI 跑 **Ubuntu 24.04**，它的 apt `texlive-binaries 2023.20230311` 里那个 xdvipdfmx
-   实测就是 `20220710`，与官方引擎、字体同源 —— 决定版式的是 xdvipdfmx，不是 `xelatex`
-   自报的 `TeX Live 2022/dev/Debian` 字符串（22.04 的旧值 `20210609` 已不再使用）。
+4. **官方与本项目 CI 用同一套 TeX**：官方 PDF 的 Producer 是 `xdvipdfmx (20220710)`＝TeX Live 2023
+   （戳里是编译日期，不是发行年；TL2022 是 20211117）。官方构建机跑 PSF 规范的 **Ubuntu 24.04**，
+   TeX 取自 apt 的 `texlive-binaries 2023.20230311`，其 xdvipdfmx 实测同为 `20220710`；本项目 CI
+   也跑 24.04，故引擎与字体同源。版式看 xdvipdfmx，不看 `xelatex --version` 自报的发行版标签。
 
 ---
 
 ## 附：官方 PDF 下载（3.6 – 3.14，全部停在 2025-10）
 
 官方 2025-09 停发 PDF 后，旧文件仍挂在 CDN 上，可作**版式参照**（官方 3.8 起 276 册引擎全是
-`xdvipdfmx 20220710`＝TL2023；本项目 CI 跑 Ubuntu 24.04，引擎与字体同源；包内也是分册，3.14 共 37 个 PDF）。
+`xdvipdfmx 20220710`＝TL2023；官方与本项目 CI 同为 Ubuntu 24.04；包内也是分册，3.14 共 37 个 PDF）。
 
 **3.15 没有官方 PDF**；3.13 / 3.14 都停在 2025-10-02——3.14 那份是 rc3（2025-09-18）到
 final（2025-10-07）之间的快照（[PEP 745](https://peps.python.org/pep-0745/)）。
@@ -374,7 +373,7 @@ final（2025-10-07）之间的快照（[PEP 745](https://peps.python.org/pep-074
 
 **构建**：[Sphinx](https://www.sphinx-doc.org/) +
 [python-docs-theme](https://github.com/python/python-docs-theme) +
-[TeX Live](https://www.tug.org/texlive/)（官方 PDF 的 xdvipdfmx 戳为 20220710＝TL2023；本项目 CI 跑 Ubuntu 24.04，apt 的 TeX 就是这一套）。
+[TeX Live](https://www.tug.org/texlive/)（官方与本项目 CI 同为 Ubuntu 24.04 的 apt TeX，xdvipdfmx 20220710）。
 
 **验收**：[poppler](https://poppler.freedesktop.org/) —— `pdfinfo` 查页数与残片、
 `pdffonts` 查中文字体有没有真嵌进去、`pdftotext` 取封面标题。
