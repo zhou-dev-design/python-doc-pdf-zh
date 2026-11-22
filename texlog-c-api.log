@@ -1,0 +1,1253 @@
+llowbreak hods' on page 394 undefined on input line 1.
+
+[394] [395] [396] [397] [398] [399]
+
+LaTeX Warning: Hyper reference `c-api/struc\allowbreak tures\allowbreak :c.PyVa
+r\allowbreak Objec\allowbreak t' on page 400 undefined on input line 1.
+
+[400]
+
+LaTeX Warning: Hyper reference `c-api/struc\allowbreak tures\allowbreak :c.PyOb
+j\allowbreak ect' on page 401 undefined on input line 1.
+
+[401] [402]
+Chapter 23.
+[403
+
+]
+Underfull \hbox (badness 10000) in paragraph at lines 61254--61256
+[]\TU/FandolHei-Regular(0)/m/n/10 位 编
+ []
+
+[404]
+Chapter 24.
+[405
+
+] [406
+
+]
+Chapter 25.
+[407]
+Underfull \hbox (badness 10000) in paragraph at lines 62150--62154
+\TU/FreeMono(0)/m/it/10 _BRANCH_LEFT[][] \TU/FreeSerif(0)/m/n/10 and [][]\TU/Fr
+eeMono(0)/m/it/10 PY_MONITORING_EVENT_
+ []
+
+[408]
+Overfull \vbox (36.6424pt too high) has occurred while \output is active []
+
+
+[409] [410]
+Appendix A.
+[411
+
+] [412] [413] [414] [415] [416] [417] [418] [419] [420] [421] [422]
+[423] [424] [425] [426] [427] [428]
+Appendix B.
+[429
+
+] [430
+
+]
+Appendix C.
+[431] [432] [433] [434] [435]
+Overfull \vbox (2.1092pt too high) detected at line 64055
+ []
+
+[436]
+Overfull \vbox (1.01921pt too high) detected at line 64120
+ []
+
+[437] [438] [439] [440]
+Underfull \vbox (badness 10000) detected at line 64490
+ []
+
+
+Underfull \vbox (badness 10000) detected at line 64490
+ []
+
+[441]
+Underfull \vbox (badness 10000) detected at line 64490
+ []
+
+
+Underfull \vbox (badness 10000) detected at line 64490
+ []
+
+[442] [443]
+Overfull \vbox (2.1992pt too high) detected at line 64581
+ []
+
+[444]
+Overfull \vbox (2.1992pt too high) detected at line 64656
+ []
+
+[445]
+Overfull \vbox (1.01917pt too high) detected at line 64720
+ []
+
+[446]
+Overfull \vbox (1.08916pt too high) detected at line 64780
+ []
+
+[447]
+Overfull \vbox (2.02916pt too high) detected at line 64864
+ []
+
+[448] [449] [450
+
+]
+Appendix D.
+[451] [452
+
+] (./c-api.ind [453
+
+] [454
+
+]
+Underfull \hbox (badness 10000) in paragraph at lines 17--18
+[]\TU/FreeMono(0)/m/n/10 _PyInterpreterState_GetEvalFrameFunc |\TU/FandolFang-R
+egular(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 18--19
+[]\TU/FreeMono(0)/m/n/10 _PyInterpreterState_SetEvalFrameFunc |\TU/FandolFang-R
+egular(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+[455
+
+]
+Underfull \hbox (badness 10000) in paragraph at lines 179--180
+[]\TU/FreeMono(0)/m/n/10 filesystem encoding and error handler --
+ []
+
+[456] [457] [458] [459]
+Underfull \hbox (badness 10000) in paragraph at lines 627--628
+[]\TU/FreeMono(0)/m/n/10 Py_MOD_MULTIPLE_INTERPRETERS_NOT_
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 628--629
+[]\TU/FreeMono(0)/m/n/10 Py_MOD_MULTIPLE_INTERPRETERS_SUPPORTED |\TU/FandolFang
+-Regular(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 630--631
+[]\TU/FreeMono(0)/m/n/10 Py_MOD_PER_INTERPRETER_GIL_SUPPORTED |\TU/FandolFang-R
+egular(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 637--638
+[]\TU/FreeMono(0)/m/n/10 PY_MONITORING_EVENT_EXCEPTION_HANDLED |\TU/FandolFang-
+Regular(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 641--642
+[]\TU/FreeMono(0)/m/n/10 PY_MONITORING_EVENT_PY_RESUME |\TU/FandolFang-Regular(
+0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C macro\TU/FandolFang-Regular(0)/m/it/10 ）| 
+\TU/FreeSerif(0)/m/n/10 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 642--643
+[]\TU/FreeMono(0)/m/n/10 PY_MONITORING_EVENT_PY_RETURN |\TU/FandolFang-Regular(
+0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C macro\TU/FandolFang-Regular(0)/m/it/10 ）| 
+\TU/FreeSerif(0)/m/n/10 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 645--646
+[]\TU/FreeMono(0)/m/n/10 PY_MONITORING_EVENT_PY_UNWIND |\TU/FandolFang-Regular(
+0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C macro\TU/FandolFang-Regular(0)/m/it/10 ）| 
+\TU/FreeSerif(0)/m/n/10 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 649--650
+[]\TU/FreeMono(0)/m/n/10 PY_MONITORING_EVENT_STOP_ITERATION |\TU/FandolFang-Reg
+ular(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 650--651
+[]\TU/FreeMono(0)/m/n/10 PY_MONITORING_IS_INSTRUMENTED_EVENT |\TU/FandolFang-Re
+gular(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+[460]
+Underfull \hbox (badness 10000) in paragraph at lines 667--668
+[]\TU/FreeMono(0)/m/n/10 Py_nb_inplace_matrix_multiply |\TU/FandolFang-Regular(
+0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C macro\TU/FandolFang-Regular(0)/m/it/10 ）| 
+\TU/FreeSerif(0)/m/n/10 ,
+ []
+
+[461]
+Underfull \hbox (badness 10000) in paragraph at lines 807--808
+[]\TU/FreeMono(0)/m/n/10 Py_TPFLAGS_DISALLOW_INSTANTIATION |\TU/FandolFang-Regu
+lar(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 810--811
+[]\TU/FreeMono(0)/m/n/10 Py_TPFLAGS_HAVE_STACKLESS_EXTENSION |\TU/FandolFang-Re
+gular(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 858--859
+[]\TU/FreeMono(0)/m/n/10 Py_UNICODE_JOIN_SURROGATES |\TU/FandolFang-Regular(0)/
+m/it/10 （\TU/FreeMono(0)/m/n/10 C function\TU/FandolFang-Regular(0)/m/it/10 ）| 
+\TU/FreeSerif(0)/m/n/10 ,
+ []
+
+[462]
+Underfull \hbox (badness 10000) in paragraph at lines 893--894
+[]\TU/FreeMono(0)/m/n/10 PyArg_ValidateKeywordArguments |\TU/FandolFang-Regular
+(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 931--932
+[]\TU/FreeMono(0)/m/n/10 PyBuffer_FillContiguousStrides |\TU/FandolFang-Regular
+(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+[463]
+Underfull \hbox (badness 10000) in paragraph at lines 1054--1055
+[]\TU/FreeMono(0)/m/n/10 PyCodec_BackslashReplaceErrors |\TU/FandolFang-Regular
+(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1060--1061
+[]\TU/FreeMono(0)/m/n/10 PyCodec_IncrementalDecoder |\TU/FandolFang-Regular(0)/
+m/it/10 （\TU/FreeMono(0)/m/n/10 C function\TU/FandolFang-Regular(0)/m/it/10 ）| 
+\TU/FreeSerif(0)/m/n/10 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1061--1062
+[]\TU/FreeMono(0)/m/n/10 PyCodec_IncrementalEncoder |\TU/FandolFang-Regular(0)/
+m/it/10 （\TU/FreeMono(0)/m/n/10 C function\TU/FandolFang-Regular(0)/m/it/10 ）| 
+\TU/FreeSerif(0)/m/n/10 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1072--1073
+[]\TU/FreeMono(0)/m/n/10 PyCodec_XMLCharRefReplaceErrors |\TU/FandolFang-Regula
+r(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1076--1077
+[]\TU/FreeMono(0)/m/n/10 PyCompile_OpcodeStackEffectWithJump |\TU/FandolFang-Re
+gular(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1078--1079
+[]\TU/FreeMono(0)/m/n/10 PyCompilerFlags.cf_feature_version |\TU/FandolFang-Reg
+ular(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+[464]
+Underfull \hbox (badness 10000) in paragraph at lines 1107--1108
+[]\TU/FreeMono(0)/m/n/10 PyConfig.filesystem_encoding |\TU/FandolFang-Regular(0
+)/m/it/10 （\TU/FreeMono(0)/m/n/10 C member\TU/FandolFang-Regular(0)/m/it/10 ）| 
+\TU/FreeSerif(0)/m/n/10 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1113--1114
+[]\TU/FreeMono(0)/m/n/10 PyConfig.install_signal_handlers |\TU/FandolFang-Regul
+ar(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1119--1120
+[]\TU/FreeMono(0)/m/n/10 PyConfig.module_search_paths_set |\TU/FandolFang-Regul
+ar(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1120--1121
+[]\TU/FreeMono(0)/m/n/10 PyConfig.module_search_paths |\TU/FandolFang-Regular(0
+)/m/it/10 （\TU/FreeMono(0)/m/n/10 C member\TU/FandolFang-Regular(0)/m/it/10 ）| 
+\TU/FreeSerif(0)/m/n/10 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1125--1126
+[]\TU/FreeMono(0)/m/n/10 PyConfig.pathconfig_warnings |\TU/FandolFang-Regular(0
+)/m/it/10 （\TU/FreeMono(0)/m/n/10 C member\TU/FandolFang-Regular(0)/m/it/10 ）| 
+\TU/FreeSerif(0)/m/n/10 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1149--1150
+[]\TU/FreeMono(0)/m/n/10 PyConfig.user_site_directory |\TU/FandolFang-Regular(0
+)/m/it/10 （\TU/FreeMono(0)/m/n/10 C member\TU/FandolFang-Regular(0)/m/it/10 ）| 
+\TU/FreeSerif(0)/m/n/10 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1166--1167
+[]\TU/FreeMono(0)/m/n/10 PyConfig_SetWideStringList |\TU/FandolFang-Regular(0)/
+m/it/10 （\TU/FreeMono(0)/m/n/10 C function\TU/FandolFang-Regular(0)/m/it/10 ）| 
+\TU/FreeSerif(0)/m/n/10 ,
+ []
+
+[465]
+Underfull \hbox (badness 10000) in paragraph at lines 1213--1214
+[]\TU/FreeMono(0)/m/n/10 PyDateTime_DATE_GET_MICROSECOND |\TU/FandolFang-Regula
+r(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1214--1215
+[]\TU/FreeMono(0)/m/n/10 PyDateTime_DATE_GET_MINUTE |\TU/FandolFang-Regular(0)/
+m/it/10 （\TU/FreeMono(0)/m/n/10 C function\TU/FandolFang-Regular(0)/m/it/10 ）| 
+\TU/FreeSerif(0)/m/n/10 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1215--1216
+[]\TU/FreeMono(0)/m/n/10 PyDateTime_DATE_GET_SECOND |\TU/FandolFang-Regular(0)/
+m/it/10 （\TU/FreeMono(0)/m/n/10 C function\TU/FandolFang-Regular(0)/m/it/10 ）| 
+\TU/FreeSerif(0)/m/n/10 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1216--1217
+[]\TU/FreeMono(0)/m/n/10 PyDateTime_DATE_GET_TZINFO |\TU/FandolFang-Regular(0)/
+m/it/10 （\TU/FreeMono(0)/m/n/10 C function\TU/FandolFang-Regular(0)/m/it/10 ）| 
+\TU/FreeSerif(0)/m/n/10 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1222--1223
+[]\TU/FreeMono(0)/m/n/10 PyDateTime_DELTA_GET_MICROSECONDS |\TU/FandolFang-Regu
+lar(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1226--1227
+[]\TU/FreeMono(0)/m/n/10 PyDateTime_FromDateAndTimeAndFold |\TU/FandolFang-Regu
+lar(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1227--1228
+[]\TU/FreeMono(0)/m/n/10 PyDateTime_FromDateAndTime |\TU/FandolFang-Regular(0)/
+m/it/10 （\TU/FreeMono(0)/m/n/10 C function\TU/FandolFang-Regular(0)/m/it/10 ）| 
+\TU/FreeSerif(0)/m/n/10 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1235--1236
+[]\TU/FreeMono(0)/m/n/10 PyDateTime_TIME_GET_MICROSECOND |\TU/FandolFang-Regula
+r(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1236--1237
+[]\TU/FreeMono(0)/m/n/10 PyDateTime_TIME_GET_MINUTE |\TU/FandolFang-Regular(0)/
+m/it/10 （\TU/FreeMono(0)/m/n/10 C function\TU/FandolFang-Regular(0)/m/it/10 ）| 
+\TU/FreeSerif(0)/m/n/10 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1237--1238
+[]\TU/FreeMono(0)/m/n/10 PyDateTime_TIME_GET_SECOND |\TU/FandolFang-Regular(0)/
+m/it/10 （\TU/FreeMono(0)/m/n/10 C function\TU/FandolFang-Regular(0)/m/it/10 ）| 
+\TU/FreeSerif(0)/m/n/10 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1238--1239
+[]\TU/FreeMono(0)/m/n/10 PyDateTime_TIME_GET_TZINFO |\TU/FandolFang-Regular(0)/
+m/it/10 （\TU/FreeMono(0)/m/n/10 C function\TU/FandolFang-Regular(0)/m/it/10 ）| 
+\TU/FreeSerif(0)/m/n/10 ,
+ []
+
+[466]
+Underfull \hbox (badness 10000) in paragraph at lines 1339--1340
+[]\TU/FreeMono(0)/m/n/10 PyErr_RangedSyntaxLocationObject |\TU/FandolFang-Regul
+ar(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1342--1343
+[]\TU/FreeMono(0)/m/n/10 PyErr_SetExcFromWindowsErrWithFilename
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1343--1344
+[]\TU/FreeMono(0)/m/n/10 PyErr_SetExcFromWindowsErrWithFilename
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1344--1345
+[]\TU/FreeMono(0)/m/n/10 PyErr_SetExcFromWindowsErrWithFilename |\TU/FandolFang
+-Regular(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1347--1348
+[]\TU/FreeMono(0)/m/n/10 PyErr_SetFromErrnoWithFilenameObjects |\TU/FandolFang-
+Regular(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1348--1349
+[]\TU/FreeMono(0)/m/n/10 PyErr_SetFromErrnoWithFilenameObject |\TU/FandolFang-R
+egular(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1349--1350
+[]\TU/FreeMono(0)/m/n/10 PyErr_SetFromErrnoWithFilename |\TU/FandolFang-Regular
+(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1351--1352
+[]\TU/FreeMono(0)/m/n/10 PyErr_SetFromWindowsErrWithFilename |\TU/FandolFang-Re
+gular(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+[467]
+Underfull \hbox (badness 10000) in paragraph at lines 1485--1486
+[]\TU/FreeMono(0)/m/n/10 PyExpat_CAPI.DefaultUnknownEncoding
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1488--1489
+[]\TU/FreeMono(0)/m/n/10 PyExpat_CAPI.GetErrorColumnNumber |\TU/FandolFang-Regu
+lar(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1494--1495
+[]\TU/FreeMono(0)/m/n/10 PyExpat_CAPI.ParserCreate_MM |\TU/FandolFang-Regular(0
+)/m/it/10 （\TU/FreeMono(0)/m/n/10 C member\TU/FandolFang-Regular(0)/m/it/10 ）| 
+\TU/FreeSerif(0)/m/n/10 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1497--1498
+[]\TU/FreeMono(0)/m/n/10 PyExpat_CAPI.SetAllocTrackerActivation
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1498--1499
+[]\TU/FreeMono(0)/m/n/10 PyExpat_CAPI.SetAllocTrackerMaximum
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1499--1500
+[]\TU/FreeMono(0)/m/n/10 PyExpat_CAPI.SetBillionLaughsAttack
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1499--1500
+\TU/FreeMono(0)/m/n/10 ProtectionActivationThreshold
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1500--1501
+[]\TU/FreeMono(0)/m/n/10 PyExpat_CAPI.SetBillionLaughsAttack
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1500--1501
+\TU/FreeMono(0)/m/n/10 ProtectionMaximumAmplification
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1501--1502
+[]\TU/FreeMono(0)/m/n/10 PyExpat_CAPI.SetCharacterDataHandler |\TU/FandolFang-R
+egular(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1503--1504
+[]\TU/FreeMono(0)/m/n/10 PyExpat_CAPI.SetDefaultHandlerExpand |\TU/FandolFang-R
+egular(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1508--1509
+[]\TU/FreeMono(0)/m/n/10 PyExpat_CAPI.SetNamespaceDeclHandler |\TU/FandolFang-R
+egular(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1509--1510
+[]\TU/FreeMono(0)/m/n/10 PyExpat_CAPI.SetProcessingInstruction
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1510--1511
+[]\TU/FreeMono(0)/m/n/10 PyExpat_CAPI.SetReparseDeferralEnabled |\TU/FandolFang
+-Regular(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+[468]
+Underfull \hbox (badness 10000) in paragraph at lines 1512--1513
+[]\TU/FreeMono(0)/m/n/10 PyExpat_CAPI.SetUnknownEncodingHandler |\TU/FandolFang
+-Regular(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1570--1571
+[]\TU/FreeMono(0)/m/n/10 PyFunction_GET_ANNOTATIONS |\TU/FandolFang-Regular(0)/
+m/it/10 （\TU/FreeMono(0)/m/n/10 C function\TU/FandolFang-Regular(0)/m/it/10 ）| 
+\TU/FreeSerif(0)/m/n/10 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1575--1576
+[]\TU/FreeMono(0)/m/n/10 PyFunction_GET_KW_DEFAULTS |\TU/FandolFang-Regular(0)/
+m/it/10 （\TU/FreeMono(0)/m/n/10 C function\TU/FandolFang-Regular(0)/m/it/10 ）| 
+\TU/FreeSerif(0)/m/n/10 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1584--1585
+[]\TU/FreeMono(0)/m/n/10 PyFunction_NewWithQualName |\TU/FandolFang-Regular(0)/
+m/it/10 （\TU/FreeMono(0)/m/n/10 C function\TU/FandolFang-Regular(0)/m/it/10 ）| 
+\TU/FreeSerif(0)/m/n/10 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1617--1618
+[]\TU/FreeMono(0)/m/n/10 PyGILState_STATE.PyGILState_LOCKED |\TU/FandolFang-Reg
+ular(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1618--1619
+[]\TU/FreeMono(0)/m/n/10 PyGILState_STATE.PyGILState_UNLOCKED |\TU/FandolFang-R
+egular(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+[469]
+Underfull \hbox (badness 10000) in paragraph at lines 1638--1639
+[]\TU/FreeMono(0)/m/n/10 PyImport_ExecCodeModuleWithPathnames |\TU/FandolFang-R
+egular(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1647--1648
+[]\TU/FreeMono(0)/m/n/10 PyImport_ImportFrozenModuleObject |\TU/FandolFang-Regu
+lar(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1649--1650
+[]\TU/FreeMono(0)/m/n/10 PyImport_ImportModuleAttrString |\TU/FandolFang-Regula
+r(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1652--1653
+[]\TU/FreeMono(0)/m/n/10 PyImport_ImportModuleLevelObject |\TU/FandolFang-Regul
+ar(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1680--1681
+[]\TU/FreeMono(0)/m/n/10 PyInterpreterConfig.allow_daemon_threads
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1683--1684
+[]\TU/FreeMono(0)/m/n/10 PyInterpreterConfig.allow_threads |\TU/FandolFang-Regu
+lar(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1684--1685
+[]\TU/FreeMono(0)/m/n/10 PyInterpreterConfig.check_multi_interp_
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1686--1687
+[]\TU/FreeMono(0)/m/n/10 PyInterpreterConfig.use_main_obmalloc |\TU/FandolFang-
+Regular(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1693--1694
+[]\TU/FreeMono(0)/m/n/10 PyInterpreterState_GetDict |\TU/FandolFang-Regular(0)/
+m/it/10 （\TU/FreeMono(0)/m/n/10 C function\TU/FandolFang-Regular(0)/m/it/10 ）| 
+\TU/FreeSerif(0)/m/n/10 ,
+ []
+
+[470]
+Underfull \hbox (badness 10000) in paragraph at lines 1773--1774
+[]\TU/FreeMono(0)/m/n/10 PyLong_FromUnsignedNativeBytes |\TU/FandolFang-Regular
+(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1805--1806
+[]\TU/FreeMono(0)/m/n/10 PyMapping_GetOptionalItemString |\TU/FandolFang-Regula
+r(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1807--1808
+[]\TU/FreeMono(0)/m/n/10 PyMapping_HasKeyStringWithError |\TU/FandolFang-Regula
+r(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1817--1818
+[]\TU/FreeMono(0)/m/n/10 PyMappingMethods.mp_ass_subscript |\TU/FandolFang-Regu
+lar(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1821--1822
+[]\TU/FreeMono(0)/m/n/10 PyMarshal_ReadLastObjectFromFile |\TU/FandolFang-Regul
+ar(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+[471]
+Underfull \hbox (badness 10000) in paragraph at lines 1824--1825
+[]\TU/FreeMono(0)/m/n/10 PyMarshal_ReadObjectFromString |\TU/FandolFang-Regular
+(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1869--1870
+[]\TU/FreeMono(0)/m/n/10 PyMemoryView_GetContiguous |\TU/FandolFang-Regular(0)/
+m/it/10 （\TU/FreeMono(0)/m/n/10 C function\TU/FandolFang-Regular(0)/m/it/10 ）| 
+\TU/FreeSerif(0)/m/n/10 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1890--1891
+[]\TU/FreeMono(0)/m/n/10 PyModule_AddStringConstant |\TU/FandolFang-Regular(0)/
+m/it/10 （\TU/FreeMono(0)/m/n/10 C function\TU/FandolFang-Regular(0)/m/it/10 ）| 
+\TU/FreeSerif(0)/m/n/10 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1903--1904
+[]\TU/FreeMono(0)/m/n/10 PyModule_GetFilenameObject |\TU/FandolFang-Regular(0)/
+m/it/10 （\TU/FreeMono(0)/m/n/10 C function\TU/FandolFang-Regular(0)/m/it/10 ）| 
+\TU/FreeSerif(0)/m/n/10 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1919--1920
+[]\TU/FreeMono(0)/m/n/10 PyModuleDef.m_slots.m_reload |\TU/FandolFang-Regular(0
+)/m/it/10 （\TU/FreeMono(0)/m/n/10 C member\TU/FandolFang-Regular(0)/m/it/10 ）| 
+\TU/FreeSerif(0)/m/n/10 ,
+ []
+
+[472]
+Underfull \hbox (badness 10000) in paragraph at lines 1930--1931
+[]\TU/FreeMono(0)/m/n/10 PyMonitoring_FireBranchLeftEvent |\TU/FandolFang-Regul
+ar(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1931--1932
+[]\TU/FreeMono(0)/m/n/10 PyMonitoring_FireBranchRightEvent |\TU/FandolFang-Regu
+lar(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1932--1933
+[]\TU/FreeMono(0)/m/n/10 PyMonitoring_FireCallEvent |\TU/FandolFang-Regular(0)/
+m/it/10 （\TU/FreeMono(0)/m/n/10 C function\TU/FandolFang-Regular(0)/m/it/10 ）| 
+\TU/FreeSerif(0)/m/n/10 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1935--1936
+[]\TU/FreeMono(0)/m/n/10 PyMonitoring_FireExceptionHandledEvent |\TU/FandolFang
+-Regular(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1936--1937
+[]\TU/FreeMono(0)/m/n/10 PyMonitoring_FireJumpEvent |\TU/FandolFang-Regular(0)/
+m/it/10 （\TU/FreeMono(0)/m/n/10 C function\TU/FandolFang-Regular(0)/m/it/10 ）| 
+\TU/FreeSerif(0)/m/n/10 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1937--1938
+[]\TU/FreeMono(0)/m/n/10 PyMonitoring_FireLineEvent |\TU/FandolFang-Regular(0)/
+m/it/10 （\TU/FreeMono(0)/m/n/10 C function\TU/FandolFang-Regular(0)/m/it/10 ）| 
+\TU/FreeSerif(0)/m/n/10 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1938--1939
+[]\TU/FreeMono(0)/m/n/10 PyMonitoring_FirePyResumeEvent |\TU/FandolFang-Regular
+(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1939--1940
+[]\TU/FreeMono(0)/m/n/10 PyMonitoring_FirePyReturnEvent |\TU/FandolFang-Regular
+(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1942--1943
+[]\TU/FreeMono(0)/m/n/10 PyMonitoring_FirePyUnwindEvent |\TU/FandolFang-Regular
+(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1946--1947
+[]\TU/FreeMono(0)/m/n/10 PyMonitoring_FireStopIterationEvent |\TU/FandolFang-Re
+gular(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1965--1966
+[]\TU/FreeMono(0)/m/n/10 PyNumber_InPlaceMatrixMultiply |\TU/FandolFang-Regular
+(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1972--1973
+[]\TU/FreeMono(0)/m/n/10 PyNumber_InPlaceTrueDivide |\TU/FandolFang-Regular(0)/
+m/it/10 （\TU/FreeMono(0)/m/n/10 C function\TU/FandolFang-Regular(0)/m/it/10 ）| 
+\TU/FreeSerif(0)/m/n/10 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2000--2001
+[]\TU/FreeMono(0)/m/n/10 PyNumberMethods.nb_inplace_lshift |\TU/FandolFang-Regu
+lar(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2001--2002
+[]\TU/FreeMono(0)/m/n/10 PyNumberMethods.nb_inplace_matrix_
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2002--2003
+[]\TU/FreeMono(0)/m/n/10 PyNumberMethods.nb_inplace_multiply |\TU/FandolFang-Re
+gular(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2004--2005
+[]\TU/FreeMono(0)/m/n/10 PyNumberMethods.nb_inplace_power |\TU/FandolFang-Regul
+ar(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2005--2006
+[]\TU/FreeMono(0)/m/n/10 PyNumberMethods.nb_inplace_remainder |\TU/FandolFang-R
+egular(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2006--2007
+[]\TU/FreeMono(0)/m/n/10 PyNumberMethods.nb_inplace_rshift |\TU/FandolFang-Regu
+lar(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2007--2008
+[]\TU/FreeMono(0)/m/n/10 PyNumberMethods.nb_inplace_subtract |\TU/FandolFang-Re
+gular(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2008--2009
+[]\TU/FreeMono(0)/m/n/10 PyNumberMethods.nb_inplace_true_divide |\TU/FandolFang
+-Regular(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+[473]
+Underfull \hbox (badness 10000) in paragraph at lines 2013--2014
+[]\TU/FreeMono(0)/m/n/10 PyNumberMethods.nb_matrix_multiply |\TU/FandolFang-Reg
+ular(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2019--2020
+[]\TU/FreeMono(0)/m/n/10 PyNumberMethods.nb_remainder |\TU/FandolFang-Regular(0
+)/m/it/10 （\TU/FreeMono(0)/m/n/10 C member\TU/FandolFang-Regular(0)/m/it/10 ）| 
+\TU/FreeSerif(0)/m/n/10 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2031--2032
+[]\TU/FreeMono(0)/m/n/10 PyObject_CallFinalizerFromDealloc |\TU/FandolFang-Regu
+lar(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2036--2037
+[]\TU/FreeMono(0)/m/n/10 PyObject_CallMethodObjArgs |\TU/FandolFang-Regular(0)/
+m/it/10 （\TU/FreeMono(0)/m/n/10 C function\TU/FandolFang-Regular(0)/m/it/10 ）| 
+\TU/FreeSerif(0)/m/n/10 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2073--2074
+[]\TU/FreeMono(0)/m/n/10 PyObject_GetArenaAllocator |\TU/FandolFang-Regular(0)/
+m/it/10 （\TU/FreeMono(0)/m/n/10 C function\TU/FandolFang-Regular(0)/m/it/10 ）| 
+\TU/FreeSerif(0)/m/n/10 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2080--2081
+[]\TU/FreeMono(0)/m/n/10 PyObject_GetOptionalAttrString |\TU/FandolFang-Regular
+(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2083--2084
+[]\TU/FreeMono(0)/m/n/10 PyObject_HasAttrStringWithError |\TU/FandolFang-Regula
+r(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+[474]
+Underfull \hbox (badness 10000) in paragraph at lines 2115--2116
+[]\TU/FreeMono(0)/m/n/10 PyObject_SetArenaAllocator |\TU/FandolFang-Regular(0)/
+m/it/10 （\TU/FreeMono(0)/m/n/10 C function\TU/FandolFang-Regular(0)/m/it/10 ）| 
+\TU/FreeSerif(0)/m/n/10 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2175--2176
+[]\TU/FreeMono(0)/m/n/10 PyPreConfig.coerce_c_locale_warn |\TU/FandolFang-Regul
+ar(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2177--2178
+[]\TU/FreeMono(0)/m/n/10 PyPreConfig.configure_locale |\TU/FandolFang-Regular(0
+)/m/it/10 （\TU/FreeMono(0)/m/n/10 C member\TU/FandolFang-Regular(0)/m/it/10 ）| 
+\TU/FreeSerif(0)/m/n/10 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2180--2181
+[]\TU/FreeMono(0)/m/n/10 PyPreConfig.legacy_windows_fs_encoding |\TU/FandolFang
+-Regular(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2184--2185
+[]\TU/FreeMono(0)/m/n/10 PyPreConfig_InitIsolatedConfig |\TU/FandolFang-Regular
+(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+[475]
+Underfull \hbox (badness 10000) in paragraph at lines 2250--2251
+[]\TU/FreeMono(0)/m/n/10 PySequenceMethods.sq_inplace_concat |\TU/FandolFang-Re
+gular(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2251--2252
+[]\TU/FreeMono(0)/m/n/10 PySequenceMethods.sq_inplace_repeat |\TU/FandolFang-Re
+gular(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2297--2298
+[]\TU/FreeMono(0)/m/n/10 PyStructSequence_Desc.fields |\TU/FandolFang-Regular(0
+)/m/it/10 （\TU/FreeMono(0)/m/n/10 C member\TU/FandolFang-Regular(0)/m/it/10 ）| 
+\TU/FreeSerif(0)/m/n/10 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2298--2299
+[]\TU/FreeMono(0)/m/n/10 PyStructSequence_Desc.n_in_sequence |\TU/FandolFang-Re
+gular(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2306--2307
+[]\TU/FreeMono(0)/m/n/10 PyStructSequence_InitType2 |\TU/FandolFang-Regular(0)/
+m/it/10 （\TU/FreeMono(0)/m/n/10 C function\TU/FandolFang-Regular(0)/m/it/10 ）| 
+\TU/FreeSerif(0)/m/n/10 ,
+ []
+
+[476] [477]
+Underfull \hbox (badness 10000) in paragraph at lines 2454--2455
+[]\TU/FreeMono(0)/m/n/10 PyThreadState_EnterTracing |\TU/FandolFang-Regular(0)/
+m/it/10 （\TU/FreeMono(0)/m/n/10 C function\TU/FandolFang-Regular(0)/m/it/10 ）| 
+\TU/FreeSerif(0)/m/n/10 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2459--2460
+[]\TU/FreeMono(0)/m/n/10 PyThreadState_GetUnchecked |\TU/FandolFang-Regular(0)/
+m/it/10 （\TU/FreeMono(0)/m/n/10 C function\TU/FandolFang-Regular(0)/m/it/10 ）| 
+\TU/FreeSerif(0)/m/n/10 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2461--2462
+[]\TU/FreeMono(0)/m/n/10 PyThreadState_LeaveTracing |\TU/FandolFang-Regular(0)/
+m/it/10 （\TU/FreeMono(0)/m/n/10 C function\TU/FandolFang-Regular(0)/m/it/10 ）| 
+\TU/FreeSerif(0)/m/n/10 ,
+ []
+
+[478]
+Underfull \hbox (badness 10000) in paragraph at lines 2599--2600
+[]\TU/FreeMono(0)/m/n/10 PyTypeObject.tp_vectorcall_offset |\TU/FandolFang-Regu
+lar(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2621--2622
+[]\TU/FreeMono(0)/m/n/10 PyUnicode_AsRawUnicodeEscapeString |\TU/FandolFang-Reg
+ular(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2624--2625
+[]\TU/FreeMono(0)/m/n/10 PyUnicode_AsUnicodeEscapeString |\TU/FandolFang-Regula
+r(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2630--2631
+[]\TU/FreeMono(0)/m/n/10 PyUnicode_AsWideCharString |\TU/FandolFang-Regular(0)/
+m/it/10 （\TU/FreeMono(0)/m/n/10 C function\TU/FandolFang-Regular(0)/m/it/10 ）| 
+\TU/FreeSerif(0)/m/n/10 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2632--2633
+[]\TU/FreeMono(0)/m/n/10 PyUnicode_BuildEncodingMap |\TU/FandolFang-Regular(0)/
+m/it/10 （\TU/FreeMono(0)/m/n/10 C function\TU/FandolFang-Regular(0)/m/it/10 ）| 
+\TU/FreeSerif(0)/m/n/10 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2636--2637
+[]\TU/FreeMono(0)/m/n/10 PyUnicode_CompareWithASCIIString |\TU/FandolFang-Regul
+ar(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2645--2646
+[]\TU/FreeMono(0)/m/n/10 PyUnicode_DecodeCodePageStateful |\TU/FandolFang-Regul
+ar(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2646--2647
+[]\TU/FreeMono(0)/m/n/10 PyUnicode_DecodeFSDefaultAndSize |\TU/FandolFang-Regul
+ar(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2653--2654
+[]\TU/FreeMono(0)/m/n/10 PyUnicode_DecodeRawUnicodeEscape |\TU/FandolFang-Regul
+ar(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+[479]
+Underfull \hbox (badness 10000) in paragraph at lines 2688--2689
+[]\TU/FreeMono(0)/m/n/10 PyUnicode_InternFromString |\TU/FandolFang-Regular(0)/
+m/it/10 （\TU/FreeMono(0)/m/n/10 C function\TU/FandolFang-Regular(0)/m/it/10 ）| 
+\TU/FreeSerif(0)/m/n/10 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2718--2719
+[]\TU/FreeMono(0)/m/n/10 PyUnicodeDecodeError_GetEncoding |\TU/FandolFang-Regul
+ar(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2720--2721
+[]\TU/FreeMono(0)/m/n/10 PyUnicodeDecodeError_GetObject |\TU/FandolFang-Regular
+(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2721--2722
+[]\TU/FreeMono(0)/m/n/10 PyUnicodeDecodeError_GetReason |\TU/FandolFang-Regular
+(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2724--2725
+[]\TU/FreeMono(0)/m/n/10 PyUnicodeDecodeError_SetReason |\TU/FandolFang-Regular
+(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2726--2727
+[]\TU/FreeMono(0)/m/n/10 PyUnicodeEncodeError_GetEncoding |\TU/FandolFang-Regul
+ar(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2728--2729
+[]\TU/FreeMono(0)/m/n/10 PyUnicodeEncodeError_GetObject |\TU/FandolFang-Regular
+(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2729--2730
+[]\TU/FreeMono(0)/m/n/10 PyUnicodeEncodeError_GetReason |\TU/FandolFang-Regular
+(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2732--2733
+[]\TU/FreeMono(0)/m/n/10 PyUnicodeEncodeError_SetReason |\TU/FandolFang-Regular
+(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2736--2737
+[]\TU/FreeMono(0)/m/n/10 PyUnicodeTranslateError_GetEnd |\TU/FandolFang-Regular
+(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2737--2738
+[]\TU/FreeMono(0)/m/n/10 PyUnicodeTranslateError_GetObject |\TU/FandolFang-Regu
+lar(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2738--2739
+[]\TU/FreeMono(0)/m/n/10 PyUnicodeTranslateError_GetReason |\TU/FandolFang-Regu
+lar(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2739--2740
+[]\TU/FreeMono(0)/m/n/10 PyUnicodeTranslateError_GetStart |\TU/FandolFang-Regul
+ar(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2740--2741
+[]\TU/FreeMono(0)/m/n/10 PyUnicodeTranslateError_SetEnd |\TU/FandolFang-Regular
+(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2741--2742
+[]\TU/FreeMono(0)/m/n/10 PyUnicodeTranslateError_SetReason |\TU/FandolFang-Regu
+lar(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2742--2743
+[]\TU/FreeMono(0)/m/n/10 PyUnicodeTranslateError_SetStart |\TU/FandolFang-Regul
+ar(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+[480]
+Underfull \hbox (badness 10000) in paragraph at lines 2744--2745
+[]\TU/FreeMono(0)/m/n/10 PyUnicodeWriter_DecodeUTF8Stateful |\TU/FandolFang-Reg
+ular(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2748--2749
+[]\TU/FreeMono(0)/m/n/10 PyUnicodeWriter_WriteASCII |\TU/FandolFang-Regular(0)/
+m/it/10 （\TU/FreeMono(0)/m/n/10 C function\TU/FandolFang-Regular(0)/m/it/10 ）| 
+\TU/FreeSerif(0)/m/n/10 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2752--2753
+[]\TU/FreeMono(0)/m/n/10 PyUnicodeWriter_WriteSubstring |\TU/FandolFang-Regular
+(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2761--2762
+[]\TU/FreeMono(0)/m/n/10 PyUnstable_Code_NewWithPosOnlyArgs |\TU/FandolFang-Reg
+ular(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2764--2765
+[]\TU/FreeMono(0)/m/n/10 PyUnstable_CopyPerfMapFile |\TU/FandolFang-Regular(0)/
+m/it/10 （\TU/FreeMono(0)/m/n/10 C function\TU/FandolFang-Regular(0)/m/it/10 ）| 
+\TU/FreeSerif(0)/m/n/10 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2765--2766
+[]\TU/FreeMono(0)/m/n/10 PyUnstable_EnableTryIncRef |\TU/FandolFang-Regular(0)/
+m/it/10 （\TU/FreeMono(0)/m/n/10 C function\TU/FandolFang-Regular(0)/m/it/10 ）| 
+\TU/FreeSerif(0)/m/n/10 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2766--2767
+[]\TU/FreeMono(0)/m/n/10 PyUnstable_Eval_RequestCodeExtraIndex |\TU/FandolFang-
+Regular(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2767--2768
+[]\TU/FreeMono(0)/m/n/10 PyUnstable_Exc_PrepReraiseStar |\TU/FandolFang-Regular
+(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2769--2770
+[]\TU/FreeMono(0)/m/n/10 PyUnstable_ExecutableKinds.PyUnstable_
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2769--2770
+\TU/FreeMono(0)/m/n/10 EXECUTABLE_KIND_BUILTIN_FUNCTION
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2770--2771
+[]\TU/FreeMono(0)/m/n/10 PyUnstable_ExecutableKinds.PyUnstable_
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2770--2771
+\TU/FreeMono(0)/m/n/10 EXECUTABLE_KIND_METHOD_DESCRIPTOR
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2771--2772
+[]\TU/FreeMono(0)/m/n/10 PyUnstable_ExecutableKinds.PyUnstable_
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2771--2772
+\TU/FreeMono(0)/m/n/10 EXECUTABLE_KIND_PY_FUNCTION |\TU/FandolFang-Regular(0)/m
+/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2772--2773
+[]\TU/FreeMono(0)/m/n/10 PyUnstable_ExecutableKinds.PyUnstable_
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2774--2775
+[]\TU/FreeMono(0)/m/n/10 PyUnstable_GC_VisitObjects |\TU/FandolFang-Regular(0)/
+m/it/10 （\TU/FreeMono(0)/m/n/10 C function\TU/FandolFang-Regular(0)/m/it/10 ）| 
+\TU/FreeSerif(0)/m/n/10 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2775--2776
+[]\TU/FreeMono(0)/m/n/10 PyUnstable_InterpreterFrame_GetCode |\TU/FandolFang-Re
+gular(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2776--2777
+[]\TU/FreeMono(0)/m/n/10 PyUnstable_InterpreterFrame_GetLasti |\TU/FandolFang-R
+egular(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2777--2778
+[]\TU/FreeMono(0)/m/n/10 PyUnstable_InterpreterFrame_GetLine |\TU/FandolFang-Re
+gular(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2782--2783
+[]\TU/FreeMono(0)/m/n/10 PyUnstable_Object_ClearWeakRefsNo
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2783--2784
+[]\TU/FreeMono(0)/m/n/10 PyUnstable_Object_EnableDeferredRefcount
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2784--2785
+[]\TU/FreeMono(0)/m/n/10 PyUnstable_Object_GC_NewWithExtraData |\TU/FandolFang-
+Regular(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2785--2786
+[]\TU/FreeMono(0)/m/n/10 PyUnstable_Object_IsUniquelyReferenced |\TU/FandolFang
+-Regular(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2786--2787
+[]\TU/FreeMono(0)/m/n/10 PyUnstable_Object_IsUniqueReferenced
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2789--2790
+[]\TU/FreeMono(0)/m/n/10 PyUnstable_PerfTrampoline_CompileCode |\TU/FandolFang-
+Regular(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2790--2791
+[]\TU/FreeMono(0)/m/n/10 PyUnstable_PerfTrampoline_SetPersistAfter
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2791--2792
+[]\TU/FreeMono(0)/m/n/10 PyUnstable_ThreadState_ResetStack
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2792--2793
+[]\TU/FreeMono(0)/m/n/10 PyUnstable_ThreadState_SetStackProtection
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2794--2795
+[]\TU/FreeMono(0)/m/n/10 PyUnstable_Type_AssignVersionTag |\TU/FandolFang-Regul
+ar(0)/m/it/10 （\TU/FreeMono(0)/m/n/10 C
+ []
+
+[481] [482] [483]) (./c-api.aux)
+ ***********
+LaTeX2e <2023-11-01> patch level 1
+L3 programming layer <2022/08/05>
+ ***********
+
+
+LaTeX Font Warning: Some font shapes were not available, defaults substituted.
+
+
+LaTeX Warning: There were undefined references.
+
+Package rerunfilecheck Info: File `c-api.out' has not changed.
+(rerunfilecheck)             Checksum: AE2F5AAA0F59AE5187773A934133E524;43243.
+ ) 
+Here is how much of TeX's memory you used:
+ 24461 strings out of 476867
+ 591457 string characters out of 5804701
+ 2204627 words of memory out of 5000000
+ 45940 multiletter control sequences out of 15000+600000
+ 569308 words of font info for 154 fonts, out of 8000000 for 9000
+ 15 hyphenation exceptions out of 8191
+ 74i,18n,95p,2576b,1014s stack positions out of 10000i,1000n,20000p,200000b,200000s
+
+Output written on c-api.pdf (491 pages).

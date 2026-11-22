@@ -1,0 +1,1346 @@
+$ '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/venv/bin/python' -m sphinx -b latex -d build/doctrees -j 4 -D language=zh_CN . build/latex
+Running Sphinx v8.2.3
+loading translations [zh_CN]... done
+matplotlib is not installed, social cards will not be generated
+making output directory... done
+building [mo]: targets for 543 po files that are out of date
+writing output... [  0%] locales/zh_CN/LC_MESSAGES/library/decimal.mo
+writing output... [  0%] locales/zh_CN/LC_MESSAGES/library/tty.mo
+writing output... [  1%] locales/zh_CN/LC_MESSAGES/library/netrc.mo
+writing output... [  1%] locales/zh_CN/LC_MESSAGES/library/tempfile.mo
+writing output... [  1%] locales/zh_CN/LC_MESSAGES/library/sunau.mo
+writing output... [  1%] locales/zh_CN/LC_MESSAGES/library/csv.mo
+writing output... [  1%] locales/zh_CN/LC_MESSAGES/library/doctest.mo
+writing output... [  1%] locales/zh_CN/LC_MESSAGES/library/site.mo
+writing output... [  2%] locales/zh_CN/LC_MESSAGES/library/linecache.mo
+writing output... [  2%] locales/zh_CN/LC_MESSAGES/library/mimetypes.mo
+writing output... [  2%] locales/zh_CN/LC_MESSAGES/library/marshal.mo
+writing output... [  2%] locales/zh_CN/LC_MESSAGES/library/asyncio-stream.mo
+writing output... [  2%] locales/zh_CN/LC_MESSAGES/library/html.entities.mo
+writing output... [  3%] locales/zh_CN/LC_MESSAGES/library/importlib.resources.abc.mo
+writing output... [  3%] locales/zh_CN/LC_MESSAGES/library/pickle.mo
+writing output... [  3%] locales/zh_CN/LC_MESSAGES/library/ftplib.mo
+writing output... [  3%] locales/zh_CN/LC_MESSAGES/library/rlcompleter.mo
+writing output... [  3%] locales/zh_CN/LC_MESSAGES/library/copyreg.mo
+writing output... [  3%] locales/zh_CN/LC_MESSAGES/library/argparse.mo
+writing output... [  4%] locales/zh_CN/LC_MESSAGES/library/syslog.mo
+writing output... [  4%] locales/zh_CN/LC_MESSAGES/library/unix.mo
+writing output... [  4%] locales/zh_CN/LC_MESSAGES/library/chunk.mo
+writing output... [  4%] locales/zh_CN/LC_MESSAGES/library/smtpd.mo
+writing output... [  4%] locales/zh_CN/LC_MESSAGES/library/stringprep.mo
+writing output... [  5%] locales/zh_CN/LC_MESSAGES/library/xdrlib.mo
+writing output... [  5%] locales/zh_CN/LC_MESSAGES/library/secrets.mo
+writing output... [  5%] locales/zh_CN/LC_MESSAGES/library/pwd.mo
+writing output... [  5%] locales/zh_CN/LC_MESSAGES/library/urllib.mo
+writing output... [  5%] locales/zh_CN/LC_MESSAGES/library/bdb.mo
+writing output... [  6%] locales/zh_CN/LC_MESSAGES/library/http.cookies.mo
+writing output... [  6%] locales/zh_CN/LC_MESSAGES/library/builtins.mo
+writing output... [  6%] locales/zh_CN/LC_MESSAGES/library/glob.mo
+writing output... [  6%] locales/zh_CN/LC_MESSAGES/library/profile.mo
+writing output... [  6%] locales/zh_CN/LC_MESSAGES/library/pydoc.mo
+writing output... [  6%] locales/zh_CN/LC_MESSAGES/library/annotationlib.mo
+writing output... [  7%] locales/zh_CN/LC_MESSAGES/library/locale.mo
+writing output... [  7%] locales/zh_CN/LC_MESSAGES/library/functional.mo
+writing output... [  7%] locales/zh_CN/LC_MESSAGES/library/poplib.mo
+writing output... [  7%] locales/zh_CN/LC_MESSAGES/library/msvcrt.mo
+writing output... [  7%] locales/zh_CN/LC_MESSAGES/library/multiprocessing.mo
+writing output... [  8%] locales/zh_CN/LC_MESSAGES/library/tokenize.mo
+writing output... [  8%] locales/zh_CN/LC_MESSAGES/library/colorsys.mo
+writing output... [  8%] locales/zh_CN/LC_MESSAGES/library/audit_events.mo
+writing output... [  8%] locales/zh_CN/LC_MESSAGES/library/string.mo
+writing output... [  8%] locales/zh_CN/LC_MESSAGES/library/aifc.mo
+writing output... [  8%] locales/zh_CN/LC_MESSAGES/library/filecmp.mo
+writing output... [  9%] locales/zh_CN/LC_MESSAGES/library/os.mo
+writing output... [  9%] locales/zh_CN/LC_MESSAGES/library/frameworks.mo
+writing output... [  9%] locales/zh_CN/LC_MESSAGES/library/asyncio-policy.mo
+writing output... [  9%] locales/zh_CN/LC_MESSAGES/library/logging.mo
+writing output... [  9%] locales/zh_CN/LC_MESSAGES/library/html.parser.mo
+writing output... [ 10%] locales/zh_CN/LC_MESSAGES/library/curses.mo
+writing output... [ 10%] locales/zh_CN/LC_MESSAGES/library/tkinter.scrolledtext.mo
+writing output... [ 10%] locales/zh_CN/LC_MESSAGES/library/typing.mo
+writing output... [ 10%] locales/zh_CN/LC_MESSAGES/library/py_compile.mo
+writing output... [ 10%] locales/zh_CN/LC_MESSAGES/library/urllib.request.mo
+writing output... [ 10%] locales/zh_CN/LC_MESSAGES/library/random.mo
+writing output... [ 11%] locales/zh_CN/LC_MESSAGES/library/asyncio-llapi-index.mo
+writing output... [ 11%] locales/zh_CN/LC_MESSAGES/library/statistics.mo
+writing output... [ 11%] locales/zh_CN/LC_MESSAGES/library/collections.mo
+writing output... [ 11%] locales/zh_CN/LC_MESSAGES/library/tkinter.mo
+writing output... [ 11%] locales/zh_CN/LC_MESSAGES/library/nntplib.mo
+writing output... [ 12%] locales/zh_CN/LC_MESSAGES/library/urllib.robotparser.mo
+writing output... [ 12%] locales/zh_CN/LC_MESSAGES/library/asyncio-task.mo
+writing output... [ 12%] locales/zh_CN/LC_MESSAGES/library/winsound.mo
+writing output... [ 12%] locales/zh_CN/LC_MESSAGES/library/sys_path_init.mo
+writing output... [ 12%] locales/zh_CN/LC_MESSAGES/library/signal.mo
+writing output... [ 13%] locales/zh_CN/LC_MESSAGES/library/resource.mo
+writing output... [ 13%] locales/zh_CN/LC_MESSAGES/library/heapq.mo
+writing output... [ 13%] locales/zh_CN/LC_MESSAGES/library/gc.mo
+writing output... [ 13%] locales/zh_CN/LC_MESSAGES/library/token.mo
+writing output... [ 13%] locales/zh_CN/LC_MESSAGES/library/custominterp.mo
+writing output... [ 13%] locales/zh_CN/LC_MESSAGES/library/tkinter.messagebox.mo
+writing output... [ 14%] locales/zh_CN/LC_MESSAGES/library/functools.mo
+writing output... [ 14%] locales/zh_CN/LC_MESSAGES/library/weakref.mo
+writing output... [ 14%] locales/zh_CN/LC_MESSAGES/library/uuid.mo
+writing output... [ 14%] locales/zh_CN/LC_MESSAGES/library/nis.mo
+writing output... [ 14%] locales/zh_CN/LC_MESSAGES/library/codeop.mo
+writing output... [ 15%] locales/zh_CN/LC_MESSAGES/library/xml.etree.elementtree.mo
+writing output... [ 15%] locales/zh_CN/LC_MESSAGES/library/asyncio-api-index.mo
+writing output... [ 15%] locales/zh_CN/LC_MESSAGES/library/ssl.mo
+writing output... [ 15%] locales/zh_CN/LC_MESSAGES/library/urllib.parse.mo
+writing output... [ 15%] locales/zh_CN/LC_MESSAGES/library/email.parser.mo
+writing output... [ 15%] locales/zh_CN/LC_MESSAGES/library/email.headerregistry.mo
+writing output... [ 16%] locales/zh_CN/LC_MESSAGES/library/plistlib.mo
+writing output... [ 16%] locales/zh_CN/LC_MESSAGES/library/tkinter.colorchooser.mo
+writing output... [ 16%] locales/zh_CN/LC_MESSAGES/library/dbm.mo
+writing output... [ 16%] locales/zh_CN/LC_MESSAGES/library/timeit.mo
+writing output... [ 16%] locales/zh_CN/LC_MESSAGES/library/tabnanny.mo
+writing output... [ 17%] locales/zh_CN/LC_MESSAGES/library/quopri.mo
+writing output... [ 17%] locales/zh_CN/LC_MESSAGES/library/spwd.mo
+writing output... [ 17%] locales/zh_CN/LC_MESSAGES/library/xml.sax.mo
+writing output... [ 17%] locales/zh_CN/LC_MESSAGES/library/asyncio-platforms.mo
+writing output... [ 17%] locales/zh_CN/LC_MESSAGES/library/compression.mo
+writing output... [ 17%] locales/zh_CN/LC_MESSAGES/library/inspect.mo
+writing output... [ 18%] locales/zh_CN/LC_MESSAGES/library/telnetlib.mo
+writing output... [ 18%] locales/zh_CN/LC_MESSAGES/library/gettext.mo
+writing output... [ 18%] locales/zh_CN/LC_MESSAGES/library/asyncio-eventloop.mo
+writing output... [ 18%] locales/zh_CN/LC_MESSAGES/library/codecs.mo
+writing output... [ 18%] locales/zh_CN/LC_MESSAGES/library/language.mo
+writing output... [ 19%] locales/zh_CN/LC_MESSAGES/library/superseded.mo
+writing output... [ 19%] locales/zh_CN/LC_MESSAGES/library/email.iterators.mo
+writing output... [ 19%] locales/zh_CN/LC_MESSAGES/library/dialog.mo
+writing output... [ 19%] locales/zh_CN/LC_MESSAGES/library/imp.mo
+writing output... [ 19%] locales/zh_CN/LC_MESSAGES/library/fnmatch.mo
+writing output... [ 20%] locales/zh_CN/LC_MESSAGES/library/distutils.mo
+writing output... [ 20%] locales/zh_CN/LC_MESSAGES/library/stat.mo
+writing output... [ 20%] locales/zh_CN/LC_MESSAGES/library/bisect.mo
+writing output... [ 20%] locales/zh_CN/LC_MESSAGES/library/text.mo
+writing output... [ 20%] locales/zh_CN/LC_MESSAGES/library/asyncio-runner.mo
+writing output... [ 20%] locales/zh_CN/LC_MESSAGES/library/collections.abc.mo
+writing output... [ 21%] locales/zh_CN/LC_MESSAGES/library/readline.mo
+writing output... [ 21%] locales/zh_CN/LC_MESSAGES/library/internet.mo
+writing output... [ 21%] locales/zh_CN/LC_MESSAGES/library/urllib.error.mo
+writing output... [ 21%] locales/zh_CN/LC_MESSAGES/library/re.mo
+writing output... [ 21%] locales/zh_CN/LC_MESSAGES/library/asyncio-threading.mo
+writing output... [ 22%] locales/zh_CN/LC_MESSAGES/library/__main__.mo
+writing output... [ 22%] locales/zh_CN/LC_MESSAGES/library/unittest.mock.mo
+writing output... [ 22%] locales/zh_CN/LC_MESSAGES/library/calendar.mo
+writing output... [ 22%] locales/zh_CN/LC_MESSAGES/library/binary.mo
+writing output... [ 22%] locales/zh_CN/LC_MESSAGES/library/debug.mo
+writing output... [ 22%] locales/zh_CN/LC_MESSAGES/library/archiving.mo
+writing output... [ 23%] locales/zh_CN/LC_MESSAGES/library/test.mo
+writing output... [ 23%] locales/zh_CN/LC_MESSAGES/library/platform.mo
+writing output... [ 23%] locales/zh_CN/LC_MESSAGES/library/math.mo
+writing output... [ 23%] locales/zh_CN/LC_MESSAGES/library/lzma.mo
+writing output... [ 23%] locales/zh_CN/LC_MESSAGES/library/email.compat32-message.mo
+writing output... [ 24%] locales/zh_CN/LC_MESSAGES/library/unicodedata.mo
+writing output... [ 24%] locales/zh_CN/LC_MESSAGES/library/uu.mo
+writing output... [ 24%] locales/zh_CN/LC_MESSAGES/library/errno.mo
+writing output... [ 24%] locales/zh_CN/LC_MESSAGES/library/difflib.mo
+writing output... [ 24%] locales/zh_CN/LC_MESSAGES/library/unittest.mo
+writing output... [ 24%] locales/zh_CN/LC_MESSAGES/library/select.mo
+writing output... [ 25%] locales/zh_CN/LC_MESSAGES/library/gzip.mo
+writing output... [ 25%] locales/zh_CN/LC_MESSAGES/library/ctypes.mo
+writing output... [ 25%] locales/zh_CN/LC_MESSAGES/library/pty.mo
+writing output... [ 25%] locales/zh_CN/LC_MESSAGES/library/http.server.mo
+writing output... [ 25%] locales/zh_CN/LC_MESSAGES/library/zipapp.mo
+writing output... [ 26%] locales/zh_CN/LC_MESSAGES/library/operator.mo
+writing output... [ 26%] locales/zh_CN/LC_MESSAGES/library/tkinter.dnd.mo
+writing output... [ 26%] locales/zh_CN/LC_MESSAGES/library/tomllib.mo
+writing output... [ 26%] locales/zh_CN/LC_MESSAGES/library/ensurepip.mo
+writing output... [ 26%] locales/zh_CN/LC_MESSAGES/library/cgi.mo
+writing output... [ 27%] locales/zh_CN/LC_MESSAGES/library/logging.config.mo
+writing output... [ 27%] locales/zh_CN/LC_MESSAGES/library/mailbox.mo
+writing output... [ 27%] locales/zh_CN/LC_MESSAGES/library/compression.zstd.mo
+writing output... [ 27%] locales/zh_CN/LC_MESSAGES/library/fractions.mo
+writing output... [ 27%] locales/zh_CN/LC_MESSAGES/library/sys.monitoring.mo
+writing output... [ 27%] locales/zh_CN/LC_MESSAGES/library/types.mo
+writing output... [ 28%] locales/zh_CN/LC_MESSAGES/library/venv.mo
+writing output... [ 28%] locales/zh_CN/LC_MESSAGES/library/http.cookiejar.mo
+writing output... [ 28%] locales/zh_CN/LC_MESSAGES/library/xml.dom.minidom.mo
+writing output... [ 28%] locales/zh_CN/LC_MESSAGES/library/__future__.mo
+writing output... [ 28%] locales/zh_CN/LC_MESSAGES/library/constants.mo
+writing output... [ 29%] locales/zh_CN/LC_MESSAGES/library/os.path.mo
+writing output... [ 29%] locales/zh_CN/LC_MESSAGES/library/ossaudiodev.mo
+writing output... [ 29%] locales/zh_CN/LC_MESSAGES/library/email.policy.mo
+writing output... [ 29%] locales/zh_CN/LC_MESSAGES/library/pprint.mo
+writing output... [ 29%] locales/zh_CN/LC_MESSAGES/library/queue.mo
+writing output... [ 29%] locales/zh_CN/LC_MESSAGES/library/graphlib.mo
+writing output... [ 30%] locales/zh_CN/LC_MESSAGES/about.mo
+writing output... [ 30%] locales/zh_CN/LC_MESSAGES/library/socket.mo
+writing output... [ 30%] locales/zh_CN/LC_MESSAGES/library/pickletools.mo
+writing output... [ 30%] locales/zh_CN/LC_MESSAGES/library/importlib.resources.mo
+writing output... [ 30%] locales/zh_CN/LC_MESSAGES/improve-page-nojs.mo
+writing output... [ 31%] locales/zh_CN/LC_MESSAGES/library/persistence.mo
+writing output... [ 31%] locales/zh_CN/LC_MESSAGES/library/curses.panel.mo
+writing output... [ 31%] locales/zh_CN/LC_MESSAGES/library/string.templatelib.mo
+writing output... [ 31%] locales/zh_CN/LC_MESSAGES/copyright.mo
+writing output... [ 31%] locales/zh_CN/LC_MESSAGES/library/asyncio-subprocess.mo
+writing output... [ 31%] locales/zh_CN/LC_MESSAGES/library/warnings.mo
+writing output... [ 32%] locales/zh_CN/LC_MESSAGES/contents.mo
+writing output... [ 32%] locales/zh_CN/LC_MESSAGES/library/cgitb.mo
+writing output... [ 32%] locales/zh_CN/LC_MESSAGES/library/asyncore.mo
+writing output... [ 32%] locales/zh_CN/LC_MESSAGES/library/pipes.mo
+writing output... [ 32%] locales/zh_CN/LC_MESSAGES/library/asyncio-tools.mo
+writing output... [ 33%] locales/zh_CN/LC_MESSAGES/library/fileinput.mo
+writing output... [ 33%] locales/zh_CN/LC_MESSAGES/glossary.mo
+writing output... [ 33%] locales/zh_CN/LC_MESSAGES/license.mo
+writing output... [ 33%] locales/zh_CN/LC_MESSAGES/improve-page.mo
+writing output... [ 33%] locales/zh_CN/LC_MESSAGES/library/grp.mo
+writing output... [ 34%] locales/zh_CN/LC_MESSAGES/library/asyncio-sync.mo
+writing output... [ 34%] locales/zh_CN/LC_MESSAGES/library/shlex.mo
+writing output... [ 34%] locales/zh_CN/LC_MESSAGES/whatsnew/index.mo
+writing output... [ 34%] locales/zh_CN/LC_MESSAGES/c-api/iter.mo
+writing output... [ 34%] locales/zh_CN/LC_MESSAGES/library/xml.mo
+writing output... [ 34%] locales/zh_CN/LC_MESSAGES/library/winreg.mo
+writing output... [ 35%] locales/zh_CN/LC_MESSAGES/distributing/index.mo
+writing output... [ 35%] locales/zh_CN/LC_MESSAGES/whatsnew/3.6.mo
+writing output... [ 35%] locales/zh_CN/LC_MESSAGES/c-api/gen.mo
+writing output... [ 35%] locales/zh_CN/LC_MESSAGES/faq/library.mo
+writing output... [ 35%] locales/zh_CN/LC_MESSAGES/c-api/descriptor.mo
+writing output... [ 36%] locales/zh_CN/LC_MESSAGES/library/json.mo
+writing output... [ 36%] locales/zh_CN/LC_MESSAGES/library/cmdline.mo
+writing output... [ 36%] locales/zh_CN/LC_MESSAGES/whatsnew/2.0.mo
+writing output... [ 36%] locales/zh_CN/LC_MESSAGES/whatsnew/2.6.mo
+writing output... [ 36%] locales/zh_CN/LC_MESSAGES/c-api/allocation.mo
+writing output... [ 36%] locales/zh_CN/LC_MESSAGES/library/io.mo
+writing output... [ 37%] locales/zh_CN/LC_MESSAGES/library/cmd.mo
+writing output... [ 37%] locales/zh_CN/LC_MESSAGES/library/time.mo
+writing output... [ 37%] locales/zh_CN/LC_MESSAGES/whatsnew/3.2.mo
+writing output... [ 37%] locales/zh_CN/LC_MESSAGES/library/concurrency.mo
+writing output... [ 37%] locales/zh_CN/LC_MESSAGES/library/getpass.mo
+writing output... [ 38%] locales/zh_CN/LC_MESSAGES/c-api/sys.mo
+writing output... [ 38%] locales/zh_CN/LC_MESSAGES/whatsnew/3.13.mo
+writing output... [ 38%] locales/zh_CN/LC_MESSAGES/c-api/init_config.mo
+writing output... [ 38%] locales/zh_CN/LC_MESSAGES/library/getopt.mo
+writing output... [ 38%] locales/zh_CN/LC_MESSAGES/whatsnew/3.5.mo
+writing output... [ 38%] locales/zh_CN/LC_MESSAGES/library/runpy.mo
+writing output... [ 39%] locales/zh_CN/LC_MESSAGES/library/development.mo
+writing output... [ 39%] locales/zh_CN/LC_MESSAGES/library/bz2.mo
+writing output... [ 39%] locales/zh_CN/LC_MESSAGES/library/base64.mo
+writing output... [ 39%] locales/zh_CN/LC_MESSAGES/library/sysconfig.mo
+writing output... [ 39%] locales/zh_CN/LC_MESSAGES/library/ast.mo
+writing output... [ 40%] locales/zh_CN/LC_MESSAGES/library/pathlib.mo
+writing output... [ 40%] locales/zh_CN/LC_MESSAGES/whatsnew/3.10.mo
+writing output... [ 40%] locales/zh_CN/LC_MESSAGES/library/_thread.mo
+writing output... [ 40%] locales/zh_CN/LC_MESSAGES/whatsnew/3.14.mo
+writing output... [ 40%] locales/zh_CN/LC_MESSAGES/library/enum.mo
+writing output... [ 41%] locales/zh_CN/LC_MESSAGES/library/webbrowser.mo
+writing output... [ 41%] locales/zh_CN/LC_MESSAGES/whatsnew/3.4.mo
+writing output... [ 41%] locales/zh_CN/LC_MESSAGES/library/itertools.mo
+writing output... [ 41%] locales/zh_CN/LC_MESSAGES/library/msilib.mo
+writing output... [ 41%] locales/zh_CN/LC_MESSAGES/whatsnew/3.9.mo
+writing output... [ 41%] locales/zh_CN/LC_MESSAGES/library/windows.mo
+writing output... [ 42%] locales/zh_CN/LC_MESSAGES/library/wsgiref.mo
+writing output... [ 42%] locales/zh_CN/LC_MESSAGES/whatsnew/2.7.mo
+writing output... [ 42%] locales/zh_CN/LC_MESSAGES/library/shutil.mo
+writing output... [ 42%] locales/zh_CN/LC_MESSAGES/library/email.mo
+writing output... [ 42%] locales/zh_CN/LC_MESSAGES/library/binascii.mo
+writing output... [ 43%] locales/zh_CN/LC_MESSAGES/whatsnew/3.1.mo
+writing output... [ 43%] locales/zh_CN/LC_MESSAGES/library/concurrent.futures.mo
+writing output... [ 43%] locales/zh_CN/LC_MESSAGES/whatsnew/3.3.mo
+writing output... [ 43%] locales/zh_CN/LC_MESSAGES/library/zlib.mo
+writing output... [ 43%] locales/zh_CN/LC_MESSAGES/whatsnew/2.1.mo
+writing output... [ 43%] locales/zh_CN/LC_MESSAGES/library/subprocess.mo
+writing output... [ 44%] locales/zh_CN/LC_MESSAGES/library/email.encoders.mo
+writing output... [ 44%] locales/zh_CN/LC_MESSAGES/library/dataclasses.mo
+writing output... [ 44%] locales/zh_CN/LC_MESSAGES/whatsnew/3.12.mo
+writing output... [ 44%] locales/zh_CN/LC_MESSAGES/library/asyncio-extending.mo
+writing output... [ 44%] locales/zh_CN/LC_MESSAGES/library/distribution.mo
+writing output... [ 45%] locales/zh_CN/LC_MESSAGES/library/email.mime.mo
+writing output... [ 45%] locales/zh_CN/LC_MESSAGES/library/threadsafety.mo
+writing output... [ 45%] locales/zh_CN/LC_MESSAGES/whatsnew/changelog.mo
+writing output... [ 45%] locales/zh_CN/LC_MESSAGES/c-api/objimpl.mo
+writing output... [ 45%] locales/zh_CN/LC_MESSAGES/whatsnew/2.3.mo
+writing output... [ 45%] locales/zh_CN/LC_MESSAGES/c-api/frame.mo
+writing output... [ 46%] locales/zh_CN/LC_MESSAGES/c-api/tuple.mo
+writing output... [ 46%] locales/zh_CN/LC_MESSAGES/library/netdata.mo
+writing output... [ 46%] locales/zh_CN/LC_MESSAGES/library/markup.mo
+writing output... [ 46%] locales/zh_CN/LC_MESSAGES/whatsnew/3.0.mo
+writing output... [ 46%] locales/zh_CN/LC_MESSAGES/c-api/stable.mo
+writing output... [ 47%] locales/zh_CN/LC_MESSAGES/library/atexit.mo
+writing output... [ 47%] locales/zh_CN/LC_MESSAGES/whatsnew/3.11.mo
+writing output... [ 47%] locales/zh_CN/LC_MESSAGES/library/audioop.mo
+writing output... [ 47%] locales/zh_CN/LC_MESSAGES/library/code.mo
+writing output... [ 47%] locales/zh_CN/LC_MESSAGES/library/sndhdr.mo
+writing output... [ 48%] locales/zh_CN/LC_MESSAGES/c-api/import.mo
+writing output... [ 48%] locales/zh_CN/LC_MESSAGES/library/termios.mo
+writing output... [ 48%] locales/zh_CN/LC_MESSAGES/library/i18n.mo
+writing output... [ 48%] locales/zh_CN/LC_MESSAGES/library/modules.mo
+writing output... [ 48%] locales/zh_CN/LC_MESSAGES/whatsnew/2.4.mo
+writing output... [ 48%] locales/zh_CN/LC_MESSAGES/c-api/intro.mo
+writing output... [ 49%] locales/zh_CN/LC_MESSAGES/library/tkinter.ttk.mo
+writing output... [ 49%] locales/zh_CN/LC_MESSAGES/library/xml.dom.mo
+writing output... [ 49%] locales/zh_CN/LC_MESSAGES/whatsnew/3.7.mo
+writing output... [ 49%] locales/zh_CN/LC_MESSAGES/c-api/subinterpreters.mo
+writing output... [ 49%] locales/zh_CN/LC_MESSAGES/library/datetime.mo
+writing output... [ 50%] locales/zh_CN/LC_MESSAGES/library/index.mo
+writing output... [ 50%] locales/zh_CN/LC_MESSAGES/whatsnew/2.2.mo
+writing output... [ 50%] locales/zh_CN/LC_MESSAGES/c-api/index.mo
+writing output... [ 50%] locales/zh_CN/LC_MESSAGES/library/tkinter.font.mo
+writing output... [ 50%] locales/zh_CN/LC_MESSAGES/c-api/synchronization.mo
+writing output... [ 50%] locales/zh_CN/LC_MESSAGES/library/cmath.mo
+writing output... [ 51%] locales/zh_CN/LC_MESSAGES/extending/embedding.mo
+writing output... [ 51%] locales/zh_CN/LC_MESSAGES/c-api/veryhigh.mo
+writing output... [ 51%] locales/zh_CN/LC_MESSAGES/library/keyword.mo
+writing output... [ 51%] locales/zh_CN/LC_MESSAGES/extending/extending.mo
+writing output... [ 51%] locales/zh_CN/LC_MESSAGES/c-api/perfmaps.mo
+writing output... [ 52%] locales/zh_CN/LC_MESSAGES/library/email.contentmanager.mo
+writing output... [ 52%] locales/zh_CN/LC_MESSAGES/library/pyexpat.mo
+writing output... [ 52%] locales/zh_CN/LC_MESSAGES/library/modulefinder.mo
+writing output... [ 52%] locales/zh_CN/LC_MESSAGES/library/concurrent.interpreters.mo
+writing output... [ 52%] locales/zh_CN/LC_MESSAGES/builtins/functions.mo
+writing output... [ 52%] locales/zh_CN/LC_MESSAGES/library/logging.handlers.mo
+writing output... [ 53%] locales/zh_CN/LC_MESSAGES/library/wave.mo
+writing output... [ 53%] locales/zh_CN/LC_MESSAGES/using/index.mo
+writing output... [ 53%] locales/zh_CN/LC_MESSAGES/extending/newtypes_tutorial.mo
+writing output... [ 53%] locales/zh_CN/LC_MESSAGES/c-api/monitoring.mo
+writing output... [ 53%] locales/zh_CN/LC_MESSAGES/extending/newtypes.mo
+writing output... [ 54%] locales/zh_CN/LC_MESSAGES/library/optparse.mo
+writing output... [ 54%] locales/zh_CN/LC_MESSAGES/c-api/conversion.mo
+writing output... [ 54%] locales/zh_CN/LC_MESSAGES/library/numbers.mo
+writing output... [ 54%] locales/zh_CN/LC_MESSAGES/extending/index.mo
+writing output... [ 54%] locales/zh_CN/LC_MESSAGES/library/contextvars.mo
+writing output... [ 55%] locales/zh_CN/LC_MESSAGES/faq/gui.mo
+writing output... [ 55%] locales/zh_CN/LC_MESSAGES/extending/building.mo
+writing output... [ 55%] locales/zh_CN/LC_MESSAGES/c-api/iterator.mo
+writing output... [ 55%] locales/zh_CN/LC_MESSAGES/library/intro.mo
+writing output... [ 55%] locales/zh_CN/LC_MESSAGES/library/xml.sax.reader.mo
+writing output... [ 55%] locales/zh_CN/LC_MESSAGES/c-api/long.mo
+writing output... [ 56%] locales/zh_CN/LC_MESSAGES/library/importlib.metadata.mo
+writing output... [ 56%] locales/zh_CN/LC_MESSAGES/library/symtable.mo
+writing output... [ 56%] locales/zh_CN/LC_MESSAGES/library/fcntl.mo
+writing output... [ 56%] locales/zh_CN/LC_MESSAGES/c-api/unicode.mo
+writing output... [ 56%] locales/zh_CN/LC_MESSAGES/library/asynchat.mo
+writing output... [ 57%] locales/zh_CN/LC_MESSAGES/library/trace.mo
+writing output... [ 57%] locales/zh_CN/LC_MESSAGES/c-api/capsule.mo
+writing output... [ 57%] locales/zh_CN/LC_MESSAGES/c-api/exceptions.mo
+writing output... [ 57%] locales/zh_CN/LC_MESSAGES/library/fileformats.mo
+writing output... [ 57%] locales/zh_CN/LC_MESSAGES/library/python.mo
+writing output... [ 57%] locales/zh_CN/LC_MESSAGES/library/asyncio-exceptions.mo
+writing output... [ 58%] locales/zh_CN/LC_MESSAGES/faq/index.mo
+writing output... [ 58%] locales/zh_CN/LC_MESSAGES/c-api/cell.mo
+writing output... [ 58%] locales/zh_CN/LC_MESSAGES/library/pyclbr.mo
+writing output... [ 58%] locales/zh_CN/LC_MESSAGES/extending/windows.mo
+writing output... [ 58%] locales/zh_CN/LC_MESSAGES/library/email.errors.mo
+writing output... [ 59%] locales/zh_CN/LC_MESSAGES/c-api/gcsupport.mo
+writing output... [ 59%] locales/zh_CN/LC_MESSAGES/c-api/apiabiversion.mo
+writing output... [ 59%] locales/zh_CN/LC_MESSAGES/library/faulthandler.mo
+writing output... [ 59%] locales/zh_CN/LC_MESSAGES/faq/extending.mo
+writing output... [ 59%] locales/zh_CN/LC_MESSAGES/c-api/set.mo
+writing output... [ 59%] locales/zh_CN/LC_MESSAGES/library/mm.mo
+writing output... [ 60%] locales/zh_CN/LC_MESSAGES/library/textwrap.mo
+writing output... [ 60%] locales/zh_CN/LC_MESSAGES/c-api/interp-lifecycle.mo
+writing output... [ 60%] locales/zh_CN/LC_MESSAGES/library/pdb.mo
+writing output... [ 60%] locales/zh_CN/LC_MESSAGES/library/zoneinfo.mo
+writing output... [ 60%] locales/zh_CN/LC_MESSAGES/c-api/structures.mo
+writing output... [ 61%] locales/zh_CN/LC_MESSAGES/faq/installed.mo
+writing output... [ 61%] locales/zh_CN/LC_MESSAGES/library/compileall.mo
+writing output... [ 61%] locales/zh_CN/LC_MESSAGES/library/sched.mo
+writing output... [ 61%] locales/zh_CN/LC_MESSAGES/c-api/call.mo
+writing output... [ 61%] locales/zh_CN/LC_MESSAGES/faq/design.mo
+writing output... [ 62%] locales/zh_CN/LC_MESSAGES/library/removed.mo
+writing output... [ 62%] locales/zh_CN/LC_MESSAGES/library/traceback.mo
+writing output... [ 62%] locales/zh_CN/LC_MESSAGES/library/copy.mo
+writing output... [ 62%] locales/zh_CN/LC_MESSAGES/faq/windows.mo
+writing output... [ 62%] locales/zh_CN/LC_MESSAGES/library/selectors.mo
+writing output... [ 62%] locales/zh_CN/LC_MESSAGES/library/asyncio.mo
+writing output... [ 63%] locales/zh_CN/LC_MESSAGES/faq/general.mo
+writing output... [ 63%] locales/zh_CN/LC_MESSAGES/c-api/hash.mo
+writing output... [ 63%] locales/zh_CN/LC_MESSAGES/library/html.mo
+writing output... [ 63%] locales/zh_CN/LC_MESSAGES/faq/programming.mo
+writing output... [ 63%] locales/zh_CN/LC_MESSAGES/c-api/marshal.mo
+writing output... [ 64%] locales/zh_CN/LC_MESSAGES/library/struct.mo
+writing output... [ 64%] locales/zh_CN/LC_MESSAGES/builtins/threadsafety.mo
+writing output... [ 64%] locales/zh_CN/LC_MESSAGES/c-api/complex.mo
+writing output... [ 64%] locales/zh_CN/LC_MESSAGES/builtins/time-complexity.mo
+writing output... [ 64%] locales/zh_CN/LC_MESSAGES/library/importlib.mo
+writing output... [ 64%] locales/zh_CN/LC_MESSAGES/library/mailcap.mo
+writing output... [ 65%] locales/zh_CN/LC_MESSAGES/c-api/module.mo
+writing output... [ 65%] locales/zh_CN/LC_MESSAGES/builtins/constants.mo
+writing output... [ 65%] locales/zh_CN/LC_MESSAGES/c-api/type.mo
+writing output... [ 65%] locales/zh_CN/LC_MESSAGES/library/filesys.mo
+writing output... [ 65%] locales/zh_CN/LC_MESSAGES/builtins/index.mo
+writing output... [ 66%] locales/zh_CN/LC_MESSAGES/installing/index.mo
+writing output... [ 66%] locales/zh_CN/LC_MESSAGES/builtins/stdtypes.mo
+writing output... [ 66%] locales/zh_CN/LC_MESSAGES/library/email.header.mo
+writing output... [ 66%] locales/zh_CN/LC_MESSAGES/builtins/exceptions.mo
+writing output... [ 66%] locales/zh_CN/LC_MESSAGES/c-api/weakref.mo
+writing output... [ 66%] locales/zh_CN/LC_MESSAGES/library/ipaddress.mo
+writing output... [ 67%] locales/zh_CN/LC_MESSAGES/reference/executionmodel.mo
+writing output... [ 67%] locales/zh_CN/LC_MESSAGES/library/imghdr.mo
+writing output... [ 67%] locales/zh_CN/LC_MESSAGES/library/pkgutil.mo
+writing output... [ 67%] locales/zh_CN/LC_MESSAGES/deprecations/pending-removal-in-3.17.mo
+writing output... [ 67%] locales/zh_CN/LC_MESSAGES/c-api/reflection.mo
+writing output... [ 68%] locales/zh_CN/LC_MESSAGES/library/turtle.mo
+writing output... [ 68%] locales/zh_CN/LC_MESSAGES/library/shelve.mo
+writing output... [ 68%] locales/zh_CN/LC_MESSAGES/c-api/number.mo
+writing output... [ 68%] locales/zh_CN/LC_MESSAGES/howto/regex.mo
+writing output... [ 68%] locales/zh_CN/LC_MESSAGES/library/email.generator.mo
+writing output... [ 69%] locales/zh_CN/LC_MESSAGES/deprecations/pending-removal-in-3.19.mo
+writing output... [ 69%] locales/zh_CN/LC_MESSAGES/tutorial/whatnow.mo
+writing output... [ 69%] locales/zh_CN/LC_MESSAGES/deprecations/c-api-pending-removal-in-future.mo
+writing output... [ 69%] locales/zh_CN/LC_MESSAGES/c-api/extension-modules.mo
+writing output... [ 69%] locales/zh_CN/LC_MESSAGES/library/contextlib.mo
+writing output... [ 69%] locales/zh_CN/LC_MESSAGES/c-api/memoryview.mo
+writing output... [ 70%] locales/zh_CN/LC_MESSAGES/library/asyncio-protocol.mo
+writing output... [ 70%] locales/zh_CN/LC_MESSAGES/library/posix.mo
+writing output... [ 70%] locales/zh_CN/LC_MESSAGES/deprecations/index.mo
+writing output... [ 70%] locales/zh_CN/LC_MESSAGES/whatsnew/3.8.mo
+writing output... [ 70%] locales/zh_CN/LC_MESSAGES/library/concurrent.mo
+writing output... [ 71%] locales/zh_CN/LC_MESSAGES/c-api/curses.mo
+writing output... [ 71%] locales/zh_CN/LC_MESSAGES/library/asyncio-dev.mo
+writing output... [ 71%] locales/zh_CN/LC_MESSAGES/library/sqlite3.mo
+writing output... [ 71%] locales/zh_CN/LC_MESSAGES/deprecations/pending-removal-in-3.14.mo
+writing output... [ 71%] locales/zh_CN/LC_MESSAGES/library/tk.mo
+writing output... [ 71%] locales/zh_CN/LC_MESSAGES/c-api/float.mo
+writing output... [ 72%] locales/zh_CN/LC_MESSAGES/whatsnew/2.5.mo
+writing output... [ 72%] locales/zh_CN/LC_MESSAGES/using/windows.mo
+writing output... [ 72%] locales/zh_CN/LC_MESSAGES/library/xmlrpc.client.mo
+writing output... [ 72%] locales/zh_CN/LC_MESSAGES/using/cmdline.mo
+writing output... [ 72%] locales/zh_CN/LC_MESSAGES/library/multiprocessing.shared_memory.mo
+writing output... [ 73%] locales/zh_CN/LC_MESSAGES/tutorial/index.mo
+writing output... [ 73%] locales/zh_CN/LC_MESSAGES/c-api/abstract.mo
+writing output... [ 73%] locales/zh_CN/LC_MESSAGES/library/asyncio-queue.mo
+writing output... [ 73%] locales/zh_CN/LC_MESSAGES/deprecations/pending-removal-in-3.15.mo
+writing output... [ 73%] locales/zh_CN/LC_MESSAGES/tutorial/appetite.mo
+writing output... [ 73%] locales/zh_CN/LC_MESSAGES/library/imaplib.mo
+writing output... [ 74%] locales/zh_CN/LC_MESSAGES/library/configparser.mo
+writing output... [ 74%] locales/zh_CN/LC_MESSAGES/library/numeric.mo
+writing output... [ 74%] locales/zh_CN/LC_MESSAGES/deprecations/pending-removal-in-3.18.mo
+writing output... [ 74%] locales/zh_CN/LC_MESSAGES/tutorial/errors.mo
+writing output... [ 74%] locales/zh_CN/LC_MESSAGES/c-api/picklebuffer.mo
+writing output... [ 75%] locales/zh_CN/LC_MESSAGES/tutorial/datastructures.mo
+writing output... [ 75%] locales/zh_CN/LC_MESSAGES/library/sys.mo
+writing output... [ 75%] locales/zh_CN/LC_MESSAGES/deprecations/pending-removal-in-future.mo
+writing output... [ 75%] locales/zh_CN/LC_MESSAGES/library/stdtypes.mo
+writing output... [ 75%] locales/zh_CN/LC_MESSAGES/tutorial/interactive.mo
+writing output... [ 76%] locales/zh_CN/LC_MESSAGES/c-api/sequence.mo
+writing output... [ 76%] locales/zh_CN/LC_MESSAGES/deprecations/c-api-pending-removal-in-3.16.mo
+writing output... [ 76%] locales/zh_CN/LC_MESSAGES/library/devmode.mo
+writing output... [ 76%] locales/zh_CN/LC_MESSAGES/c-api/dict.mo
+writing output... [ 76%] locales/zh_CN/LC_MESSAGES/howto/sockets.mo
+writing output... [ 76%] locales/zh_CN/LC_MESSAGES/howto/instrumentation.mo
+writing output... [ 77%] locales/zh_CN/LC_MESSAGES/c-api/method.mo
+writing output... [ 77%] locales/zh_CN/LC_MESSAGES/library/functions.mo
+writing output... [ 77%] locales/zh_CN/LC_MESSAGES/howto/a-conceptual-overview-of-asyncio.mo
+writing output... [ 77%] locales/zh_CN/LC_MESSAGES/tutorial/floatingpoint.mo
+writing output... [ 77%] locales/zh_CN/LC_MESSAGES/library/smtplib.mo
+writing output... [ 78%] locales/zh_CN/LC_MESSAGES/tutorial/introduction.mo
+writing output... [ 78%] locales/zh_CN/LC_MESSAGES/c-api/arg.mo
+writing output... [ 78%] locales/zh_CN/LC_MESSAGES/library/email.charset.mo
+writing output... [ 78%] locales/zh_CN/LC_MESSAGES/howto/index.mo
+writing output... [ 78%] locales/zh_CN/LC_MESSAGES/tutorial/appendix.mo
+writing output... [ 78%] locales/zh_CN/LC_MESSAGES/tutorial/classes.mo
+writing output... [ 79%] locales/zh_CN/LC_MESSAGES/library/tracemalloc.mo
+writing output... [ 79%] locales/zh_CN/LC_MESSAGES/howto/unicode.mo
+writing output... [ 79%] locales/zh_CN/LC_MESSAGES/c-api/bytearray.mo
+writing output... [ 79%] locales/zh_CN/LC_MESSAGES/tutorial/stdlib.mo
+writing output... [ 79%] locales/zh_CN/LC_MESSAGES/library/mmap.mo
+writing output... [ 80%] locales/zh_CN/LC_MESSAGES/howto/clinic.mo
+writing output... [ 80%] locales/zh_CN/LC_MESSAGES/c-api/concrete.mo
+writing output... [ 80%] locales/zh_CN/LC_MESSAGES/howto/ipaddress.mo
+writing output... [ 80%] locales/zh_CN/LC_MESSAGES/tutorial/venv.mo
+writing output... [ 80%] locales/zh_CN/LC_MESSAGES/c-api/threads.mo
+writing output... [ 80%] locales/zh_CN/LC_MESSAGES/library/threading.mo
+writing output... [ 81%] locales/zh_CN/LC_MESSAGES/howto/cporting.mo
+writing output... [ 81%] locales/zh_CN/LC_MESSAGES/c-api/none.mo
+writing output... [ 81%] locales/zh_CN/LC_MESSAGES/library/asyncio-future.mo
+writing output... [ 81%] locales/zh_CN/LC_MESSAGES/bugs.mo
+writing output... [ 81%] locales/zh_CN/LC_MESSAGES/tutorial/inputoutput.mo
+writing output... [ 82%] locales/zh_CN/LC_MESSAGES/howto/isolating-extensions.mo
+writing output... [ 82%] locales/zh_CN/LC_MESSAGES/c-api/slice.mo
+writing output... [ 82%] locales/zh_CN/LC_MESSAGES/c-api/file.mo
+writing output... [ 82%] locales/zh_CN/LC_MESSAGES/library/zipfile.mo
+writing output... [ 82%] locales/zh_CN/LC_MESSAGES/tutorial/controlflow.mo
+writing output... [ 83%] locales/zh_CN/LC_MESSAGES/library/allos.mo
+writing output... [ 83%] locales/zh_CN/LC_MESSAGES/howto/free-threading-extensions.mo
+writing output... [ 83%] locales/zh_CN/LC_MESSAGES/reference/lexical_analysis.mo
+writing output... [ 83%] locales/zh_CN/LC_MESSAGES/howto/pyporting.mo
+writing output... [ 83%] locales/zh_CN/LC_MESSAGES/c-api/profiling.mo
+writing output... [ 83%] locales/zh_CN/LC_MESSAGES/library/array.mo
+writing output... [ 84%] locales/zh_CN/LC_MESSAGES/library/asyncio-graph.mo
+writing output... [ 84%] locales/zh_CN/LC_MESSAGES/tutorial/modules.mo
+writing output... [ 84%] locales/zh_CN/LC_MESSAGES/howto/mro.mo
+writing output... [ 84%] locales/zh_CN/LC_MESSAGES/tutorial/interpreter.mo
+writing output... [ 84%] locales/zh_CN/LC_MESSAGES/howto/argparse.mo
+writing output... [ 85%] locales/zh_CN/LC_MESSAGES/tutorial/stdlib2.mo
+writing output... [ 85%] locales/zh_CN/LC_MESSAGES/c-api/function.mo
+writing output... [ 85%] locales/zh_CN/LC_MESSAGES/howto/logging.mo
+writing output... [ 85%] locales/zh_CN/LC_MESSAGES/howto/curses.mo
+writing output... [ 85%] locales/zh_CN/LC_MESSAGES/c-api/buffer.mo
+writing output... [ 85%] locales/zh_CN/LC_MESSAGES/library/http.client.mo
+writing output... [ 86%] locales/zh_CN/LC_MESSAGES/reference/introduction.mo
+writing output... [ 86%] locales/zh_CN/LC_MESSAGES/library/dis.mo
+writing output... [ 86%] locales/zh_CN/LC_MESSAGES/howto/urllib2.mo
+writing output... [ 86%] locales/zh_CN/LC_MESSAGES/c-api/utilities.mo
+writing output... [ 86%] locales/zh_CN/LC_MESSAGES/c-api/init.mo
+writing output... [ 87%] locales/zh_CN/LC_MESSAGES/library/crypto.mo
+writing output... [ 87%] locales/zh_CN/LC_MESSAGES/reference/import.mo
+writing output... [ 87%] locales/zh_CN/LC_MESSAGES/c-api/memory.mo
+writing output... [ 87%] locales/zh_CN/LC_MESSAGES/library/abc.mo
+writing output... [ 87%] locales/zh_CN/LC_MESSAGES/howto/sorting.mo
+writing output... [ 87%] locales/zh_CN/LC_MESSAGES/c-api/bool.mo
+writing output... [ 88%] locales/zh_CN/LC_MESSAGES/c-api/typehints.mo
+writing output... [ 88%] locales/zh_CN/LC_MESSAGES/reference/datamodel.mo
+writing output... [ 88%] locales/zh_CN/LC_MESSAGES/library/socketserver.mo
+writing output... [ 88%] locales/zh_CN/LC_MESSAGES/howto/perf_profiling.mo
+writing output... [ 88%] locales/zh_CN/LC_MESSAGES/reference/expressions.mo
+writing output... [ 89%] locales/zh_CN/LC_MESSAGES/reference/compound_stmts.mo
+writing output... [ 89%] locales/zh_CN/LC_MESSAGES/library/security_warnings.mo
+writing output... [ 89%] locales/zh_CN/LC_MESSAGES/reference/simple_stmts.mo
+writing output... [ 89%] locales/zh_CN/LC_MESSAGES/c-api/coro.mo
+writing output... [ 89%] locales/zh_CN/LC_MESSAGES/howto/argparse-optparse.mo
+writing output... [ 90%] locales/zh_CN/LC_MESSAGES/library/curses.ascii.mo
+writing output... [ 90%] locales/zh_CN/LC_MESSAGES/reference/index.mo
+writing output... [ 90%] locales/zh_CN/LC_MESSAGES/library/cmdlinelibs.mo
+writing output... [ 90%] locales/zh_CN/LC_MESSAGES/howto/remote_debugging.mo
+writing output... [ 90%] locales/zh_CN/LC_MESSAGES/c-api/lifecycle.mo
+writing output... [ 90%] locales/zh_CN/LC_MESSAGES/library/idle.mo
+writing output... [ 91%] locales/zh_CN/LC_MESSAGES/reference/grammar.mo
+writing output... [ 91%] locales/zh_CN/LC_MESSAGES/library/hashlib.mo
+writing output... [ 91%] locales/zh_CN/LC_MESSAGES/c-api/tls.mo
+writing output... [ 91%] locales/zh_CN/LC_MESSAGES/reference/toplevel_components.mo
+writing output... [ 91%] locales/zh_CN/LC_MESSAGES/c-api/contextvars.mo
+writing output... [ 92%] locales/zh_CN/LC_MESSAGES/library/crypt.mo
+writing output... [ 92%] locales/zh_CN/LC_MESSAGES/howto/timerfd.mo
+writing output... [ 92%] locales/zh_CN/LC_MESSAGES/c-api/typeobj.mo
+writing output... [ 92%] locales/zh_CN/LC_MESSAGES/howto/functional.mo
+writing output... [ 92%] locales/zh_CN/LC_MESSAGES/using/configure.mo
+writing output... [ 92%] locales/zh_CN/LC_MESSAGES/c-api/time.mo
+writing output... [ 93%] locales/zh_CN/LC_MESSAGES/library/unittest.mock-examples.mo
+writing output... [ 93%] locales/zh_CN/LC_MESSAGES/howto/logging-cookbook.mo
+writing output... [ 93%] locales/zh_CN/LC_MESSAGES/using/ios.mo
+writing output... [ 93%] locales/zh_CN/LC_MESSAGES/c-api/object.mo
+writing output... [ 93%] locales/zh_CN/LC_MESSAGES/howto/enum.mo
+writing output... [ 94%] locales/zh_CN/LC_MESSAGES/library/datatypes.mo
+writing output... [ 94%] locales/zh_CN/LC_MESSAGES/howto/gdb_helpers.mo
+writing output... [ 94%] locales/zh_CN/LC_MESSAGES/library/tarfile.mo
+writing output... [ 94%] locales/zh_CN/LC_MESSAGES/using/android.mo
+writing output... [ 94%] locales/zh_CN/LC_MESSAGES/library/ipc.mo
+writing output... [ 94%] locales/zh_CN/LC_MESSAGES/howto/annotations.mo
+writing output... [ 95%] locales/zh_CN/LC_MESSAGES/using/unix.mo
+writing output... [ 95%] locales/zh_CN/LC_MESSAGES/howto/free-threading-python.mo
+writing output... [ 95%] locales/zh_CN/LC_MESSAGES/c-api/refcounting.mo
+writing output... [ 95%] locales/zh_CN/LC_MESSAGES/c-api/bytes.mo
+writing output... [ 95%] locales/zh_CN/LC_MESSAGES/library/email.message.mo
+writing output... [ 96%] locales/zh_CN/LC_MESSAGES/library/exceptions.mo
+writing output... [ 96%] locales/zh_CN/LC_MESSAGES/howto/descriptor.mo
+writing output... [ 96%] locales/zh_CN/LC_MESSAGES/using/mac.mo
+writing output... [ 96%] locales/zh_CN/LC_MESSAGES/library/xml.dom.pulldom.mo
+writing output... [ 96%] locales/zh_CN/LC_MESSAGES/deprecations/pending-removal-in-3.13.mo
+writing output... [ 97%] locales/zh_CN/LC_MESSAGES/c-api/mapping.mo
+writing output... [ 97%] locales/zh_CN/LC_MESSAGES/library/email.examples.mo
+writing output... [ 97%] locales/zh_CN/LC_MESSAGES/c-api/list.mo
+writing output... [ 97%] locales/zh_CN/LC_MESSAGES/deprecations/c-api-pending-removal-in-3.18.mo
+writing output... [ 97%] locales/zh_CN/LC_MESSAGES/library/xml.sax.handler.mo
+writing output... [ 97%] locales/zh_CN/LC_MESSAGES/library/xmlrpc.mo
+writing output... [ 98%] locales/zh_CN/LC_MESSAGES/using/editors.mo
+writing output... [ 98%] locales/zh_CN/LC_MESSAGES/c-api/code.mo
+writing output... [ 98%] locales/zh_CN/LC_MESSAGES/library/http.mo
+writing output... [ 98%] locales/zh_CN/LC_MESSAGES/library/xml.sax.utils.mo
+writing output... [ 98%] locales/zh_CN/LC_MESSAGES/deprecations/c-api-pending-removal-in-3.15.mo
+writing output... [ 99%] locales/zh_CN/LC_MESSAGES/library/email.utils.mo
+writing output... [ 99%] locales/zh_CN/LC_MESSAGES/c-api/datetime.mo
+writing output... [ 99%] locales/zh_CN/LC_MESSAGES/library/zipimport.mo
+writing output... [ 99%] locales/zh_CN/LC_MESSAGES/deprecations/pending-removal-in-3.16.mo
+writing output... [ 99%] locales/zh_CN/LC_MESSAGES/c-api/codec.mo
+writing output... [ 99%] locales/zh_CN/LC_MESSAGES/library/hmac.mo
+writing output... [100%] locales/zh_CN/LC_MESSAGES/deprecations/c-api-pending-removal-in-3.14.mo
+writing output... [100%] locales/zh_CN/LC_MESSAGES/library/xmlrpc.server.mo
+writing output... [100%] locales/zh_CN/LC_MESSAGES/library/reprlib.mo
+
+building [latex]: all documents
+updating environment: [new config] 539 added, 0 changed, 0 removed
+… 仍在运行（python 已用 30s，最新进度 100%）
+reading sources... [  7%] about .. c-api/frame
+reading sources... [ 13%] c-api/function .. c-api/stable
+… 仍在运行（python 已用 1m00s，最新进度 13%）
+reading sources... [ 20%] c-api/structures .. extending/index
+reading sources... [ 27%] extending/newtypes .. howto/regex
+… 仍在运行（python 已用 1m30s，最新进度 27%）
+reading sources... [ 33%] howto/remote_debugging .. library/asyncio-stream
+… 仍在运行（python 已用 2m00s，最新进度 33%）
+… 仍在运行（python 已用 2m30s，最新进度 33%）
+reading sources... [ 40%] library/asyncio-subprocess .. library/concurrent.futures
+reading sources... [ 47%] library/concurrent.interpreters .. library/email.generator
+… 仍在运行（python 已用 3m00s，最新进度 47%）
+reading sources... [ 53%] library/email.header .. library/html.entities
+… 仍在运行（python 已用 3m30s，最新进度 53%）
+reading sources... [ 60%] library/html.parser .. library/marshal
+reading sources... [ 67%] library/math .. library/pwd
+reading sources... [ 73%] library/py_compile .. library/string
+… 仍在运行（python 已用 4m00s，最新进度 73%）
+reading sources... [ 80%] library/string.templatelib .. library/traceback
+reading sources... [ 87%] library/tracemalloc .. library/xml.sax.utils
+reading sources... [ 93%] library/xmlrpc .. tutorial/venv
+… 仍在运行（python 已用 4m30s，最新进度 93%）
+reading sources... [100%] tutorial/whatnow .. whatsnew/index
+
+looking for now-outdated files... none found
+pickling environment... done
+checking consistency... /home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/howto/argparse.rst: document is referenced in multiple toctrees: ['howto/index', 'library/argparse'], selecting: library/argparse <- howto/argparse
+done
+preparing documents... done
+copying assets... 
+copying TeX support files... Writing evaluated template result to /home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/make.bat
+Writing evaluated template result to /home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/Makefile
+Writing evaluated template result to /home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/latexmkrc
+Writing evaluated template result to /home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/latexmkjarc
+done
+copying assets: done
+processing c-api.tex... 
+c-api/index
+ c-api/intro
+ c-api/stable
+ c-api/veryhigh
+ c-api/refcounting
+ c-api/exceptions
+ c-api/extension-modules
+ c-api/utilities
+  c-api/sys
+  c-api/import
+  c-api/marshal
+  c-api/arg
+  c-api/conversion
+  c-api/hash
+  c-api/reflection
+  c-api/codec
+  c-api/time
+  c-api/perfmaps
+  c-api/pyexpat
+ c-api/abstract
+  c-api/object
+  c-api/call
+  c-api/number
+  c-api/sequence
+  c-api/mapping
+  c-api/iter
+  c-api/buffer
+ c-api/concrete
+  c-api/type
+  c-api/none
+   c-api/long
+   c-api/bool
+   c-api/float
+   c-api/complex
+    c-api/bytes
+    c-api/bytearray
+    c-api/unicode
+    c-api/tuple
+    c-api/list
+     c-api/dict
+     c-api/set
+      c-api/function
+      c-api/method
+      c-api/cell
+      c-api/code
+       c-api/file
+       c-api/module
+       c-api/iterator
+       c-api/descriptor
+       c-api/slice
+       c-api/memoryview
+       c-api/picklebuffer
+       c-api/weakref
+       c-api/capsule
+       c-api/frame
+       c-api/gen
+       c-api/coro
+       c-api/contextvars
+       c-api/typehints
+        c-api/curses
+        c-api/datetime
+ c-api/interp-lifecycle
+ c-api/threads
+ c-api/synchronization
+ c-api/tls
+ c-api/subinterpreters
+ c-api/profiling
+ c-api/init_config
+ c-api/memory
+ c-api/objimpl
+  c-api/allocation
+  c-api/lifecycle
+  c-api/structures
+  c-api/typeobj
+  c-api/gcsupport
+ c-api/apiabiversion
+ c-api/monitoring
+
+resolving references...
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/venv/lib/python3.14/site-packages/cairocffi/surfaces.py:68: RemovedInSphinx90Warning: Sphinx 9 will drop support for representing paths as strings. Use "pathlib.Path" or "os.fspath" instead.
+  filename = filename.encode(sys.getfilesystemencoding())
+processing c-api.tex: done
+writing... /home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/c-api/buffer.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/c-api/buffer.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/c-api/buffer.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/c-api/bytes.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/c-api/unicode.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/c-api/unicode.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+done
+processing extending.tex... 
+extending/index
+ extending/extending
+ extending/newtypes_tutorial
+ extending/newtypes
+ extending/building
+ extending/windows
+  extending/embedding
+
+resolving references...
+processing extending.tex: done
+writing... done
+processing installing.tex... 
+installing/index
+
+resolving references...
+processing installing.tex: done
+writing... done
+processing builtins.tex... 
+builtins/index
+ builtins/stdtypes
+ builtins/constants
+ builtins/functions
+ builtins/exceptions
+ builtins/threadsafety
+ builtins/time-complexity
+
+resolving references...
+processing builtins.tex: done
+writing... done
+processing library.tex... 
+library/index
+ library/intro
+ library/text
+  library/string
+  library/string.templatelib
+  library/re
+  library/difflib
+  library/textwrap
+  library/unicodedata
+  library/stringprep
+  library/readline
+  library/rlcompleter
+ library/binary
+  library/struct
+  library/codecs
+ library/datatypes
+  library/datetime
+  library/zoneinfo
+  library/calendar
+  library/collections
+  library/collections.abc
+  library/heapq
+  library/bisect
+  library/array
+  library/weakref
+  library/types
+  library/copy
+  library/pprint
+  library/reprlib
+  library/enum
+  library/graphlib
+ library/numeric
+  library/numbers
+  library/math
+  library/cmath
+  library/decimal
+  library/fractions
+  library/random
+  library/statistics
+ library/functional
+  library/itertools
+  library/functools
+  library/operator
+ library/filesys
+  library/pathlib
+  library/os.path
+  library/stat
+  library/filecmp
+  library/tempfile
+  library/glob
+  library/fnmatch
+  library/linecache
+  library/shutil
+ library/persistence
+  library/pickle
+  library/copyreg
+  library/shelve
+  library/marshal
+  library/dbm
+  library/sqlite3
+ library/archiving
+  library/compression
+  library/compression.zstd
+  library/zlib
+  library/gzip
+  library/bz2
+  library/lzma
+  library/zipfile
+  library/tarfile
+ library/fileformats
+  library/csv
+  library/configparser
+  library/tomllib
+  library/netrc
+  library/plistlib
+ library/crypto
+  library/hashlib
+  library/hmac
+  library/secrets
+ library/allos
+  library/os
+  library/io
+  library/time
+  library/logging
+  library/logging.config
+  library/logging.handlers
+  library/platform
+  library/errno
+  library/ctypes
+ library/cmdlinelibs
+  library/argparse
+   howto/argparse
+   howto/argparse-optparse
+  library/optparse
+  library/getpass
+  library/fileinput
+  library/curses
+  library/curses.ascii
+  library/curses.panel
+  library/cmd
+ library/concurrency
+  library/threading
+  library/multiprocessing
+  library/multiprocessing.shared_memory
+  library/concurrent
+  library/concurrent.futures
+  library/concurrent.interpreters
+  library/subprocess
+  library/sched
+  library/queue
+  library/contextvars
+   library/_thread
+ library/ipc
+  library/asyncio
+   library/asyncio-runner
+   library/asyncio-task
+   library/asyncio-stream
+   library/asyncio-sync
+   library/asyncio-subprocess
+   library/asyncio-queue
+   library/asyncio-exceptions
+    library/asyncio-graph
+    library/asyncio-tools
+     library/asyncio-eventloop
+     library/asyncio-future
+     library/asyncio-protocol
+     library/asyncio-policy
+     library/asyncio-platforms
+     library/asyncio-extending
+      library/asyncio-api-index
+      library/asyncio-llapi-index
+      library/asyncio-dev
+      library/asyncio-threading
+  library/socket
+  library/ssl
+  library/select
+  library/selectors
+  library/signal
+  library/mmap
+ library/netdata
+  library/email
+   library/email.message
+   library/email.parser
+   library/email.generator
+   library/email.policy
+   library/email.errors
+   library/email.headerregistry
+   library/email.contentmanager
+   library/email.examples
+    library/email.compat32-message
+    library/email.mime
+    library/email.header
+    library/email.charset
+    library/email.encoders
+    library/email.utils
+    library/email.iterators
+  library/json
+  library/mailbox
+  library/mimetypes
+  library/base64
+  library/binascii
+  library/quopri
+ library/markup
+  library/html
+  library/html.parser
+  library/html.entities
+  library/xml
+  library/xml.etree.elementtree
+  library/xml.dom
+  library/xml.dom.minidom
+  library/xml.dom.pulldom
+  library/xml.sax
+  library/xml.sax.handler
+  library/xml.sax.utils
+  library/xml.sax.reader
+  library/pyexpat
+ library/internet
+  library/webbrowser
+  library/wsgiref
+  library/urllib
+  library/urllib.request
+… 仍在运行（python 已用 5m00s，最新进度 100%）
+  library/urllib.parse
+  library/urllib.error
+  library/urllib.robotparser
+  library/http
+  library/http.client
+  library/ftplib
+  library/poplib
+  library/imaplib
+  library/smtplib
+  library/uuid
+  library/socketserver
+  library/http.server
+  library/http.cookies
+  library/http.cookiejar
+  library/xmlrpc
+  library/xmlrpc.client
+  library/xmlrpc.server
+  library/ipaddress
+ library/mm
+  library/wave
+  library/colorsys
+ library/i18n
+  library/gettext
+  library/locale
+ library/tk
+  library/tkinter
+  library/tkinter.colorchooser
+  library/tkinter.font
+  library/dialog
+  library/tkinter.messagebox
+  library/tkinter.scrolledtext
+  library/tkinter.dnd
+  library/tkinter.ttk
+  library/idle
+  library/turtle
+ library/development
+  library/typing
+  library/pydoc
+  library/devmode
+  library/doctest
+  library/unittest
+  library/unittest.mock
+  library/unittest.mock-examples
+  library/test
+ library/debug
+  library/audit_events
+  library/bdb
+  library/faulthandler
+  library/pdb
+  library/profile
+  library/timeit
+  library/trace
+  library/tracemalloc
+ library/distribution
+  library/ensurepip
+  library/venv
+  library/zipapp
+ library/python
+  library/sys
+  library/sys.monitoring
+  library/sysconfig
+  library/builtins
+  library/__main__
+  library/warnings
+  library/dataclasses
+  library/contextlib
+  library/abc
+  library/atexit
+  library/traceback
+  library/__future__
+  library/gc
+  library/inspect
+  library/annotationlib
+  library/site
+ library/custominterp
+  library/code
+  library/codeop
+ library/modules
+  library/zipimport
+  library/pkgutil
+  library/modulefinder
+  library/runpy
+  library/importlib
+  library/importlib.resources
+  library/importlib.resources.abc
+  library/importlib.metadata
+  library/sys_path_init
+ library/language
+  library/ast
+  library/symtable
+  library/token
+  library/keyword
+  library/tokenize
+  library/tabnanny
+  library/pyclbr
+  library/py_compile
+  library/compileall
+  library/dis
+  library/pickletools
+ library/windows
+  library/msvcrt
+  library/winreg
+  library/winsound
+ library/unix
+  library/shlex
+  library/posix
+  library/pwd
+  library/grp
+  library/termios
+  library/tty
+  library/pty
+  library/fcntl
+  library/resource
+  library/syslog
+ library/cmdline
+ library/superseded
+  library/getopt
+ library/removed
+  library/aifc
+  library/asynchat
+  library/asyncore
+  library/audioop
+  library/cgi
+  library/cgitb
+  library/chunk
+  library/crypt
+  library/distutils
+  library/imghdr
+  library/imp
+  library/mailcap
+  library/msilib
+  library/nis
+  library/nntplib
+  library/ossaudiodev
+  library/pipes
+  library/smtpd
+  library/sndhdr
+  library/spwd
+  library/sunau
+  library/telnetlib
+  library/uu
+  library/xdrlib
+ library/security_warnings
+
+resolving references...
+processing library.tex: done
+writing... /home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/library/codecs.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/library/codecs.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/library/codecs.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/library/codecs.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/library/codecs.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/library/collections.abc.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/library/io.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/library/logging.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/library/email.policy.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/library/xml.etree.elementtree.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/library/xmlrpc.client.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/library/locale.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/library/tkinter.ttk.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/library/tkinter.ttk.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/library/tkinter.ttk.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/library/tkinter.ttk.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/library/tkinter.ttk.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/library/tkinter.ttk.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/library/tkinter.ttk.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/library/tkinter.ttk.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/library/tkinter.ttk.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/library/tkinter.ttk.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/library/tkinter.ttk.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/library/tkinter.ttk.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/library/tkinter.ttk.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/library/tkinter.ttk.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/library/tkinter.ttk.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/library/turtle.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/library/warnings.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/library/inspect.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+done
+processing reference.tex... 
+reference/index
+ reference/introduction
+ reference/lexical_analysis
+ reference/datamodel
+ reference/executionmodel
+ reference/import
+ reference/expressions
+ reference/simple_stmts
+ reference/compound_stmts
+ reference/toplevel_components
+ reference/grammar
+
+resolving references...
+processing reference.tex: done
+writing... done
+processing tutorial.tex... 
+tutorial/index
+ tutorial/appetite
+ tutorial/interpreter
+ tutorial/introduction
+ tutorial/controlflow
+ tutorial/datastructures
+ tutorial/modules
+ tutorial/inputoutput
+ tutorial/errors
+ tutorial/classes
+ tutorial/stdlib
+ tutorial/stdlib2
+ tutorial/venv
+ tutorial/whatnow
+ tutorial/interactive
+ tutorial/floatingpoint
+ tutorial/appendix
+
+resolving references...
+processing tutorial.tex: done
+writing... done
+processing using.tex... 
+using/index
+ using/cmdline
+ using/unix
+ using/configure
+ using/windows
+ using/mac
+ using/android
+ using/ios
+ using/editors
+
+resolving references...
+processing using.tex: done
+writing... done
+processing faq.tex... 
+faq/index
+ faq/general
+ faq/programming
+ faq/design
+ faq/library
+ faq/extending
+ faq/windows
+ faq/gui
+ faq/installed
+
+resolving references...
+processing faq.tex: done
+writing... done
+processing whatsnew.tex... 
+whatsnew/3.14
+
+resolving references...
+processing whatsnew.tex: done
+writing... done
+processing howto-sorting.tex... 
+howto/sorting
+
+resolving references...
+processing howto-sorting.tex: done
+writing... done
+processing howto-a-conceptual-overview-of-asyncio.tex... 
+howto/a-conceptual-overview-of-asyncio
+
+resolving references...
+processing howto-a-conceptual-overview-of-asyncio.tex: done
+writing... /home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/howto/a-conceptual-overview-of-asyncio.rst:5: WARNING: document title is not a single Text node
+done
+processing howto-pyporting.tex... 
+howto/pyporting
+
+resolving references...
+processing howto-pyporting.tex: done
+writing... done
+processing howto-ipaddress.tex... 
+howto/ipaddress
+
+resolving references...
+processing howto-ipaddress.tex: done
+writing... done
+processing howto-instrumentation.tex... 
+howto/instrumentation
+
+resolving references...
+processing howto-instrumentation.tex: done
+writing... done
+processing howto-argparse.tex... 
+howto/argparse
+
+resolving references...
+processing howto-argparse.tex: done
+writing... done
+processing howto-perf_profiling.tex... 
+howto/perf_profiling
+
+resolving references...
+processing howto-perf_profiling.tex: done
+writing... done
+processing howto-annotations.tex... 
+howto/annotations
+
+resolving references...
+processing howto-annotations.tex: done
+writing... done
+processing howto-free-threading-python.tex... 
+howto/free-threading-python
+
+resolving references...
+processing howto-free-threading-python.tex: done
+writing... done
+processing howto-curses.tex... 
+howto/curses
+
+resolving references...
+processing howto-curses.tex: done
+writing... done
+processing howto-regex.tex... 
+howto/regex
+
+resolving references...
+processing howto-regex.tex: done
+writing... done
+processing howto-timerfd.tex... 
+howto/timerfd
+
+resolving references...
+processing howto-timerfd.tex: done
+writing... done
+processing howto-free-threading-extensions.tex... 
+howto/free-threading-extensions
+
+resolving references...
+processing howto-free-threading-extensions.tex: done
+writing... done
+processing howto-cporting.tex... 
+howto/cporting
+
+resolving references...
+processing howto-cporting.tex: done
+writing... done
+processing howto-remote_debugging.tex... 
+howto/remote_debugging
+
+resolving references...
+processing howto-remote_debugging.tex: done
+writing... done
+processing howto-clinic.tex... 
+howto/clinic
+
+resolving references...
+processing howto-clinic.tex: done
+writing... done
+processing howto-descriptor.tex... 
+howto/descriptor
+
+resolving references...
+processing howto-descriptor.tex: done
+writing... done
+processing howto-urllib2.tex... 
+howto/urllib2
+
+resolving references...
+processing howto-urllib2.tex: done
+writing... done
+processing howto-logging-cookbook.tex... 
+howto/logging-cookbook
+
+resolving references...
+processing howto-logging-cookbook.tex: done
+writing... done
+processing howto-argparse-optparse.tex... 
+howto/argparse-optparse
+
+resolving references...
+processing howto-argparse-optparse.tex: done
+writing... done
+processing howto-sockets.tex... 
+howto/sockets
+
+resolving references...
+processing howto-sockets.tex: done
+writing... done
+processing howto-mro.tex... 
+howto/mro
+
+resolving references...
+processing howto-mro.tex: done
+writing... done
+processing howto-functional.tex... 
+howto/functional
+
+resolving references...
+processing howto-functional.tex: done
+writing... done
+processing howto-enum.tex... 
+howto/enum
+
+resolving references...
+processing howto-enum.tex: done
+writing... done
+processing howto-isolating-extensions.tex... 
+howto/isolating-extensions
+
+resolving references...
+processing howto-isolating-extensions.tex: done
+writing... done
+processing howto-gdb_helpers.tex... 
+howto/gdb_helpers
+
+resolving references...
+processing howto-gdb_helpers.tex: done
+writing... done
+processing howto-unicode.tex... 
+howto/unicode
+
+resolving references...
+processing howto-unicode.tex: done
+writing... done
+processing howto-logging.tex... 
+howto/logging
+
+resolving references...
+processing howto-logging.tex: done
+writing... /home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/howto/logging.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+done
+copying images... [  5%] c-api/lifecycle.dot.svg
+copying images... [ 10%] library/datetime-inheritance.svg
+copying images... [ 15%] library/kde_example.png
+copying images... [ 20%] library/pathlib-inheritance.png
+copying images... [ 25%] library/pathlib-parts.svg
+copying images... [ 30%] library/hashlib-blake2-tree.png
+copying images... [ 35%] library/tk_msg.png
+copying images... [ 40%] library/turtle-star.png
+copying images... [ 45%] using/win_installer.png
+copying images... [ 50%] using/win_install_freethreaded.png
+copying images... [ 55%] using/mac_installer_01_introduction.png
+copying images... [ 60%] using/mac_installer_02_readme.png
+copying images... [ 65%] using/mac_installer_03_license.png
+copying images... [ 70%] using/mac_installer_04_installation_type.png
+copying images... [ 75%] using/mac_installer_05_custom_install.png
+copying images... [ 80%] using/mac_installer_06_summary.png
+copying images... [ 85%] using/mac_installer_07_applications.png
+copying images... [ 90%] using/mac_installer_08_install_certificates.png
+copying images... [ 95%] using/mac_installer_09_custom_install_free_threaded.png
+copying images... [100%] howto/logging_flow.png
+
+Writing evaluated template result to /home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/sphinxmessages.sty
+rediraffe: Redirect generation skipped for unsupported builders. Supported builders: html, dirhtml, readthedocs, readthedocsdirhtml.
+build succeeded, 1 warning.
+
+The LaTeX files are in build/latex.
+Run 'make' in that directory to run these through (pdf)latex
+(use `make latexpdf' here to do that automatically).
+  读入 3m57s（15 篇，-j 4，约 4 篇/分） · 写出 5s
+  ↳ 退出码 0，用时 327.5s
+[ok] 生成 .tex：38 个（其中带 \documentclass 的册子 38 个）
+[ok] 残留 .svg：0 个（应为 0）
+----- 步骤 6 构建 LaTeX 源：完成（5m28s）38 个册子 .tex 已生成
+
+===== 步骤 6b 封面标题中文化 =====

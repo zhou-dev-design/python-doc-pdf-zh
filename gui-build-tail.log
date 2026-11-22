@@ -1,0 +1,3704 @@
+# 构建开始 2026-11-22 07:31:57
+#   version = 3.14
+#   versions = ['3.14']
+#   version_pythons = {'3.14': '/opt/hostedtoolcache/Python/3.14.10/x64/bin/python'}
+#   date_tag = 20261122
+#   base_dir = /home/runner/work/_temp/build
+#   root = 
+#   outdir = 
+#   python = /opt/hostedtoolcache/Python/3.14.10/x64/bin/python
+#   texlive_bin = 
+#   zh_src = 
+#   tools_dir = 
+#   venv = 
+#   version_branch = 
+#   gh = https://github.com
+#   cpython_url = 
+#   zh_url = 
+#   pip_index = https://pypi.org/simple
+#   i18n_extra_url = 
+#   lang = zh_CN
+#   from_step = 0
+#   only_steps = 
+#   download_sources = True
+#   refresh_sources = True
+#   skip_clone_if_exists = True
+#   skip_pip_if_ready = True
+#   keep_build_dir = False
+#   build_html = False
+#   localize_titles = True
+#   fix_index = True
+#   prune_extra_pdf = True
+#   gen_report = True
+#   merge_pdf = True
+#   merge_name = 
+#   clean_mode = none
+#   books = 
+#   jobs = 4
+#   verbose_log = False
+#   open_outdir_when_done = False
+# --- 解析后的实际取值 ---
+#   root = /home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122
+#   outdir = /home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122
+#   tools_dir = /home/runner/work/python-doc-pdf-zh/python-doc-pdf-zh/sphinx-pdf/tools
+#   venv = /home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/venv/Scripts/python.exe
+#   branch = 3.14
+
+===== 步骤 0 前置检查 =====
+$ /opt/hostedtoolcache/Python/3.14.10/x64/bin/python --version
+Python 3.14.10
+[ok] Python  : Python 3.14.10
+$ xelatex --version
+XeTeX 3.141592653-2.6-0.999995 (TeX Live 2023/Debian)
+kpathsea version 6.3.5
+Copyright 2023 SIL International, Jonathan Kew and Khaled Hosny.
+There is NO warranty.  Redistribution of this software is
+covered by the terms of both the XeTeX copyright and
+the Lesser GNU General Public License.
+For more information about these matters, see the file
+named COPYING and the XeTeX source.
+Primary author of XeTeX: Jonathan Kew.
+Compiled with ICU version 74.2; using 74.2
+Compiled with zlib version 1.3; using 1.3
+Compiled with FreeType2 version 2.13.2; using 2.13.2
+Compiled with Graphite2 version 1.3.14; using 1.3.14
+Compiled with HarfBuzz version 8.3.0; using 8.3.0
+Compiled with libpng version 1.6.43; using 1.6.43
+Compiled with pplib version v2.05 less toxic i hope
+Compiled with fontconfig version 2.15.0; using 2.15.0
+[ok] XeLaTeX : XeTeX 3.141592653-2.6-0.999995 (TeX Live 2023/Debian)
+  latexmk    /usr/bin/latexmk
+  makeindex  /usr/bin/makeindex
+  pdfinfo    /usr/bin/pdfinfo
+  pdffonts   /usr/bin/pdffonts
+  python     /opt/hostedtoolcache/Python/3.14.10/x64/bin/python
+----- 步骤 0 前置检查：完成（0s）Python/TeX 工具链就绪；TeX Live = ；版本 3.14（分支 3.14）
+
+===== 步骤 1 获取 CPython 源码 =====
+  [1/1] CPython 源码：用 github 直连 克隆分支 3.14
+        https://github.com/python/cpython
+$ git -c http.lowSpeedLimit=2000 -c http.lowSpeedTime=25 clone --depth 1 --filter=blob:none --sparse --branch 3.14 https://github.com/python/cpython '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython'
+Cloning into '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython'...
+  ↳ 退出码 0，用时 0.7s
+[ok]   ✔ CPython 源码 已就位（github 直连，用时 0s）
+$ git -C '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython' remote set-url origin https://github.com/python/cpython
+  [1/1] 稀疏检出：走 github 直连
+$ git -c http.lowSpeedLimit=2000 -c http.lowSpeedTime=25 -C '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython' sparse-checkout set Doc Misc/NEWS.d Include Grammar Parser Lib/profiling/sampling
+  ↳ 退出码 0，用时 3.4s
+$ check-doc-refs /home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc --list
+Doc 越界引用自检：以 ../ 开头的 103 条，其中真正走出 Doc/ 的 3 条（其余都在 Doc/ 内部，取了 Doc 就一定有）
+  走出 Doc/ 的目标（稀疏检出必须覆盖）：
+      Grammar/python.gram
+      Lib/test/exception_hierarchy.txt
+      Parser/Python.asdl
+MISSINGFILE Lib/test/exception_hierarchy.txt
+MISSINGKIND Lib/test/exception_hierarchy.txt blob
+REFMISSING 1
+$ git -C '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython' remote set-url origin https://github.com/python/cpython
+[ok]       按需取回 Lib/test/exception_hierarchy.txt（2434 字节，只拉这一个 blob，不拉整个目录）
+$ check-doc-refs /home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc --list
+Doc 越界引用自检：以 ../ 开头的 103 条，其中真正走出 Doc/ 的 3 条（其余都在 Doc/ 内部，取了 Doc 就一定有）
+  走出 Doc/ 的目标（稀疏检出必须覆盖）：
+      Grammar/python.gram
+      Lib/test/exception_hierarchy.txt
+      Parser/Python.asdl
+REFMISSING 0
+$ /opt/hostedtoolcache/Python/3.14.10/x64/bin/python '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/tools/extensions/patchlevel.py'
+3.14.10
+[ok] patchlevel → 3.14.10
+----- 步骤 1 获取 CPython 源码：完成（4s）CPython 3.14 源码就绪，版本号 3.14.10
+
+===== 步骤 2 准备中文翻译 =====
+  [1/1] 翻译源：用 github 直连 克隆分支 3.14
+        https://github.com/python/python-docs-zh-cn
+$ git -c http.lowSpeedLimit=2000 -c http.lowSpeedTime=25 clone --depth 1 --branch 3.14 https://github.com/python/python-docs-zh-cn '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/zh-cn'
+Cloning into '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/zh-cn'...
+  ↳ 退出码 0，用时 2.4s
+[ok]   ✔ 翻译源 已就位（github 直连，用时 2s）
+----- 步骤 2 准备中文翻译：完成（2s）翻译源 zh-cn（分支 3.14）
+
+===== 步骤 3 安装 locales =====
+[ok] 已装 .po：544 个（源 544 个，拷贝 544 个）
+目录：(根目录)、builtins、c-api、deprecations、distributing、extending、faq、howto、installing、library、reference、tutorial、using、whatsnew
+      补充译文：程序不内置正文译文，正文全部用上游 .po（步骤 2 已取最新；要额外打补丁就配「补充译文地址」）
+$ alias-po /home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/zh-cn --doc /home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc --locale /home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/locales/zh_CN/LC_MESSAGES
+ALIASED 0
+EXTRAED 0
+DRIFTED 0
+  ↳ 退出码 0，用时 1.0s
+----- 步骤 3 安装 locales：完成（1s）544 个 .po 已就位
+
+===== 步骤 4 虚拟环境与依赖 =====
+没有可用的 venv，创建 /home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/venv
+$ /opt/hostedtoolcache/Python/3.14.10/x64/bin/python -m venv '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/venv'
+  ↳ 退出码 0，用时 3.1s
+venv python → /home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/venv/bin/python
+$ '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/venv/bin/python' -c 'import sphinx, python_docs_theme, sphinxcontrib.cairosvgconverter, pypdf'
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+    import sphinx, python_docs_theme, sphinxcontrib.cairosvgconverter, pypdf
+ModuleNotFoundError: No module named 'sphinx'
+  ↳ 退出码 1，用时 0.0s
+[warn]   （完整输出见 /home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/pip.log）
+$ '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/venv/bin/python' -m pip install --upgrade pip --retries 3 --timeout 30 -q -i https://pypi.org/simple
+  ↳ 退出码 0，用时 1.9s
+$ '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/venv/bin/python' -m pip install --retries 5 --timeout 30 -i https://pypi.org/simple 'sphinx<9.0.0' 'pygments>=2.21' 'sphinx-notfound-page~=1.0.0' 'sphinxext-opengraph~=0.13.0' sphinxext-rediraffe 'python-docs-theme>=2023.3.1,!=2023.7' 'sphinxcontrib-svg2pdfconverter[CairoSVG]' 'pypdf>=5'
+Collecting sphinx<9.0.0
+  Downloading sphinx-8.2.3-py3-none-any.whl.metadata (7.0 kB)
+Collecting pygments>=2.21
+  Downloading pygments-2.21.0-py3-none-any.whl.metadata (2.5 kB)
+Collecting sphinx-notfound-page~=1.0.0
+  Downloading sphinx_notfound_page-1.0.4-py3-none-any.whl.metadata (2.9 kB)
+Collecting sphinxext-opengraph~=0.13.0
+  Downloading sphinxext_opengraph-0.13.0-py3-none-any.whl.metadata (2.7 kB)
+Collecting sphinxext-rediraffe
+  Downloading sphinxext_rediraffe-0.3.0-py3-none-any.whl.metadata (2.9 kB)
+Collecting python-docs-theme!=2023.7,>=2023.3.1
+  Downloading python_docs_theme-2026.9.1-py3-none-any.whl.metadata (2.7 kB)
+Collecting pypdf>=5
+  Downloading pypdf-7.1.1-py3-none-any.whl.metadata (7.6 kB)
+Collecting sphinxcontrib-svg2pdfconverter[CairoSVG]
+  Downloading sphinxcontrib_svg2pdfconverter-2.1.0-py3-none-any.whl.metadata (3.3 kB)
+Collecting sphinxcontrib-applehelp>=1.0.7 (from sphinx<9.0.0)
+  Downloading sphinxcontrib_applehelp-2.0.0-py3-none-any.whl.metadata (2.3 kB)
+Collecting sphinxcontrib-devhelp>=1.0.6 (from sphinx<9.0.0)
+  Downloading sphinxcontrib_devhelp-2.0.0-py3-none-any.whl.metadata (2.3 kB)
+Collecting sphinxcontrib-htmlhelp>=2.0.6 (from sphinx<9.0.0)
+  Downloading sphinxcontrib_htmlhelp-2.1.0-py3-none-any.whl.metadata (2.3 kB)
+Collecting sphinxcontrib-jsmath>=1.0.1 (from sphinx<9.0.0)
+  Downloading sphinxcontrib_jsmath-2.0.0-py3-none-any.whl.metadata (2.6 kB)
+Collecting sphinxcontrib-qthelp>=1.0.6 (from sphinx<9.0.0)
+  Downloading sphinxcontrib_qthelp-2.0.0-py3-none-any.whl.metadata (2.3 kB)
+Collecting sphinxcontrib-serializinghtml>=1.1.9 (from sphinx<9.0.0)
+  Downloading sphinxcontrib_serializinghtml-2.0.0-py3-none-any.whl.metadata (2.4 kB)
+Collecting Jinja2>=3.1 (from sphinx<9.0.0)
+  Downloading jinja2-3.1.6-py3-none-any.whl.metadata (2.9 kB)
+Collecting docutils<0.22,>=0.20 (from sphinx<9.0.0)
+  Downloading docutils-0.21.2-py3-none-any.whl.metadata (2.8 kB)
+Collecting snowballstemmer>=2.2 (from sphinx<9.0.0)
+  Downloading snowballstemmer-3.1.1-py3-none-any.whl.metadata (7.9 kB)
+Collecting babel>=2.13 (from sphinx<9.0.0)
+  Downloading babel-2.18.0-py3-none-any.whl.metadata (2.2 kB)
+Collecting alabaster>=0.7.14 (from sphinx<9.0.0)
+  Downloading alabaster-1.0.0-py3-none-any.whl.metadata (2.8 kB)
+Collecting imagesize>=1.3 (from sphinx<9.0.0)
+  Downloading imagesize-2.0.1-py3-none-any.whl.metadata (7.0 kB)
+Collecting requests>=2.30.0 (from sphinx<9.0.0)
+  Downloading requests-2.34.2-py3-none-any.whl.metadata (4.8 kB)
+Collecting roman-numerals-py>=1.0.0 (from sphinx<9.0.0)
+  Downloading roman_numerals_py-4.1.0-py3-none-any.whl.metadata (561 bytes)
+Collecting packaging>=23.0 (from sphinx<9.0.0)
+  Downloading packaging-26.3-py3-none-any.whl.metadata (3.5 kB)
+Collecting cairosvg>=1.0 (from sphinxcontrib-svg2pdfconverter[CairoSVG])
+  Downloading cairosvg-2.9.1-py3-none-any.whl.metadata (2.7 kB)
+Collecting cairocffi (from cairosvg>=1.0->sphinxcontrib-svg2pdfconverter[CairoSVG])
+  Downloading cairocffi-1.7.1-py3-none-any.whl.metadata (3.3 kB)
+Collecting cssselect2 (from cairosvg>=1.0->sphinxcontrib-svg2pdfconverter[CairoSVG])
+  Downloading cssselect2-0.10.1-py3-none-any.whl.metadata (2.9 kB)
+Collecting defusedxml (from cairosvg>=1.0->sphinxcontrib-svg2pdfconverter[CairoSVG])
+  Downloading defusedxml-0.7.1-py2.py3-none-any.whl.metadata (32 kB)
+Collecting pillow (from cairosvg>=1.0->sphinxcontrib-svg2pdfconverter[CairoSVG])
+  Downloading pillow-13.0.0-cp314-cp314-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (9.1 kB)
+Collecting tinycss2 (from cairosvg>=1.0->sphinxcontrib-svg2pdfconverter[CairoSVG])
+  Downloading tinycss2-1.5.1-py3-none-any.whl.metadata (3.0 kB)
+Collecting MarkupSafe>=2.0 (from Jinja2>=3.1->sphinx<9.0.0)
+  Downloading markupsafe-3.0.4-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.7 kB)
+Collecting charset_normalizer<4,>=2 (from requests>=2.30.0->sphinx<9.0.0)
+  Downloading charset_normalizer-3.5.2-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (46 kB)
+Collecting idna<4,>=2.5 (from requests>=2.30.0->sphinx<9.0.0)
+  Downloading idna-3.20-py3-none-any.whl.metadata (7.2 kB)
+Collecting urllib3<3,>=1.26 (from requests>=2.30.0->sphinx<9.0.0)
+  Downloading urllib3-2.8.0-py3-none-any.whl.metadata (7.4 kB)
+Collecting certifi>=2023.5.7 (from requests>=2.30.0->sphinx<9.0.0)
+  Downloading certifi-2026.11.20-py3-none-any.whl.metadata (2.5 kB)
+Collecting roman-numerals==4.1.0 (from roman-numerals-py>=1.0.0->sphinx<9.0.0)
+  Downloading roman_numerals-4.1.0-py3-none-any.whl.metadata (3.3 kB)
+Collecting cffi>=1.1.0 (from cairocffi->cairosvg>=1.0->sphinxcontrib-svg2pdfconverter[CairoSVG])
+  Downloading cffi-2.1.1-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (2.5 kB)
+Collecting pycparser (from cffi>=1.1.0->cairocffi->cairosvg>=1.0->sphinxcontrib-svg2pdfconverter[CairoSVG])
+  Downloading pycparser-3.12-py3-none-any.whl.metadata (9.7 kB)
+Collecting webencodings (from cssselect2->cairosvg>=1.0->sphinxcontrib-svg2pdfconverter[CairoSVG])
+  Downloading webencodings-0.6.1-py3-none-any.whl.metadata (3.4 kB)
+Downloading sphinx-8.2.3-py3-none-any.whl (3.6 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 3.6/3.6 MB 97.0 MB/s  0:00:00
+Downloading sphinx_notfound_page-1.0.4-py3-none-any.whl (8.2 kB)
+Downloading sphinxext_opengraph-0.13.0-py3-none-any.whl (1.0 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.0/1.0 MB 333.2 MB/s  0:00:00
+Downloading docutils-0.21.2-py3-none-any.whl (587 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 587.4/587.4 kB 211.8 MB/s  0:00:00
+Downloading pygments-2.21.0-py3-none-any.whl (1.3 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.3/1.3 MB 339.3 MB/s  0:00:00
+Downloading sphinxext_rediraffe-0.3.0-py3-none-any.whl (7.2 kB)
+Downloading python_docs_theme-2026.9.1-py3-none-any.whl (99 kB)
+Downloading sphinxcontrib_svg2pdfconverter-2.1.0-py3-none-any.whl (9.3 kB)
+Downloading pypdf-7.1.1-py3-none-any.whl (421 kB)
+Downloading alabaster-1.0.0-py3-none-any.whl (13 kB)
+Downloading babel-2.18.0-py3-none-any.whl (10.2 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 10.2/10.2 MB 346.2 MB/s  0:00:00
+Downloading cairosvg-2.9.1-py3-none-any.whl (46 kB)
+Downloading imagesize-2.0.1-py3-none-any.whl (14 kB)
+Downloading jinja2-3.1.6-py3-none-any.whl (134 kB)
+Downloading markupsafe-3.0.4-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (23 kB)
+Downloading packaging-26.3-py3-none-any.whl (129 kB)
+Downloading requests-2.34.2-py3-none-any.whl (73 kB)
+Downloading charset_normalizer-3.5.2-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (255 kB)
+Downloading idna-3.20-py3-none-any.whl (69 kB)
+Downloading urllib3-2.8.0-py3-none-any.whl (135 kB)
+Downloading certifi-2026.11.20-py3-none-any.whl (127 kB)
+Downloading roman_numerals_py-4.1.0-py3-none-any.whl (4.5 kB)
+Downloading roman_numerals-4.1.0-py3-none-any.whl (7.7 kB)
+Downloading snowballstemmer-3.1.1-py3-none-any.whl (104 kB)
+Downloading sphinxcontrib_applehelp-2.0.0-py3-none-any.whl (119 kB)
+Downloading sphinxcontrib_devhelp-2.0.0-py3-none-any.whl (82 kB)
+Downloading sphinxcontrib_htmlhelp-2.1.0-py3-none-any.whl (98 kB)
+Downloading sphinxcontrib_jsmath-2.0.0-py3-none-any.whl (78 kB)
+Downloading sphinxcontrib_qthelp-2.0.0-py3-none-any.whl (88 kB)
+Downloading sphinxcontrib_serializinghtml-2.0.0-py3-none-any.whl (92 kB)
+Downloading cairocffi-1.7.1-py3-none-any.whl (75 kB)
+Downloading cffi-2.1.1-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (221 kB)
+Downloading cssselect2-0.10.1-py3-none-any.whl (15 kB)
+Downloading defusedxml-0.7.1-py2.py3-none-any.whl (25 kB)
+Downloading pillow-13.0.0-cp314-cp314-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (7.1 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 7.1/7.1 MB 231.7 MB/s  0:00:00
+Downloading pycparser-3.12-py3-none-any.whl (62 kB)
+Downloading tinycss2-1.5.1-py3-none-any.whl (28 kB)
+Downloading webencodings-0.6.1-py3-none-any.whl (8.7 kB)
+Installing collected packages: webencodings, urllib3, sphinxcontrib-serializinghtml, sphinxcontrib-qthelp, sphinxcontrib-jsmath, sphinxcontrib-htmlhelp, sphinxcontrib-devhelp, sphinxcontrib-applehelp, snowballstemmer, roman-numerals, pypdf, pygments, pycparser, pillow, packaging, MarkupSafe, imagesize, idna, docutils, defusedxml, charset_normalizer, certifi, babel, alabaster, tinycss2, roman-numerals-py, requests, Jinja2, cffi, sphinx, cssselect2, cairocffi, sphinxext-rediraffe, sphinxext-opengraph, sphinxcontrib-svg2pdfconverter, sphinx-notfound-page, python-docs-theme, cairosvg
+
+Successfully installed Jinja2-3.1.6 MarkupSafe-3.0.4 alabaster-1.0.0 babel-2.18.0 cairocffi-1.7.1 cairosvg-2.9.1 certifi-2026.11.20 cffi-2.1.1 charset_normalizer-3.5.2 cssselect2-0.10.1 defusedxml-0.7.1 docutils-0.21.2 idna-3.20 imagesize-2.0.1 packaging-26.3 pillow-13.0.0 pycparser-3.12 pygments-2.21.0 pypdf-7.1.1 python-docs-theme-2026.9.1 requests-2.34.2 roman-numerals-4.1.0 roman-numerals-py-4.1.0 snowballstemmer-3.1.1 sphinx-8.2.3 sphinx-notfound-page-1.0.4 sphinxcontrib-applehelp-2.0.0 sphinxcontrib-devhelp-2.0.0 sphinxcontrib-htmlhelp-2.1.0 sphinxcontrib-jsmath-2.0.0 sphinxcontrib-qthelp-2.0.0 sphinxcontrib-serializinghtml-2.0.0 sphinxcontrib-svg2pdfconverter-2.1.0 sphinxext-opengraph-0.13.0 sphinxext-rediraffe-0.3.0 tinycss2-1.5.1 urllib3-2.8.0 webencodings-0.6.1
+  ↳ 退出码 0，用时 6.1s
+$ '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/venv/bin/python' -c 'import sphinx, python_docs_theme;print('"'"'sphinx'"'"', sphinx.__version__)'
+sphinx 8.2.3
+[ok] sphinx 8.2.3
+----- 步骤 4 虚拟环境与依赖：完成（11s）venv 就绪，sphinx 8.2.3
+
+===== 步骤 5 构建 HTML =====
+[warn] 按设置跳过 HTML 构建（只影响 HTML 验证，不影响 PDF）
+----- 步骤 5 构建 HTML：完成（0s）已跳过
+
+===== 步骤 6 构建 LaTeX 源 =====
+      pypdf 备用目录：/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/venv/lib/python3.14/site-packages
+$ check-doc-refs /home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc
+Doc 越界引用自检：以 ../ 开头的 103 条，其中真正走出 Doc/ 的 3 条（其余都在 Doc/ 内部，取了 Doc 就一定有）
+  走出 Doc/ 的目标（稀疏检出必须覆盖）：
+      Grammar/python.gram
+      Lib/test/exception_hierarchy.txt
+      Parser/Python.asdl
+  所有目标的文件都在 ✔
+REFMISSING 0
+      Doc 越界引用自检：以 ../ 开头的 103 条，其中真正走出 Doc/ 的 3 条（其余都在 Doc/ 内部，取了 Doc 就一定有）
+      走出 Doc/ 的目标（稀疏检出必须覆盖）：
+      Grammar/python.gram
+      Lib/test/exception_hierarchy.txt
+      Parser/Python.asdl
+      所有目标的文件都在 ✔
+[ok] Doc 越界引用自检：都齐
+[ok] conf.py：sphinxcontrib.rsvgconverter → sphinxcontrib.cairosvgconverter
+[ok] 已在 conf.py 加长串断行补丁（PYPDF_LINEBREAK_V2）：code-block 硬折行 + 下划线断点 + 字母数字串每 5 位断点（根治中文表格与 hex/长数字横向溢出）
+[ok] 已在 conf.py 挂上表格列宽补丁（PYPDF_TABLE_WIDTHS）：没有 :widths: 的表补列宽 → 生成可折行的 \X{a}{b} 列（不转 longtable，避免 latexmk 不收敛）
+[ok] SVG 转换器可用（3 个 rst 带 SVG 插图）
+$ '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/venv/bin/python' -c 'import sphinx;print(sphinx.__version__)'
+8.2.3
+$ '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/venv/bin/python' -m sphinx -b latex -d build/doctrees -j 4 -D language=zh_CN . build/latex
+Running Sphinx v8.2.3
+loading translations [zh_CN]... done
+matplotlib is not installed, social cards will not be generated
+making output directory... done
+building [mo]: targets for 543 po files that are out of date
+writing output... [  0%] locales/zh_CN/LC_MESSAGES/library/decimal.mo
+writing output... [  0%] locales/zh_CN/LC_MESSAGES/library/tty.mo
+writing output... [  1%] locales/zh_CN/LC_MESSAGES/library/netrc.mo
+writing output... [  1%] locales/zh_CN/LC_MESSAGES/library/tempfile.mo
+writing output... [  1%] locales/zh_CN/LC_MESSAGES/library/sunau.mo
+writing output... [  1%] locales/zh_CN/LC_MESSAGES/library/csv.mo
+writing output... [  1%] locales/zh_CN/LC_MESSAGES/library/doctest.mo
+writing output... [  1%] locales/zh_CN/LC_MESSAGES/library/site.mo
+writing output... [  2%] locales/zh_CN/LC_MESSAGES/library/linecache.mo
+writing output... [  2%] locales/zh_CN/LC_MESSAGES/library/mimetypes.mo
+writing output... [  2%] locales/zh_CN/LC_MESSAGES/library/marshal.mo
+writing output... [  2%] locales/zh_CN/LC_MESSAGES/library/asyncio-stream.mo
+writing output... [  2%] locales/zh_CN/LC_MESSAGES/library/html.entities.mo
+writing output... [  3%] locales/zh_CN/LC_MESSAGES/library/importlib.resources.abc.mo
+writing output... [  3%] locales/zh_CN/LC_MESSAGES/library/pickle.mo
+writing output... [  3%] locales/zh_CN/LC_MESSAGES/library/ftplib.mo
+writing output... [  3%] locales/zh_CN/LC_MESSAGES/library/rlcompleter.mo
+writing output... [  3%] locales/zh_CN/LC_MESSAGES/library/copyreg.mo
+writing output... [  3%] locales/zh_CN/LC_MESSAGES/library/argparse.mo
+writing output... [  4%] locales/zh_CN/LC_MESSAGES/library/syslog.mo
+writing output... [  4%] locales/zh_CN/LC_MESSAGES/library/unix.mo
+writing output... [  4%] locales/zh_CN/LC_MESSAGES/library/chunk.mo
+writing output... [  4%] locales/zh_CN/LC_MESSAGES/library/smtpd.mo
+writing output... [  4%] locales/zh_CN/LC_MESSAGES/library/stringprep.mo
+writing output... [  5%] locales/zh_CN/LC_MESSAGES/library/xdrlib.mo
+writing output... [  5%] locales/zh_CN/LC_MESSAGES/library/secrets.mo
+writing output... [  5%] locales/zh_CN/LC_MESSAGES/library/pwd.mo
+writing output... [  5%] locales/zh_CN/LC_MESSAGES/library/urllib.mo
+writing output... [  5%] locales/zh_CN/LC_MESSAGES/library/bdb.mo
+writing output... [  6%] locales/zh_CN/LC_MESSAGES/library/http.cookies.mo
+writing output... [  6%] locales/zh_CN/LC_MESSAGES/library/builtins.mo
+writing output... [  6%] locales/zh_CN/LC_MESSAGES/library/glob.mo
+writing output... [  6%] locales/zh_CN/LC_MESSAGES/library/profile.mo
+writing output... [  6%] locales/zh_CN/LC_MESSAGES/library/pydoc.mo
+writing output... [  6%] locales/zh_CN/LC_MESSAGES/library/annotationlib.mo
+writing output... [  7%] locales/zh_CN/LC_MESSAGES/library/locale.mo
+writing output... [  7%] locales/zh_CN/LC_MESSAGES/library/functional.mo
+writing output... [  7%] locales/zh_CN/LC_MESSAGES/library/poplib.mo
+writing output... [  7%] locales/zh_CN/LC_MESSAGES/library/msvcrt.mo
+writing output... [  7%] locales/zh_CN/LC_MESSAGES/library/multiprocessing.mo
+writing output... [  8%] locales/zh_CN/LC_MESSAGES/library/tokenize.mo
+writing output... [  8%] locales/zh_CN/LC_MESSAGES/library/colorsys.mo
+writing output... [  8%] locales/zh_CN/LC_MESSAGES/library/audit_events.mo
+writing output... [  8%] locales/zh_CN/LC_MESSAGES/library/string.mo
+writing output... [  8%] locales/zh_CN/LC_MESSAGES/library/aifc.mo
+writing output... [  8%] locales/zh_CN/LC_MESSAGES/library/filecmp.mo
+writing output... [  9%] locales/zh_CN/LC_MESSAGES/library/os.mo
+writing output... [  9%] locales/zh_CN/LC_MESSAGES/library/frameworks.mo
+writing output... [  9%] locales/zh_CN/LC_MESSAGES/library/asyncio-policy.mo
+writing output... [  9%] locales/zh_CN/LC_MESSAGES/library/logging.mo
+writing output... [  9%] locales/zh_CN/LC_MESSAGES/library/html.parser.mo
+writing output... [ 10%] locales/zh_CN/LC_MESSAGES/library/curses.mo
+writing output... [ 10%] locales/zh_CN/LC_MESSAGES/library/tkinter.scrolledtext.mo
+writing output... [ 10%] locales/zh_CN/LC_MESSAGES/library/typing.mo
+writing output... [ 10%] locales/zh_CN/LC_MESSAGES/library/py_compile.mo
+writing output... [ 10%] locales/zh_CN/LC_MESSAGES/library/urllib.request.mo
+writing output... [ 10%] locales/zh_CN/LC_MESSAGES/library/random.mo
+writing output... [ 11%] locales/zh_CN/LC_MESSAGES/library/asyncio-llapi-index.mo
+writing output... [ 11%] locales/zh_CN/LC_MESSAGES/library/statistics.mo
+writing output... [ 11%] locales/zh_CN/LC_MESSAGES/library/collections.mo
+writing output... [ 11%] locales/zh_CN/LC_MESSAGES/library/tkinter.mo
+writing output... [ 11%] locales/zh_CN/LC_MESSAGES/library/nntplib.mo
+writing output... [ 12%] locales/zh_CN/LC_MESSAGES/library/urllib.robotparser.mo
+writing output... [ 12%] locales/zh_CN/LC_MESSAGES/library/asyncio-task.mo
+writing output... [ 12%] locales/zh_CN/LC_MESSAGES/library/winsound.mo
+writing output... [ 12%] locales/zh_CN/LC_MESSAGES/library/sys_path_init.mo
+writing output... [ 12%] locales/zh_CN/LC_MESSAGES/library/signal.mo
+writing output... [ 13%] locales/zh_CN/LC_MESSAGES/library/resource.mo
+writing output... [ 13%] locales/zh_CN/LC_MESSAGES/library/heapq.mo
+writing output... [ 13%] locales/zh_CN/LC_MESSAGES/library/gc.mo
+writing output... [ 13%] locales/zh_CN/LC_MESSAGES/library/token.mo
+writing output... [ 13%] locales/zh_CN/LC_MESSAGES/library/custominterp.mo
+writing output... [ 13%] locales/zh_CN/LC_MESSAGES/library/tkinter.messagebox.mo
+writing output... [ 14%] locales/zh_CN/LC_MESSAGES/library/functools.mo
+writing output... [ 14%] locales/zh_CN/LC_MESSAGES/library/weakref.mo
+writing output... [ 14%] locales/zh_CN/LC_MESSAGES/library/uuid.mo
+writing output... [ 14%] locales/zh_CN/LC_MESSAGES/library/nis.mo
+writing output... [ 14%] locales/zh_CN/LC_MESSAGES/library/codeop.mo
+writing output... [ 15%] locales/zh_CN/LC_MESSAGES/library/xml.etree.elementtree.mo
+writing output... [ 15%] locales/zh_CN/LC_MESSAGES/library/asyncio-api-index.mo
+writing output... [ 15%] locales/zh_CN/LC_MESSAGES/library/ssl.mo
+writing output... [ 15%] locales/zh_CN/LC_MESSAGES/library/urllib.parse.mo
+writing output... [ 15%] locales/zh_CN/LC_MESSAGES/library/email.parser.mo
+writing output... [ 15%] locales/zh_CN/LC_MESSAGES/library/email.headerregistry.mo
+writing output... [ 16%] locales/zh_CN/LC_MESSAGES/library/plistlib.mo
+writing output... [ 16%] locales/zh_CN/LC_MESSAGES/library/tkinter.colorchooser.mo
+writing output... [ 16%] locales/zh_CN/LC_MESSAGES/library/dbm.mo
+writing output... [ 16%] locales/zh_CN/LC_MESSAGES/library/timeit.mo
+writing output... [ 16%] locales/zh_CN/LC_MESSAGES/library/tabnanny.mo
+writing output... [ 17%] locales/zh_CN/LC_MESSAGES/library/quopri.mo
+writing output... [ 17%] locales/zh_CN/LC_MESSAGES/library/spwd.mo
+writing output... [ 17%] locales/zh_CN/LC_MESSAGES/library/xml.sax.mo
+writing output... [ 17%] locales/zh_CN/LC_MESSAGES/library/asyncio-platforms.mo
+writing output... [ 17%] locales/zh_CN/LC_MESSAGES/library/compression.mo
+writing output... [ 17%] locales/zh_CN/LC_MESSAGES/library/inspect.mo
+writing output... [ 18%] locales/zh_CN/LC_MESSAGES/library/telnetlib.mo
+writing output... [ 18%] locales/zh_CN/LC_MESSAGES/library/gettext.mo
+writing output... [ 18%] locales/zh_CN/LC_MESSAGES/library/asyncio-eventloop.mo
+writing output... [ 18%] locales/zh_CN/LC_MESSAGES/library/codecs.mo
+writing output... [ 18%] locales/zh_CN/LC_MESSAGES/library/language.mo
+writing output... [ 19%] locales/zh_CN/LC_MESSAGES/library/superseded.mo
+writing output... [ 19%] locales/zh_CN/LC_MESSAGES/library/email.iterators.mo
+writing output... [ 19%] locales/zh_CN/LC_MESSAGES/library/dialog.mo
+writing output... [ 19%] locales/zh_CN/LC_MESSAGES/library/imp.mo
+writing output... [ 19%] locales/zh_CN/LC_MESSAGES/library/fnmatch.mo
+writing output... [ 20%] locales/zh_CN/LC_MESSAGES/library/distutils.mo
+writing output... [ 20%] locales/zh_CN/LC_MESSAGES/library/stat.mo
+writing output... [ 20%] locales/zh_CN/LC_MESSAGES/library/bisect.mo
+writing output... [ 20%] locales/zh_CN/LC_MESSAGES/library/text.mo
+writing output... [ 20%] locales/zh_CN/LC_MESSAGES/library/asyncio-runner.mo
+writing output... [ 20%] locales/zh_CN/LC_MESSAGES/library/collections.abc.mo
+writing output... [ 21%] locales/zh_CN/LC_MESSAGES/library/readline.mo
+writing output... [ 21%] locales/zh_CN/LC_MESSAGES/library/internet.mo
+writing output... [ 21%] locales/zh_CN/LC_MESSAGES/library/urllib.error.mo
+writing output... [ 21%] locales/zh_CN/LC_MESSAGES/library/re.mo
+writing output... [ 21%] locales/zh_CN/LC_MESSAGES/library/asyncio-threading.mo
+writing output... [ 22%] locales/zh_CN/LC_MESSAGES/library/__main__.mo
+writing output... [ 22%] locales/zh_CN/LC_MESSAGES/library/unittest.mock.mo
+writing output... [ 22%] locales/zh_CN/LC_MESSAGES/library/calendar.mo
+writing output... [ 22%] locales/zh_CN/LC_MESSAGES/library/binary.mo
+writing output... [ 22%] locales/zh_CN/LC_MESSAGES/library/debug.mo
+writing output... [ 22%] locales/zh_CN/LC_MESSAGES/library/archiving.mo
+writing output... [ 23%] locales/zh_CN/LC_MESSAGES/library/test.mo
+writing output... [ 23%] locales/zh_CN/LC_MESSAGES/library/platform.mo
+writing output... [ 23%] locales/zh_CN/LC_MESSAGES/library/math.mo
+writing output... [ 23%] locales/zh_CN/LC_MESSAGES/library/lzma.mo
+writing output... [ 23%] locales/zh_CN/LC_MESSAGES/library/email.compat32-message.mo
+writing output... [ 24%] locales/zh_CN/LC_MESSAGES/library/unicodedata.mo
+writing output... [ 24%] locales/zh_CN/LC_MESSAGES/library/uu.mo
+writing output... [ 24%] locales/zh_CN/LC_MESSAGES/library/errno.mo
+writing output... [ 24%] locales/zh_CN/LC_MESSAGES/library/difflib.mo
+writing output... [ 24%] locales/zh_CN/LC_MESSAGES/library/unittest.mo
+writing output... [ 24%] locales/zh_CN/LC_MESSAGES/library/select.mo
+writing output... [ 25%] locales/zh_CN/LC_MESSAGES/library/gzip.mo
+writing output... [ 25%] locales/zh_CN/LC_MESSAGES/library/ctypes.mo
+writing output... [ 25%] locales/zh_CN/LC_MESSAGES/library/pty.mo
+writing output... [ 25%] locales/zh_CN/LC_MESSAGES/library/http.server.mo
+writing output... [ 25%] locales/zh_CN/LC_MESSAGES/library/zipapp.mo
+writing output... [ 26%] locales/zh_CN/LC_MESSAGES/library/operator.mo
+writing output... [ 26%] locales/zh_CN/LC_MESSAGES/library/tkinter.dnd.mo
+writing output... [ 26%] locales/zh_CN/LC_MESSAGES/library/tomllib.mo
+writing output... [ 26%] locales/zh_CN/LC_MESSAGES/library/ensurepip.mo
+writing output... [ 26%] locales/zh_CN/LC_MESSAGES/library/cgi.mo
+writing output... [ 27%] locales/zh_CN/LC_MESSAGES/library/logging.config.mo
+writing output... [ 27%] locales/zh_CN/LC_MESSAGES/library/mailbox.mo
+writing output... [ 27%] locales/zh_CN/LC_MESSAGES/library/compression.zstd.mo
+writing output... [ 27%] locales/zh_CN/LC_MESSAGES/library/fractions.mo
+writing output... [ 27%] locales/zh_CN/LC_MESSAGES/library/sys.monitoring.mo
+writing output... [ 27%] locales/zh_CN/LC_MESSAGES/library/types.mo
+writing output... [ 28%] locales/zh_CN/LC_MESSAGES/library/venv.mo
+writing output... [ 28%] locales/zh_CN/LC_MESSAGES/library/http.cookiejar.mo
+writing output... [ 28%] locales/zh_CN/LC_MESSAGES/library/xml.dom.minidom.mo
+writing output... [ 28%] locales/zh_CN/LC_MESSAGES/library/__future__.mo
+writing output... [ 28%] locales/zh_CN/LC_MESSAGES/library/constants.mo
+writing output... [ 29%] locales/zh_CN/LC_MESSAGES/library/os.path.mo
+writing output... [ 29%] locales/zh_CN/LC_MESSAGES/library/ossaudiodev.mo
+writing output... [ 29%] locales/zh_CN/LC_MESSAGES/library/email.policy.mo
+writing output... [ 29%] locales/zh_CN/LC_MESSAGES/library/pprint.mo
+writing output... [ 29%] locales/zh_CN/LC_MESSAGES/library/queue.mo
+writing output... [ 29%] locales/zh_CN/LC_MESSAGES/library/graphlib.mo
+writing output... [ 30%] locales/zh_CN/LC_MESSAGES/about.mo
+writing output... [ 30%] locales/zh_CN/LC_MESSAGES/library/socket.mo
+writing output... [ 30%] locales/zh_CN/LC_MESSAGES/library/pickletools.mo
+writing output... [ 30%] locales/zh_CN/LC_MESSAGES/library/importlib.resources.mo
+writing output... [ 30%] locales/zh_CN/LC_MESSAGES/improve-page-nojs.mo
+writing output... [ 31%] locales/zh_CN/LC_MESSAGES/library/persistence.mo
+writing output... [ 31%] locales/zh_CN/LC_MESSAGES/library/curses.panel.mo
+writing output... [ 31%] locales/zh_CN/LC_MESSAGES/library/string.templatelib.mo
+writing output... [ 31%] locales/zh_CN/LC_MESSAGES/copyright.mo
+writing output... [ 31%] locales/zh_CN/LC_MESSAGES/library/asyncio-subprocess.mo
+writing output... [ 31%] locales/zh_CN/LC_MESSAGES/library/warnings.mo
+writing output... [ 32%] locales/zh_CN/LC_MESSAGES/contents.mo
+writing output... [ 32%] locales/zh_CN/LC_MESSAGES/library/cgitb.mo
+writing output... [ 32%] locales/zh_CN/LC_MESSAGES/library/asyncore.mo
+writing output... [ 32%] locales/zh_CN/LC_MESSAGES/library/pipes.mo
+writing output... [ 32%] locales/zh_CN/LC_MESSAGES/library/asyncio-tools.mo
+writing output... [ 33%] locales/zh_CN/LC_MESSAGES/library/fileinput.mo
+writing output... [ 33%] locales/zh_CN/LC_MESSAGES/glossary.mo
+writing output... [ 33%] locales/zh_CN/LC_MESSAGES/license.mo
+writing output... [ 33%] locales/zh_CN/LC_MESSAGES/improve-page.mo
+writing output... [ 33%] locales/zh_CN/LC_MESSAGES/library/grp.mo
+writing output... [ 34%] locales/zh_CN/LC_MESSAGES/library/asyncio-sync.mo
+writing output... [ 34%] locales/zh_CN/LC_MESSAGES/library/shlex.mo
+writing output... [ 34%] locales/zh_CN/LC_MESSAGES/whatsnew/index.mo
+writing output... [ 34%] locales/zh_CN/LC_MESSAGES/c-api/iter.mo
+writing output... [ 34%] locales/zh_CN/LC_MESSAGES/library/xml.mo
+writing output... [ 34%] locales/zh_CN/LC_MESSAGES/library/winreg.mo
+writing output... [ 35%] locales/zh_CN/LC_MESSAGES/distributing/index.mo
+writing output... [ 35%] locales/zh_CN/LC_MESSAGES/whatsnew/3.6.mo
+writing output... [ 35%] locales/zh_CN/LC_MESSAGES/c-api/gen.mo
+writing output... [ 35%] locales/zh_CN/LC_MESSAGES/faq/library.mo
+writing output... [ 35%] locales/zh_CN/LC_MESSAGES/c-api/descriptor.mo
+writing output... [ 36%] locales/zh_CN/LC_MESSAGES/library/json.mo
+writing output... [ 36%] locales/zh_CN/LC_MESSAGES/library/cmdline.mo
+writing output... [ 36%] locales/zh_CN/LC_MESSAGES/whatsnew/2.0.mo
+writing output... [ 36%] locales/zh_CN/LC_MESSAGES/whatsnew/2.6.mo
+writing output... [ 36%] locales/zh_CN/LC_MESSAGES/c-api/allocation.mo
+writing output... [ 36%] locales/zh_CN/LC_MESSAGES/library/io.mo
+writing output... [ 37%] locales/zh_CN/LC_MESSAGES/library/cmd.mo
+writing output... [ 37%] locales/zh_CN/LC_MESSAGES/library/time.mo
+writing output... [ 37%] locales/zh_CN/LC_MESSAGES/whatsnew/3.2.mo
+writing output... [ 37%] locales/zh_CN/LC_MESSAGES/library/concurrency.mo
+writing output... [ 37%] locales/zh_CN/LC_MESSAGES/library/getpass.mo
+writing output... [ 38%] locales/zh_CN/LC_MESSAGES/c-api/sys.mo
+writing output... [ 38%] locales/zh_CN/LC_MESSAGES/whatsnew/3.13.mo
+writing output... [ 38%] locales/zh_CN/LC_MESSAGES/c-api/init_config.mo
+writing output... [ 38%] locales/zh_CN/LC_MESSAGES/library/getopt.mo
+writing output... [ 38%] locales/zh_CN/LC_MESSAGES/whatsnew/3.5.mo
+writing output... [ 38%] locales/zh_CN/LC_MESSAGES/library/runpy.mo
+writing output... [ 39%] locales/zh_CN/LC_MESSAGES/library/development.mo
+writing output... [ 39%] locales/zh_CN/LC_MESSAGES/library/bz2.mo
+writing output... [ 39%] locales/zh_CN/LC_MESSAGES/library/base64.mo
+writing output... [ 39%] locales/zh_CN/LC_MESSAGES/library/sysconfig.mo
+writing output... [ 39%] locales/zh_CN/LC_MESSAGES/library/ast.mo
+writing output... [ 40%] locales/zh_CN/LC_MESSAGES/library/pathlib.mo
+writing output... [ 40%] locales/zh_CN/LC_MESSAGES/whatsnew/3.10.mo
+writing output... [ 40%] locales/zh_CN/LC_MESSAGES/library/_thread.mo
+writing output... [ 40%] locales/zh_CN/LC_MESSAGES/whatsnew/3.14.mo
+writing output... [ 40%] locales/zh_CN/LC_MESSAGES/library/enum.mo
+writing output... [ 41%] locales/zh_CN/LC_MESSAGES/library/webbrowser.mo
+writing output... [ 41%] locales/zh_CN/LC_MESSAGES/whatsnew/3.4.mo
+writing output... [ 41%] locales/zh_CN/LC_MESSAGES/library/itertools.mo
+writing output... [ 41%] locales/zh_CN/LC_MESSAGES/library/msilib.mo
+writing output... [ 41%] locales/zh_CN/LC_MESSAGES/whatsnew/3.9.mo
+writing output... [ 41%] locales/zh_CN/LC_MESSAGES/library/windows.mo
+writing output... [ 42%] locales/zh_CN/LC_MESSAGES/library/wsgiref.mo
+writing output... [ 42%] locales/zh_CN/LC_MESSAGES/whatsnew/2.7.mo
+writing output... [ 42%] locales/zh_CN/LC_MESSAGES/library/shutil.mo
+writing output... [ 42%] locales/zh_CN/LC_MESSAGES/library/email.mo
+writing output... [ 42%] locales/zh_CN/LC_MESSAGES/library/binascii.mo
+writing output... [ 43%] locales/zh_CN/LC_MESSAGES/whatsnew/3.1.mo
+writing output... [ 43%] locales/zh_CN/LC_MESSAGES/library/concurrent.futures.mo
+writing output... [ 43%] locales/zh_CN/LC_MESSAGES/whatsnew/3.3.mo
+writing output... [ 43%] locales/zh_CN/LC_MESSAGES/library/zlib.mo
+writing output... [ 43%] locales/zh_CN/LC_MESSAGES/whatsnew/2.1.mo
+writing output... [ 43%] locales/zh_CN/LC_MESSAGES/library/subprocess.mo
+writing output... [ 44%] locales/zh_CN/LC_MESSAGES/library/email.encoders.mo
+writing output... [ 44%] locales/zh_CN/LC_MESSAGES/library/dataclasses.mo
+writing output... [ 44%] locales/zh_CN/LC_MESSAGES/whatsnew/3.12.mo
+writing output... [ 44%] locales/zh_CN/LC_MESSAGES/library/asyncio-extending.mo
+writing output... [ 44%] locales/zh_CN/LC_MESSAGES/library/distribution.mo
+writing output... [ 45%] locales/zh_CN/LC_MESSAGES/library/email.mime.mo
+writing output... [ 45%] locales/zh_CN/LC_MESSAGES/library/threadsafety.mo
+writing output... [ 45%] locales/zh_CN/LC_MESSAGES/whatsnew/changelog.mo
+writing output... [ 45%] locales/zh_CN/LC_MESSAGES/c-api/objimpl.mo
+writing output... [ 45%] locales/zh_CN/LC_MESSAGES/whatsnew/2.3.mo
+writing output... [ 45%] locales/zh_CN/LC_MESSAGES/c-api/frame.mo
+writing output... [ 46%] locales/zh_CN/LC_MESSAGES/c-api/tuple.mo
+writing output... [ 46%] locales/zh_CN/LC_MESSAGES/library/netdata.mo
+writing output... [ 46%] locales/zh_CN/LC_MESSAGES/library/markup.mo
+writing output... [ 46%] locales/zh_CN/LC_MESSAGES/whatsnew/3.0.mo
+writing output... [ 46%] locales/zh_CN/LC_MESSAGES/c-api/stable.mo
+writing output... [ 47%] locales/zh_CN/LC_MESSAGES/library/atexit.mo
+writing output... [ 47%] locales/zh_CN/LC_MESSAGES/whatsnew/3.11.mo
+writing output... [ 47%] locales/zh_CN/LC_MESSAGES/library/audioop.mo
+writing output... [ 47%] locales/zh_CN/LC_MESSAGES/library/code.mo
+writing output... [ 47%] locales/zh_CN/LC_MESSAGES/library/sndhdr.mo
+writing output... [ 48%] locales/zh_CN/LC_MESSAGES/c-api/import.mo
+writing output... [ 48%] locales/zh_CN/LC_MESSAGES/library/termios.mo
+writing output... [ 48%] locales/zh_CN/LC_MESSAGES/library/i18n.mo
+writing output... [ 48%] locales/zh_CN/LC_MESSAGES/library/modules.mo
+writing output... [ 48%] locales/zh_CN/LC_MESSAGES/whatsnew/2.4.mo
+writing output... [ 48%] locales/zh_CN/LC_MESSAGES/c-api/intro.mo
+writing output... [ 49%] locales/zh_CN/LC_MESSAGES/library/tkinter.ttk.mo
+writing output... [ 49%] locales/zh_CN/LC_MESSAGES/library/xml.dom.mo
+writing output... [ 49%] locales/zh_CN/LC_MESSAGES/whatsnew/3.7.mo
+writing output... [ 49%] locales/zh_CN/LC_MESSAGES/c-api/subinterpreters.mo
+writing output... [ 49%] locales/zh_CN/LC_MESSAGES/library/datetime.mo
+writing output... [ 50%] locales/zh_CN/LC_MESSAGES/library/index.mo
+writing output... [ 50%] locales/zh_CN/LC_MESSAGES/whatsnew/2.2.mo
+writing output... [ 50%] locales/zh_CN/LC_MESSAGES/c-api/index.mo
+writing output... [ 50%] locales/zh_CN/LC_MESSAGES/library/tkinter.font.mo
+writing output... [ 50%] locales/zh_CN/LC_MESSAGES/c-api/synchronization.mo
+writing output... [ 50%] locales/zh_CN/LC_MESSAGES/library/cmath.mo
+writing output... [ 51%] locales/zh_CN/LC_MESSAGES/extending/embedding.mo
+writing output... [ 51%] locales/zh_CN/LC_MESSAGES/c-api/veryhigh.mo
+writing output... [ 51%] locales/zh_CN/LC_MESSAGES/library/keyword.mo
+writing output... [ 51%] locales/zh_CN/LC_MESSAGES/extending/extending.mo
+writing output... [ 51%] locales/zh_CN/LC_MESSAGES/c-api/perfmaps.mo
+writing output... [ 52%] locales/zh_CN/LC_MESSAGES/library/email.contentmanager.mo
+writing output... [ 52%] locales/zh_CN/LC_MESSAGES/library/pyexpat.mo
+writing output... [ 52%] locales/zh_CN/LC_MESSAGES/library/modulefinder.mo
+writing output... [ 52%] locales/zh_CN/LC_MESSAGES/library/concurrent.interpreters.mo
+writing output... [ 52%] locales/zh_CN/LC_MESSAGES/builtins/functions.mo
+writing output... [ 52%] locales/zh_CN/LC_MESSAGES/library/logging.handlers.mo
+writing output... [ 53%] locales/zh_CN/LC_MESSAGES/library/wave.mo
+writing output... [ 53%] locales/zh_CN/LC_MESSAGES/using/index.mo
+writing output... [ 53%] locales/zh_CN/LC_MESSAGES/extending/newtypes_tutorial.mo
+writing output... [ 53%] locales/zh_CN/LC_MESSAGES/c-api/monitoring.mo
+writing output... [ 53%] locales/zh_CN/LC_MESSAGES/extending/newtypes.mo
+writing output... [ 54%] locales/zh_CN/LC_MESSAGES/library/optparse.mo
+writing output... [ 54%] locales/zh_CN/LC_MESSAGES/c-api/conversion.mo
+writing output... [ 54%] locales/zh_CN/LC_MESSAGES/library/numbers.mo
+writing output... [ 54%] locales/zh_CN/LC_MESSAGES/extending/index.mo
+writing output... [ 54%] locales/zh_CN/LC_MESSAGES/library/contextvars.mo
+writing output... [ 55%] locales/zh_CN/LC_MESSAGES/faq/gui.mo
+writing output... [ 55%] locales/zh_CN/LC_MESSAGES/extending/building.mo
+writing output... [ 55%] locales/zh_CN/LC_MESSAGES/c-api/iterator.mo
+writing output... [ 55%] locales/zh_CN/LC_MESSAGES/library/intro.mo
+writing output... [ 55%] locales/zh_CN/LC_MESSAGES/library/xml.sax.reader.mo
+writing output... [ 55%] locales/zh_CN/LC_MESSAGES/c-api/long.mo
+writing output... [ 56%] locales/zh_CN/LC_MESSAGES/library/importlib.metadata.mo
+writing output... [ 56%] locales/zh_CN/LC_MESSAGES/library/symtable.mo
+writing output... [ 56%] locales/zh_CN/LC_MESSAGES/library/fcntl.mo
+writing output... [ 56%] locales/zh_CN/LC_MESSAGES/c-api/unicode.mo
+writing output... [ 56%] locales/zh_CN/LC_MESSAGES/library/asynchat.mo
+writing output... [ 57%] locales/zh_CN/LC_MESSAGES/library/trace.mo
+writing output... [ 57%] locales/zh_CN/LC_MESSAGES/c-api/capsule.mo
+writing output... [ 57%] locales/zh_CN/LC_MESSAGES/c-api/exceptions.mo
+writing output... [ 57%] locales/zh_CN/LC_MESSAGES/library/fileformats.mo
+writing output... [ 57%] locales/zh_CN/LC_MESSAGES/library/python.mo
+writing output... [ 57%] locales/zh_CN/LC_MESSAGES/library/asyncio-exceptions.mo
+writing output... [ 58%] locales/zh_CN/LC_MESSAGES/faq/index.mo
+writing output... [ 58%] locales/zh_CN/LC_MESSAGES/c-api/cell.mo
+writing output... [ 58%] locales/zh_CN/LC_MESSAGES/library/pyclbr.mo
+writing output... [ 58%] locales/zh_CN/LC_MESSAGES/extending/windows.mo
+writing output... [ 58%] locales/zh_CN/LC_MESSAGES/library/email.errors.mo
+writing output... [ 59%] locales/zh_CN/LC_MESSAGES/c-api/gcsupport.mo
+writing output... [ 59%] locales/zh_CN/LC_MESSAGES/c-api/apiabiversion.mo
+writing output... [ 59%] locales/zh_CN/LC_MESSAGES/library/faulthandler.mo
+writing output... [ 59%] locales/zh_CN/LC_MESSAGES/faq/extending.mo
+writing output... [ 59%] locales/zh_CN/LC_MESSAGES/c-api/set.mo
+writing output... [ 59%] locales/zh_CN/LC_MESSAGES/library/mm.mo
+writing output... [ 60%] locales/zh_CN/LC_MESSAGES/library/textwrap.mo
+writing output... [ 60%] locales/zh_CN/LC_MESSAGES/c-api/interp-lifecycle.mo
+writing output... [ 60%] locales/zh_CN/LC_MESSAGES/library/pdb.mo
+writing output... [ 60%] locales/zh_CN/LC_MESSAGES/library/zoneinfo.mo
+writing output... [ 60%] locales/zh_CN/LC_MESSAGES/c-api/structures.mo
+writing output... [ 61%] locales/zh_CN/LC_MESSAGES/faq/installed.mo
+writing output... [ 61%] locales/zh_CN/LC_MESSAGES/library/compileall.mo
+writing output... [ 61%] locales/zh_CN/LC_MESSAGES/library/sched.mo
+writing output... [ 61%] locales/zh_CN/LC_MESSAGES/c-api/call.mo
+writing output... [ 61%] locales/zh_CN/LC_MESSAGES/faq/design.mo
+writing output... [ 62%] locales/zh_CN/LC_MESSAGES/library/removed.mo
+writing output... [ 62%] locales/zh_CN/LC_MESSAGES/library/traceback.mo
+writing output... [ 62%] locales/zh_CN/LC_MESSAGES/library/copy.mo
+writing output... [ 62%] locales/zh_CN/LC_MESSAGES/faq/windows.mo
+writing output... [ 62%] locales/zh_CN/LC_MESSAGES/library/selectors.mo
+writing output... [ 62%] locales/zh_CN/LC_MESSAGES/library/asyncio.mo
+writing output... [ 63%] locales/zh_CN/LC_MESSAGES/faq/general.mo
+writing output... [ 63%] locales/zh_CN/LC_MESSAGES/c-api/hash.mo
+writing output... [ 63%] locales/zh_CN/LC_MESSAGES/library/html.mo
+writing output... [ 63%] locales/zh_CN/LC_MESSAGES/faq/programming.mo
+writing output... [ 63%] locales/zh_CN/LC_MESSAGES/c-api/marshal.mo
+writing output... [ 64%] locales/zh_CN/LC_MESSAGES/library/struct.mo
+writing output... [ 64%] locales/zh_CN/LC_MESSAGES/builtins/threadsafety.mo
+writing output... [ 64%] locales/zh_CN/LC_MESSAGES/c-api/complex.mo
+writing output... [ 64%] locales/zh_CN/LC_MESSAGES/builtins/time-complexity.mo
+writing output... [ 64%] locales/zh_CN/LC_MESSAGES/library/importlib.mo
+writing output... [ 64%] locales/zh_CN/LC_MESSAGES/library/mailcap.mo
+writing output... [ 65%] locales/zh_CN/LC_MESSAGES/c-api/module.mo
+writing output... [ 65%] locales/zh_CN/LC_MESSAGES/builtins/constants.mo
+writing output... [ 65%] locales/zh_CN/LC_MESSAGES/c-api/type.mo
+writing output... [ 65%] locales/zh_CN/LC_MESSAGES/library/filesys.mo
+writing output... [ 65%] locales/zh_CN/LC_MESSAGES/builtins/index.mo
+writing output... [ 66%] locales/zh_CN/LC_MESSAGES/installing/index.mo
+writing output... [ 66%] locales/zh_CN/LC_MESSAGES/builtins/stdtypes.mo
+writing output... [ 66%] locales/zh_CN/LC_MESSAGES/library/email.header.mo
+writing output... [ 66%] locales/zh_CN/LC_MESSAGES/builtins/exceptions.mo
+writing output... [ 66%] locales/zh_CN/LC_MESSAGES/c-api/weakref.mo
+writing output... [ 66%] locales/zh_CN/LC_MESSAGES/library/ipaddress.mo
+writing output... [ 67%] locales/zh_CN/LC_MESSAGES/reference/executionmodel.mo
+writing output... [ 67%] locales/zh_CN/LC_MESSAGES/library/imghdr.mo
+writing output... [ 67%] locales/zh_CN/LC_MESSAGES/library/pkgutil.mo
+writing output... [ 67%] locales/zh_CN/LC_MESSAGES/deprecations/pending-removal-in-3.17.mo
+writing output... [ 67%] locales/zh_CN/LC_MESSAGES/c-api/reflection.mo
+writing output... [ 68%] locales/zh_CN/LC_MESSAGES/library/turtle.mo
+writing output... [ 68%] locales/zh_CN/LC_MESSAGES/library/shelve.mo
+writing output... [ 68%] locales/zh_CN/LC_MESSAGES/c-api/number.mo
+writing output... [ 68%] locales/zh_CN/LC_MESSAGES/howto/regex.mo
+writing output... [ 68%] locales/zh_CN/LC_MESSAGES/library/email.generator.mo
+writing output... [ 69%] locales/zh_CN/LC_MESSAGES/deprecations/pending-removal-in-3.19.mo
+writing output... [ 69%] locales/zh_CN/LC_MESSAGES/tutorial/whatnow.mo
+writing output... [ 69%] locales/zh_CN/LC_MESSAGES/deprecations/c-api-pending-removal-in-future.mo
+writing output... [ 69%] locales/zh_CN/LC_MESSAGES/c-api/extension-modules.mo
+writing output... [ 69%] locales/zh_CN/LC_MESSAGES/library/contextlib.mo
+writing output... [ 69%] locales/zh_CN/LC_MESSAGES/c-api/memoryview.mo
+writing output... [ 70%] locales/zh_CN/LC_MESSAGES/library/asyncio-protocol.mo
+writing output... [ 70%] locales/zh_CN/LC_MESSAGES/library/posix.mo
+writing output... [ 70%] locales/zh_CN/LC_MESSAGES/deprecations/index.mo
+writing output... [ 70%] locales/zh_CN/LC_MESSAGES/whatsnew/3.8.mo
+writing output... [ 70%] locales/zh_CN/LC_MESSAGES/library/concurrent.mo
+writing output... [ 71%] locales/zh_CN/LC_MESSAGES/c-api/curses.mo
+writing output... [ 71%] locales/zh_CN/LC_MESSAGES/library/asyncio-dev.mo
+writing output... [ 71%] locales/zh_CN/LC_MESSAGES/library/sqlite3.mo
+writing output... [ 71%] locales/zh_CN/LC_MESSAGES/deprecations/pending-removal-in-3.14.mo
+writing output... [ 71%] locales/zh_CN/LC_MESSAGES/library/tk.mo
+writing output... [ 71%] locales/zh_CN/LC_MESSAGES/c-api/float.mo
+writing output... [ 72%] locales/zh_CN/LC_MESSAGES/whatsnew/2.5.mo
+writing output... [ 72%] locales/zh_CN/LC_MESSAGES/using/windows.mo
+writing output... [ 72%] locales/zh_CN/LC_MESSAGES/library/xmlrpc.client.mo
+writing output... [ 72%] locales/zh_CN/LC_MESSAGES/using/cmdline.mo
+writing output... [ 72%] locales/zh_CN/LC_MESSAGES/library/multiprocessing.shared_memory.mo
+writing output... [ 73%] locales/zh_CN/LC_MESSAGES/tutorial/index.mo
+writing output... [ 73%] locales/zh_CN/LC_MESSAGES/c-api/abstract.mo
+writing output... [ 73%] locales/zh_CN/LC_MESSAGES/library/asyncio-queue.mo
+writing output... [ 73%] locales/zh_CN/LC_MESSAGES/deprecations/pending-removal-in-3.15.mo
+writing output... [ 73%] locales/zh_CN/LC_MESSAGES/tutorial/appetite.mo
+writing output... [ 73%] locales/zh_CN/LC_MESSAGES/library/imaplib.mo
+writing output... [ 74%] locales/zh_CN/LC_MESSAGES/library/configparser.mo
+writing output... [ 74%] locales/zh_CN/LC_MESSAGES/library/numeric.mo
+writing output... [ 74%] locales/zh_CN/LC_MESSAGES/deprecations/pending-removal-in-3.18.mo
+writing output... [ 74%] locales/zh_CN/LC_MESSAGES/tutorial/errors.mo
+writing output... [ 74%] locales/zh_CN/LC_MESSAGES/c-api/picklebuffer.mo
+writing output... [ 75%] locales/zh_CN/LC_MESSAGES/tutorial/datastructures.mo
+writing output... [ 75%] locales/zh_CN/LC_MESSAGES/library/sys.mo
+writing output... [ 75%] locales/zh_CN/LC_MESSAGES/deprecations/pending-removal-in-future.mo
+writing output... [ 75%] locales/zh_CN/LC_MESSAGES/library/stdtypes.mo
+writing output... [ 75%] locales/zh_CN/LC_MESSAGES/tutorial/interactive.mo
+writing output... [ 76%] locales/zh_CN/LC_MESSAGES/c-api/sequence.mo
+writing output... [ 76%] locales/zh_CN/LC_MESSAGES/deprecations/c-api-pending-removal-in-3.16.mo
+writing output... [ 76%] locales/zh_CN/LC_MESSAGES/library/devmode.mo
+writing output... [ 76%] locales/zh_CN/LC_MESSAGES/c-api/dict.mo
+writing output... [ 76%] locales/zh_CN/LC_MESSAGES/howto/sockets.mo
+writing output... [ 76%] locales/zh_CN/LC_MESSAGES/howto/instrumentation.mo
+writing output... [ 77%] locales/zh_CN/LC_MESSAGES/c-api/method.mo
+writing output... [ 77%] locales/zh_CN/LC_MESSAGES/library/functions.mo
+writing output... [ 77%] locales/zh_CN/LC_MESSAGES/howto/a-conceptual-overview-of-asyncio.mo
+writing output... [ 77%] locales/zh_CN/LC_MESSAGES/tutorial/floatingpoint.mo
+writing output... [ 77%] locales/zh_CN/LC_MESSAGES/library/smtplib.mo
+writing output... [ 78%] locales/zh_CN/LC_MESSAGES/tutorial/introduction.mo
+writing output... [ 78%] locales/zh_CN/LC_MESSAGES/c-api/arg.mo
+writing output... [ 78%] locales/zh_CN/LC_MESSAGES/library/email.charset.mo
+writing output... [ 78%] locales/zh_CN/LC_MESSAGES/howto/index.mo
+writing output... [ 78%] locales/zh_CN/LC_MESSAGES/tutorial/appendix.mo
+writing output... [ 78%] locales/zh_CN/LC_MESSAGES/tutorial/classes.mo
+writing output... [ 79%] locales/zh_CN/LC_MESSAGES/library/tracemalloc.mo
+writing output... [ 79%] locales/zh_CN/LC_MESSAGES/howto/unicode.mo
+writing output... [ 79%] locales/zh_CN/LC_MESSAGES/c-api/bytearray.mo
+writing output... [ 79%] locales/zh_CN/LC_MESSAGES/tutorial/stdlib.mo
+writing output... [ 79%] locales/zh_CN/LC_MESSAGES/library/mmap.mo
+writing output... [ 80%] locales/zh_CN/LC_MESSAGES/howto/clinic.mo
+writing output... [ 80%] locales/zh_CN/LC_MESSAGES/c-api/concrete.mo
+writing output... [ 80%] locales/zh_CN/LC_MESSAGES/howto/ipaddress.mo
+writing output... [ 80%] locales/zh_CN/LC_MESSAGES/tutorial/venv.mo
+writing output... [ 80%] locales/zh_CN/LC_MESSAGES/c-api/threads.mo
+writing output... [ 80%] locales/zh_CN/LC_MESSAGES/library/threading.mo
+writing output... [ 81%] locales/zh_CN/LC_MESSAGES/howto/cporting.mo
+writing output... [ 81%] locales/zh_CN/LC_MESSAGES/c-api/none.mo
+writing output... [ 81%] locales/zh_CN/LC_MESSAGES/library/asyncio-future.mo
+writing output... [ 81%] locales/zh_CN/LC_MESSAGES/bugs.mo
+writing output... [ 81%] locales/zh_CN/LC_MESSAGES/tutorial/inputoutput.mo
+writing output... [ 82%] locales/zh_CN/LC_MESSAGES/howto/isolating-extensions.mo
+writing output... [ 82%] locales/zh_CN/LC_MESSAGES/c-api/slice.mo
+writing output... [ 82%] locales/zh_CN/LC_MESSAGES/c-api/file.mo
+writing output... [ 82%] locales/zh_CN/LC_MESSAGES/library/zipfile.mo
+writing output... [ 82%] locales/zh_CN/LC_MESSAGES/tutorial/controlflow.mo
+writing output... [ 83%] locales/zh_CN/LC_MESSAGES/library/allos.mo
+writing output... [ 83%] locales/zh_CN/LC_MESSAGES/howto/free-threading-extensions.mo
+writing output... [ 83%] locales/zh_CN/LC_MESSAGES/reference/lexical_analysis.mo
+writing output... [ 83%] locales/zh_CN/LC_MESSAGES/howto/pyporting.mo
+writing output... [ 83%] locales/zh_CN/LC_MESSAGES/c-api/profiling.mo
+writing output... [ 83%] locales/zh_CN/LC_MESSAGES/library/array.mo
+writing output... [ 84%] locales/zh_CN/LC_MESSAGES/library/asyncio-graph.mo
+writing output... [ 84%] locales/zh_CN/LC_MESSAGES/tutorial/modules.mo
+writing output... [ 84%] locales/zh_CN/LC_MESSAGES/howto/mro.mo
+writing output... [ 84%] locales/zh_CN/LC_MESSAGES/tutorial/interpreter.mo
+writing output... [ 84%] locales/zh_CN/LC_MESSAGES/howto/argparse.mo
+writing output... [ 85%] locales/zh_CN/LC_MESSAGES/tutorial/stdlib2.mo
+writing output... [ 85%] locales/zh_CN/LC_MESSAGES/c-api/function.mo
+writing output... [ 85%] locales/zh_CN/LC_MESSAGES/howto/logging.mo
+writing output... [ 85%] locales/zh_CN/LC_MESSAGES/howto/curses.mo
+writing output... [ 85%] locales/zh_CN/LC_MESSAGES/c-api/buffer.mo
+writing output... [ 85%] locales/zh_CN/LC_MESSAGES/library/http.client.mo
+writing output... [ 86%] locales/zh_CN/LC_MESSAGES/reference/introduction.mo
+writing output... [ 86%] locales/zh_CN/LC_MESSAGES/library/dis.mo
+writing output... [ 86%] locales/zh_CN/LC_MESSAGES/howto/urllib2.mo
+writing output... [ 86%] locales/zh_CN/LC_MESSAGES/c-api/utilities.mo
+writing output... [ 86%] locales/zh_CN/LC_MESSAGES/c-api/init.mo
+writing output... [ 87%] locales/zh_CN/LC_MESSAGES/library/crypto.mo
+writing output... [ 87%] locales/zh_CN/LC_MESSAGES/reference/import.mo
+writing output... [ 87%] locales/zh_CN/LC_MESSAGES/c-api/memory.mo
+writing output... [ 87%] locales/zh_CN/LC_MESSAGES/library/abc.mo
+writing output... [ 87%] locales/zh_CN/LC_MESSAGES/howto/sorting.mo
+writing output... [ 87%] locales/zh_CN/LC_MESSAGES/c-api/bool.mo
+writing output... [ 88%] locales/zh_CN/LC_MESSAGES/c-api/typehints.mo
+writing output... [ 88%] locales/zh_CN/LC_MESSAGES/reference/datamodel.mo
+writing output... [ 88%] locales/zh_CN/LC_MESSAGES/library/socketserver.mo
+writing output... [ 88%] locales/zh_CN/LC_MESSAGES/howto/perf_profiling.mo
+writing output... [ 88%] locales/zh_CN/LC_MESSAGES/reference/expressions.mo
+writing output... [ 89%] locales/zh_CN/LC_MESSAGES/reference/compound_stmts.mo
+writing output... [ 89%] locales/zh_CN/LC_MESSAGES/library/security_warnings.mo
+writing output... [ 89%] locales/zh_CN/LC_MESSAGES/reference/simple_stmts.mo
+writing output... [ 89%] locales/zh_CN/LC_MESSAGES/c-api/coro.mo
+writing output... [ 89%] locales/zh_CN/LC_MESSAGES/howto/argparse-optparse.mo
+writing output... [ 90%] locales/zh_CN/LC_MESSAGES/library/curses.ascii.mo
+writing output... [ 90%] locales/zh_CN/LC_MESSAGES/reference/index.mo
+writing output... [ 90%] locales/zh_CN/LC_MESSAGES/library/cmdlinelibs.mo
+writing output... [ 90%] locales/zh_CN/LC_MESSAGES/howto/remote_debugging.mo
+writing output... [ 90%] locales/zh_CN/LC_MESSAGES/c-api/lifecycle.mo
+writing output... [ 90%] locales/zh_CN/LC_MESSAGES/library/idle.mo
+writing output... [ 91%] locales/zh_CN/LC_MESSAGES/reference/grammar.mo
+writing output... [ 91%] locales/zh_CN/LC_MESSAGES/library/hashlib.mo
+writing output... [ 91%] locales/zh_CN/LC_MESSAGES/c-api/tls.mo
+writing output... [ 91%] locales/zh_CN/LC_MESSAGES/reference/toplevel_components.mo
+writing output... [ 91%] locales/zh_CN/LC_MESSAGES/c-api/contextvars.mo
+writing output... [ 92%] locales/zh_CN/LC_MESSAGES/library/crypt.mo
+writing output... [ 92%] locales/zh_CN/LC_MESSAGES/howto/timerfd.mo
+writing output... [ 92%] locales/zh_CN/LC_MESSAGES/c-api/typeobj.mo
+writing output... [ 92%] locales/zh_CN/LC_MESSAGES/howto/functional.mo
+writing output... [ 92%] locales/zh_CN/LC_MESSAGES/using/configure.mo
+writing output... [ 92%] locales/zh_CN/LC_MESSAGES/c-api/time.mo
+writing output... [ 93%] locales/zh_CN/LC_MESSAGES/library/unittest.mock-examples.mo
+writing output... [ 93%] locales/zh_CN/LC_MESSAGES/howto/logging-cookbook.mo
+writing output... [ 93%] locales/zh_CN/LC_MESSAGES/using/ios.mo
+writing output... [ 93%] locales/zh_CN/LC_MESSAGES/c-api/object.mo
+writing output... [ 93%] locales/zh_CN/LC_MESSAGES/howto/enum.mo
+writing output... [ 94%] locales/zh_CN/LC_MESSAGES/library/datatypes.mo
+writing output... [ 94%] locales/zh_CN/LC_MESSAGES/howto/gdb_helpers.mo
+writing output... [ 94%] locales/zh_CN/LC_MESSAGES/library/tarfile.mo
+writing output... [ 94%] locales/zh_CN/LC_MESSAGES/using/android.mo
+writing output... [ 94%] locales/zh_CN/LC_MESSAGES/library/ipc.mo
+writing output... [ 94%] locales/zh_CN/LC_MESSAGES/howto/annotations.mo
+writing output... [ 95%] locales/zh_CN/LC_MESSAGES/using/unix.mo
+writing output... [ 95%] locales/zh_CN/LC_MESSAGES/howto/free-threading-python.mo
+writing output... [ 95%] locales/zh_CN/LC_MESSAGES/c-api/refcounting.mo
+writing output... [ 95%] locales/zh_CN/LC_MESSAGES/c-api/bytes.mo
+writing output... [ 95%] locales/zh_CN/LC_MESSAGES/library/email.message.mo
+writing output... [ 96%] locales/zh_CN/LC_MESSAGES/library/exceptions.mo
+writing output... [ 96%] locales/zh_CN/LC_MESSAGES/howto/descriptor.mo
+writing output... [ 96%] locales/zh_CN/LC_MESSAGES/using/mac.mo
+writing output... [ 96%] locales/zh_CN/LC_MESSAGES/library/xml.dom.pulldom.mo
+writing output... [ 96%] locales/zh_CN/LC_MESSAGES/deprecations/pending-removal-in-3.13.mo
+writing output... [ 97%] locales/zh_CN/LC_MESSAGES/c-api/mapping.mo
+writing output... [ 97%] locales/zh_CN/LC_MESSAGES/library/email.examples.mo
+writing output... [ 97%] locales/zh_CN/LC_MESSAGES/c-api/list.mo
+writing output... [ 97%] locales/zh_CN/LC_MESSAGES/deprecations/c-api-pending-removal-in-3.18.mo
+writing output... [ 97%] locales/zh_CN/LC_MESSAGES/library/xml.sax.handler.mo
+writing output... [ 97%] locales/zh_CN/LC_MESSAGES/library/xmlrpc.mo
+writing output... [ 98%] locales/zh_CN/LC_MESSAGES/using/editors.mo
+writing output... [ 98%] locales/zh_CN/LC_MESSAGES/c-api/code.mo
+writing output... [ 98%] locales/zh_CN/LC_MESSAGES/library/http.mo
+writing output... [ 98%] locales/zh_CN/LC_MESSAGES/library/xml.sax.utils.mo
+writing output... [ 98%] locales/zh_CN/LC_MESSAGES/deprecations/c-api-pending-removal-in-3.15.mo
+writing output... [ 99%] locales/zh_CN/LC_MESSAGES/library/email.utils.mo
+writing output... [ 99%] locales/zh_CN/LC_MESSAGES/c-api/datetime.mo
+writing output... [ 99%] locales/zh_CN/LC_MESSAGES/library/zipimport.mo
+writing output... [ 99%] locales/zh_CN/LC_MESSAGES/deprecations/pending-removal-in-3.16.mo
+writing output... [ 99%] locales/zh_CN/LC_MESSAGES/c-api/codec.mo
+writing output... [ 99%] locales/zh_CN/LC_MESSAGES/library/hmac.mo
+writing output... [100%] locales/zh_CN/LC_MESSAGES/deprecations/c-api-pending-removal-in-3.14.mo
+writing output... [100%] locales/zh_CN/LC_MESSAGES/library/xmlrpc.server.mo
+writing output... [100%] locales/zh_CN/LC_MESSAGES/library/reprlib.mo
+
+building [latex]: all documents
+updating environment: [new config] 539 added, 0 changed, 0 removed
+… 仍在运行（python 已用 30s，最新进度 100%）
+reading sources... [  7%] about .. c-api/frame
+reading sources... [ 13%] c-api/function .. c-api/stable
+… 仍在运行（python 已用 1m00s，最新进度 13%）
+reading sources... [ 20%] c-api/structures .. extending/index
+reading sources... [ 27%] extending/newtypes .. howto/regex
+… 仍在运行（python 已用 1m30s，最新进度 27%）
+reading sources... [ 33%] howto/remote_debugging .. library/asyncio-stream
+… 仍在运行（python 已用 2m00s，最新进度 33%）
+… 仍在运行（python 已用 2m30s，最新进度 33%）
+reading sources... [ 40%] library/asyncio-subprocess .. library/concurrent.futures
+reading sources... [ 47%] library/concurrent.interpreters .. library/email.generator
+… 仍在运行（python 已用 3m00s，最新进度 47%）
+reading sources... [ 53%] library/email.header .. library/html.entities
+… 仍在运行（python 已用 3m30s，最新进度 53%）
+reading sources... [ 60%] library/html.parser .. library/marshal
+reading sources... [ 67%] library/math .. library/pwd
+reading sources... [ 73%] library/py_compile .. library/string
+… 仍在运行（python 已用 4m00s，最新进度 73%）
+reading sources... [ 80%] library/string.templatelib .. library/traceback
+reading sources... [ 87%] library/tracemalloc .. library/xml.sax.utils
+reading sources... [ 93%] library/xmlrpc .. tutorial/venv
+… 仍在运行（python 已用 4m30s，最新进度 93%）
+reading sources... [100%] tutorial/whatnow .. whatsnew/index
+
+looking for now-outdated files... none found
+pickling environment... done
+checking consistency... /home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/howto/argparse.rst: document is referenced in multiple toctrees: ['howto/index', 'library/argparse'], selecting: library/argparse <- howto/argparse
+done
+preparing documents... done
+copying assets... 
+copying TeX support files... Writing evaluated template result to /home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/make.bat
+Writing evaluated template result to /home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/Makefile
+Writing evaluated template result to /home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/latexmkrc
+Writing evaluated template result to /home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/latexmkjarc
+done
+copying assets: done
+processing c-api.tex... 
+c-api/index
+ c-api/intro
+ c-api/stable
+ c-api/veryhigh
+ c-api/refcounting
+ c-api/exceptions
+ c-api/extension-modules
+ c-api/utilities
+  c-api/sys
+  c-api/import
+  c-api/marshal
+  c-api/arg
+  c-api/conversion
+  c-api/hash
+  c-api/reflection
+  c-api/codec
+  c-api/time
+  c-api/perfmaps
+  c-api/pyexpat
+ c-api/abstract
+  c-api/object
+  c-api/call
+  c-api/number
+  c-api/sequence
+  c-api/mapping
+  c-api/iter
+  c-api/buffer
+ c-api/concrete
+  c-api/type
+  c-api/none
+   c-api/long
+   c-api/bool
+   c-api/float
+   c-api/complex
+    c-api/bytes
+    c-api/bytearray
+    c-api/unicode
+    c-api/tuple
+    c-api/list
+     c-api/dict
+     c-api/set
+      c-api/function
+      c-api/method
+      c-api/cell
+      c-api/code
+       c-api/file
+       c-api/module
+       c-api/iterator
+       c-api/descriptor
+       c-api/slice
+       c-api/memoryview
+       c-api/picklebuffer
+       c-api/weakref
+       c-api/capsule
+       c-api/frame
+       c-api/gen
+       c-api/coro
+       c-api/contextvars
+       c-api/typehints
+        c-api/curses
+        c-api/datetime
+ c-api/interp-lifecycle
+ c-api/threads
+ c-api/synchronization
+ c-api/tls
+ c-api/subinterpreters
+ c-api/profiling
+ c-api/init_config
+ c-api/memory
+ c-api/objimpl
+  c-api/allocation
+  c-api/lifecycle
+  c-api/structures
+  c-api/typeobj
+  c-api/gcsupport
+ c-api/apiabiversion
+ c-api/monitoring
+
+resolving references...
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/venv/lib/python3.14/site-packages/cairocffi/surfaces.py:68: RemovedInSphinx90Warning: Sphinx 9 will drop support for representing paths as strings. Use "pathlib.Path" or "os.fspath" instead.
+  filename = filename.encode(sys.getfilesystemencoding())
+processing c-api.tex: done
+writing... /home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/c-api/buffer.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/c-api/buffer.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/c-api/buffer.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/c-api/bytes.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/c-api/unicode.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/c-api/unicode.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+done
+processing extending.tex... 
+extending/index
+ extending/extending
+ extending/newtypes_tutorial
+ extending/newtypes
+ extending/building
+ extending/windows
+  extending/embedding
+
+resolving references...
+processing extending.tex: done
+writing... done
+processing installing.tex... 
+installing/index
+
+resolving references...
+processing installing.tex: done
+writing... done
+processing builtins.tex... 
+builtins/index
+ builtins/stdtypes
+ builtins/constants
+ builtins/functions
+ builtins/exceptions
+ builtins/threadsafety
+ builtins/time-complexity
+
+resolving references...
+processing builtins.tex: done
+writing... done
+processing library.tex... 
+library/index
+ library/intro
+ library/text
+  library/string
+  library/string.templatelib
+  library/re
+  library/difflib
+  library/textwrap
+  library/unicodedata
+  library/stringprep
+  library/readline
+  library/rlcompleter
+ library/binary
+  library/struct
+  library/codecs
+ library/datatypes
+  library/datetime
+  library/zoneinfo
+  library/calendar
+  library/collections
+  library/collections.abc
+  library/heapq
+  library/bisect
+  library/array
+  library/weakref
+  library/types
+  library/copy
+  library/pprint
+  library/reprlib
+  library/enum
+  library/graphlib
+ library/numeric
+  library/numbers
+  library/math
+  library/cmath
+  library/decimal
+  library/fractions
+  library/random
+  library/statistics
+ library/functional
+  library/itertools
+  library/functools
+  library/operator
+ library/filesys
+  library/pathlib
+  library/os.path
+  library/stat
+  library/filecmp
+  library/tempfile
+  library/glob
+  library/fnmatch
+  library/linecache
+  library/shutil
+ library/persistence
+  library/pickle
+  library/copyreg
+  library/shelve
+  library/marshal
+  library/dbm
+  library/sqlite3
+ library/archiving
+  library/compression
+  library/compression.zstd
+  library/zlib
+  library/gzip
+  library/bz2
+  library/lzma
+  library/zipfile
+  library/tarfile
+ library/fileformats
+  library/csv
+  library/configparser
+  library/tomllib
+  library/netrc
+  library/plistlib
+ library/crypto
+  library/hashlib
+  library/hmac
+  library/secrets
+ library/allos
+  library/os
+  library/io
+  library/time
+  library/logging
+  library/logging.config
+  library/logging.handlers
+  library/platform
+  library/errno
+  library/ctypes
+ library/cmdlinelibs
+  library/argparse
+   howto/argparse
+   howto/argparse-optparse
+  library/optparse
+  library/getpass
+  library/fileinput
+  library/curses
+  library/curses.ascii
+  library/curses.panel
+  library/cmd
+ library/concurrency
+  library/threading
+  library/multiprocessing
+  library/multiprocessing.shared_memory
+  library/concurrent
+  library/concurrent.futures
+  library/concurrent.interpreters
+  library/subprocess
+  library/sched
+  library/queue
+  library/contextvars
+   library/_thread
+ library/ipc
+  library/asyncio
+   library/asyncio-runner
+   library/asyncio-task
+   library/asyncio-stream
+   library/asyncio-sync
+   library/asyncio-subprocess
+   library/asyncio-queue
+   library/asyncio-exceptions
+    library/asyncio-graph
+    library/asyncio-tools
+     library/asyncio-eventloop
+     library/asyncio-future
+     library/asyncio-protocol
+     library/asyncio-policy
+     library/asyncio-platforms
+     library/asyncio-extending
+      library/asyncio-api-index
+      library/asyncio-llapi-index
+      library/asyncio-dev
+      library/asyncio-threading
+  library/socket
+  library/ssl
+  library/select
+  library/selectors
+  library/signal
+  library/mmap
+ library/netdata
+  library/email
+   library/email.message
+   library/email.parser
+   library/email.generator
+   library/email.policy
+   library/email.errors
+   library/email.headerregistry
+   library/email.contentmanager
+   library/email.examples
+    library/email.compat32-message
+    library/email.mime
+    library/email.header
+    library/email.charset
+    library/email.encoders
+    library/email.utils
+    library/email.iterators
+  library/json
+  library/mailbox
+  library/mimetypes
+  library/base64
+  library/binascii
+  library/quopri
+ library/markup
+  library/html
+  library/html.parser
+  library/html.entities
+  library/xml
+  library/xml.etree.elementtree
+  library/xml.dom
+  library/xml.dom.minidom
+  library/xml.dom.pulldom
+  library/xml.sax
+  library/xml.sax.handler
+  library/xml.sax.utils
+  library/xml.sax.reader
+  library/pyexpat
+ library/internet
+  library/webbrowser
+  library/wsgiref
+  library/urllib
+  library/urllib.request
+… 仍在运行（python 已用 5m00s，最新进度 100%）
+  library/urllib.parse
+  library/urllib.error
+  library/urllib.robotparser
+  library/http
+  library/http.client
+  library/ftplib
+  library/poplib
+  library/imaplib
+  library/smtplib
+  library/uuid
+  library/socketserver
+  library/http.server
+  library/http.cookies
+  library/http.cookiejar
+  library/xmlrpc
+  library/xmlrpc.client
+  library/xmlrpc.server
+  library/ipaddress
+ library/mm
+  library/wave
+  library/colorsys
+ library/i18n
+  library/gettext
+  library/locale
+ library/tk
+  library/tkinter
+  library/tkinter.colorchooser
+  library/tkinter.font
+  library/dialog
+  library/tkinter.messagebox
+  library/tkinter.scrolledtext
+  library/tkinter.dnd
+  library/tkinter.ttk
+  library/idle
+  library/turtle
+ library/development
+  library/typing
+  library/pydoc
+  library/devmode
+  library/doctest
+  library/unittest
+  library/unittest.mock
+  library/unittest.mock-examples
+  library/test
+ library/debug
+  library/audit_events
+  library/bdb
+  library/faulthandler
+  library/pdb
+  library/profile
+  library/timeit
+  library/trace
+  library/tracemalloc
+ library/distribution
+  library/ensurepip
+  library/venv
+  library/zipapp
+ library/python
+  library/sys
+  library/sys.monitoring
+  library/sysconfig
+  library/builtins
+  library/__main__
+  library/warnings
+  library/dataclasses
+  library/contextlib
+  library/abc
+  library/atexit
+  library/traceback
+  library/__future__
+  library/gc
+  library/inspect
+  library/annotationlib
+  library/site
+ library/custominterp
+  library/code
+  library/codeop
+ library/modules
+  library/zipimport
+  library/pkgutil
+  library/modulefinder
+  library/runpy
+  library/importlib
+  library/importlib.resources
+  library/importlib.resources.abc
+  library/importlib.metadata
+  library/sys_path_init
+ library/language
+  library/ast
+  library/symtable
+  library/token
+  library/keyword
+  library/tokenize
+  library/tabnanny
+  library/pyclbr
+  library/py_compile
+  library/compileall
+  library/dis
+  library/pickletools
+ library/windows
+  library/msvcrt
+  library/winreg
+  library/winsound
+ library/unix
+  library/shlex
+  library/posix
+  library/pwd
+  library/grp
+  library/termios
+  library/tty
+  library/pty
+  library/fcntl
+  library/resource
+  library/syslog
+ library/cmdline
+ library/superseded
+  library/getopt
+ library/removed
+  library/aifc
+  library/asynchat
+  library/asyncore
+  library/audioop
+  library/cgi
+  library/cgitb
+  library/chunk
+  library/crypt
+  library/distutils
+  library/imghdr
+  library/imp
+  library/mailcap
+  library/msilib
+  library/nis
+  library/nntplib
+  library/ossaudiodev
+  library/pipes
+  library/smtpd
+  library/sndhdr
+  library/spwd
+  library/sunau
+  library/telnetlib
+  library/uu
+  library/xdrlib
+ library/security_warnings
+
+resolving references...
+processing library.tex: done
+writing... /home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/library/codecs.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/library/codecs.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/library/codecs.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/library/codecs.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/library/codecs.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/library/collections.abc.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/library/io.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/library/logging.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/library/email.policy.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/library/xml.etree.elementtree.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/library/xmlrpc.client.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/library/locale.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/library/tkinter.ttk.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/library/tkinter.ttk.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/library/tkinter.ttk.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/library/tkinter.ttk.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/library/tkinter.ttk.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/library/tkinter.ttk.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/library/tkinter.ttk.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/library/tkinter.ttk.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/library/tkinter.ttk.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/library/tkinter.ttk.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/library/tkinter.ttk.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/library/tkinter.ttk.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/library/tkinter.ttk.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/library/tkinter.ttk.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/library/tkinter.ttk.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/library/turtle.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/library/warnings.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/library/inspect.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+done
+processing reference.tex... 
+reference/index
+ reference/introduction
+ reference/lexical_analysis
+ reference/datamodel
+ reference/executionmodel
+ reference/import
+ reference/expressions
+ reference/simple_stmts
+ reference/compound_stmts
+ reference/toplevel_components
+ reference/grammar
+
+resolving references...
+processing reference.tex: done
+writing... done
+processing tutorial.tex... 
+tutorial/index
+ tutorial/appetite
+ tutorial/interpreter
+ tutorial/introduction
+ tutorial/controlflow
+ tutorial/datastructures
+ tutorial/modules
+ tutorial/inputoutput
+ tutorial/errors
+ tutorial/classes
+ tutorial/stdlib
+ tutorial/stdlib2
+ tutorial/venv
+ tutorial/whatnow
+ tutorial/interactive
+ tutorial/floatingpoint
+ tutorial/appendix
+
+resolving references...
+processing tutorial.tex: done
+writing... done
+processing using.tex... 
+using/index
+ using/cmdline
+ using/unix
+ using/configure
+ using/windows
+ using/mac
+ using/android
+ using/ios
+ using/editors
+
+resolving references...
+processing using.tex: done
+writing... done
+processing faq.tex... 
+faq/index
+ faq/general
+ faq/programming
+ faq/design
+ faq/library
+ faq/extending
+ faq/windows
+ faq/gui
+ faq/installed
+
+resolving references...
+processing faq.tex: done
+writing... done
+processing whatsnew.tex... 
+whatsnew/3.14
+
+resolving references...
+processing whatsnew.tex: done
+writing... done
+processing howto-sorting.tex... 
+howto/sorting
+
+resolving references...
+processing howto-sorting.tex: done
+writing... done
+processing howto-a-conceptual-overview-of-asyncio.tex... 
+howto/a-conceptual-overview-of-asyncio
+
+resolving references...
+processing howto-a-conceptual-overview-of-asyncio.tex: done
+writing... /home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/howto/a-conceptual-overview-of-asyncio.rst:5: WARNING: document title is not a single Text node
+done
+processing howto-pyporting.tex... 
+howto/pyporting
+
+resolving references...
+processing howto-pyporting.tex: done
+writing... done
+processing howto-ipaddress.tex... 
+howto/ipaddress
+
+resolving references...
+processing howto-ipaddress.tex: done
+writing... done
+processing howto-instrumentation.tex... 
+howto/instrumentation
+
+resolving references...
+processing howto-instrumentation.tex: done
+writing... done
+processing howto-argparse.tex... 
+howto/argparse
+
+resolving references...
+processing howto-argparse.tex: done
+writing... done
+processing howto-perf_profiling.tex... 
+howto/perf_profiling
+
+resolving references...
+processing howto-perf_profiling.tex: done
+writing... done
+processing howto-annotations.tex... 
+howto/annotations
+
+resolving references...
+processing howto-annotations.tex: done
+writing... done
+processing howto-free-threading-python.tex... 
+howto/free-threading-python
+
+resolving references...
+processing howto-free-threading-python.tex: done
+writing... done
+processing howto-curses.tex... 
+howto/curses
+
+resolving references...
+processing howto-curses.tex: done
+writing... done
+processing howto-regex.tex... 
+howto/regex
+
+resolving references...
+processing howto-regex.tex: done
+writing... done
+processing howto-timerfd.tex... 
+howto/timerfd
+
+resolving references...
+processing howto-timerfd.tex: done
+writing... done
+processing howto-free-threading-extensions.tex... 
+howto/free-threading-extensions
+
+resolving references...
+processing howto-free-threading-extensions.tex: done
+writing... done
+processing howto-cporting.tex... 
+howto/cporting
+
+resolving references...
+processing howto-cporting.tex: done
+writing... done
+processing howto-remote_debugging.tex... 
+howto/remote_debugging
+
+resolving references...
+processing howto-remote_debugging.tex: done
+writing... done
+processing howto-clinic.tex... 
+howto/clinic
+
+resolving references...
+processing howto-clinic.tex: done
+writing... done
+processing howto-descriptor.tex... 
+howto/descriptor
+
+resolving references...
+processing howto-descriptor.tex: done
+writing... done
+processing howto-urllib2.tex... 
+howto/urllib2
+
+resolving references...
+processing howto-urllib2.tex: done
+writing... done
+processing howto-logging-cookbook.tex... 
+howto/logging-cookbook
+
+resolving references...
+processing howto-logging-cookbook.tex: done
+writing... done
+processing howto-argparse-optparse.tex... 
+howto/argparse-optparse
+
+resolving references...
+processing howto-argparse-optparse.tex: done
+writing... done
+processing howto-sockets.tex... 
+howto/sockets
+
+resolving references...
+processing howto-sockets.tex: done
+writing... done
+processing howto-mro.tex... 
+howto/mro
+
+resolving references...
+processing howto-mro.tex: done
+writing... done
+processing howto-functional.tex... 
+howto/functional
+
+resolving references...
+processing howto-functional.tex: done
+writing... done
+processing howto-enum.tex... 
+howto/enum
+
+resolving references...
+processing howto-enum.tex: done
+writing... done
+processing howto-isolating-extensions.tex... 
+howto/isolating-extensions
+
+resolving references...
+processing howto-isolating-extensions.tex: done
+writing... done
+processing howto-gdb_helpers.tex... 
+howto/gdb_helpers
+
+resolving references...
+processing howto-gdb_helpers.tex: done
+writing... done
+processing howto-unicode.tex... 
+howto/unicode
+
+resolving references...
+processing howto-unicode.tex: done
+writing... done
+processing howto-logging.tex... 
+howto/logging
+
+resolving references...
+processing howto-logging.tex: done
+writing... /home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/howto/logging.rst:: both tabularcolumns and :widths: option are given. :widths: is ignored.
+done
+copying images... [  5%] c-api/lifecycle.dot.svg
+copying images... [ 10%] library/datetime-inheritance.svg
+copying images... [ 15%] library/kde_example.png
+copying images... [ 20%] library/pathlib-inheritance.png
+copying images... [ 25%] library/pathlib-parts.svg
+copying images... [ 30%] library/hashlib-blake2-tree.png
+copying images... [ 35%] library/tk_msg.png
+copying images... [ 40%] library/turtle-star.png
+copying images... [ 45%] using/win_installer.png
+copying images... [ 50%] using/win_install_freethreaded.png
+copying images... [ 55%] using/mac_installer_01_introduction.png
+copying images... [ 60%] using/mac_installer_02_readme.png
+copying images... [ 65%] using/mac_installer_03_license.png
+copying images... [ 70%] using/mac_installer_04_installation_type.png
+copying images... [ 75%] using/mac_installer_05_custom_install.png
+copying images... [ 80%] using/mac_installer_06_summary.png
+copying images... [ 85%] using/mac_installer_07_applications.png
+copying images... [ 90%] using/mac_installer_08_install_certificates.png
+copying images... [ 95%] using/mac_installer_09_custom_install_free_threaded.png
+copying images... [100%] howto/logging_flow.png
+
+Writing evaluated template result to /home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/sphinxmessages.sty
+rediraffe: Redirect generation skipped for unsupported builders. Supported builders: html, dirhtml, readthedocs, readthedocsdirhtml.
+build succeeded, 1 warning.
+
+The LaTeX files are in build/latex.
+Run 'make' in that directory to run these through (pdf)latex
+(use `make latexpdf' here to do that automatically).
+  读入 3m57s（15 篇，-j 4，约 4 篇/分） · 写出 5s
+  ↳ 退出码 0，用时 327.5s
+[ok] 生成 .tex：38 个（其中带 \documentclass 的册子 38 个）
+[ok] 残留 .svg：0 个（应为 0）
+----- 步骤 6 构建 LaTeX 源：完成（5m28s）38 个册子 .tex 已生成
+
+===== 步骤 6b 封面标题中文化 =====
+$ localize-titles .
+── 改封面标题（.）
+  whatsnew.tex
+      "What's New in Python"
+   -> 'Python 3.14 有什么新变化'
+  tutorial.tex
+      'Python Tutorial'
+   -> 'Python 教程'
+  using.tex
+      'Python Setup and Usage'
+   -> 'Python安装和使用'
+  reference.tex
+      'The Python Language Reference'
+   -> 'Python 语言参考手册'
+  library.tex
+      'The Python Library Reference'
+   -> 'Python 标准库'
+  extending.tex
+      'Extending and Embedding Python'
+   -> '扩展和嵌入 Python 解释器'
+  c-api.tex
+      'The Python/C API'
+   -> 'Python C API 参考手册'
+  installing.tex
+      'Installing Python Modules'
+   -> '安装 Python 模块'
+  faq.tex
+      'Python Frequently Asked Questions'
+   -> 'Python 常见问题'
+  builtins.tex
+      'Python Built-ins Reference'
+   -> 'Python 内置参考手册'
+待改 11 册 → 改动 10，已是中文 1，跳过 0
+⚠️ 改完只能重跑 xelatex，不要重跑 makeindex/make，否则 .ind 里的索引又会坏
+  ↳ 退出码 0，用时 0.2s
+  whatsnew               → Python 3.14 有什么新变化
+  tutorial               → Python 教程
+  using                  → Python安装和使用
+  reference              → Python 语言参考手册
+  library                → Python 标准库
+  extending              → 扩展和嵌入 Python 解释器
+  c-api                  → Python C API 参考手册
+  installing             → 安装 Python 模块
+  faq                    → Python 常见问题
+  builtins               → Python 内置参考手册
+  howto-perf_profiling   → Python 对 Linux perf 性能分析器的支持
+[warn]   注：3 册正文中文很少（howto-clinic、howto-cporting、howto-pyporting）——上游 zh-CN 尚未翻译，属正常
+----- 步骤 6b 封面标题中文化：完成（0s）封面/页眉标题已中文化（11 册）
+
+===== 步骤 7 编译 PDF =====
+$ check-doc-refs /home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc
+Doc 越界引用自检：以 ../ 开头的 103 条，其中真正走出 Doc/ 的 3 条（其余都在 Doc/ 内部，取了 Doc 就一定有）
+  走出 Doc/ 的目标（稀疏检出必须覆盖）：
+      Grammar/python.gram
+      Lib/test/exception_hierarchy.txt
+      Parser/Python.asdl
+  所有目标的文件都在 ✔
+REFMISSING 0
+      Doc 越界引用自检：以 ../ 开头的 103 条，其中真正走出 Doc/ 的 3 条（其余都在 Doc/ 内部，取了 Doc 就一定有）
+      走出 Doc/ 的目标（稀疏检出必须覆盖）：
+      Grammar/python.gram
+      Lib/test/exception_hierarchy.txt
+      Parser/Python.asdl
+      所有目标的文件都在 ✔
+[ok] Doc 越界引用自检：都齐
+待编 38 册（按体积降序：最大那册先开工，其余 slot 同时吃小册）
+索引修复脚本已就位：makeindex-fix.py（替代裸 makeindex）
+并发编译：4 册同时跑（共 38 册，CPU 4 核）；各册日志先分别落盘，结束后按册序合并进 pdf-build.log
+[07:37:46] 开始编译 library
+[07:37:46] 开始编译 c-api
+[07:37:46] 开始编译 reference
+[07:37:46] 开始编译 builtins
+[07:38:32] 开始编译 using
+      [1/38] reference 结束（退出码 0，用时 45.3s）
+[07:38:36] 开始编译 tutorial
+      [2/38] builtins 结束（退出码 0，用时 49.5s）
+[07:39:05] 开始编译 extending
+      [3/38] tutorial 结束（退出码 0，用时 29.6s）
+[07:39:05] 开始编译 faq
+      [4/38] using 结束（退出码 0，用时 33.9s）
+[07:39:27] 开始编译 howto-logging-cookbook
+      [5/38] faq 结束（退出码 0，用时 21.7s）
+[07:39:29] 开始编译 whatsnew
+      [6/38] extending 结束（退出码 0，用时 23.2s）
+[07:39:42] 开始编译 installing
+      [7/38] howto-logging-cookbook 结束（退出码 0，用时 15.0s）
+[07:39:53] 开始编译 howto-descriptor
+      [8/38] installing 结束（退出码 0，用时 10.7s）
+[07:39:53] 开始编译 howto-regex
+      [9/38] whatsnew 结束（退出码 0，用时 24.7s）
+[07:40:00] 开始编译 howto-enum
+      [10/38] howto-descriptor 结束（退出码 0，用时 7.7s）
+[07:40:01] 开始编译 howto-functional
+      [11/38] howto-regex 结束（退出码 0，用时 7.7s）
+[07:40:09] 开始编译 howto-logging
+      [12/38] howto-functional 结束（退出码 0，用时 7.6s）
+[07:40:09] 开始编译 howto-argparse
+      [13/38] howto-enum 结束（退出码 0，用时 8.7s）
+[07:40:15] 开始编译 howto-unicode
+      [14/38] howto-logging 结束（退出码 0，用时 6.8s）
+[07:40:15] 开始编译 howto-remote_debugging
+      [15/38] howto-argparse 结束（退出码 0，用时 6.3s）
+[07:40:18] 开始编译 howto-mro
+      [16/38] c-api 结束（退出码 0，用时 151.7s）
+[07:40:21] 开始编译 howto-urllib2
+      [17/38] howto-unicode 结束（退出码 0，用时 5.4s）
+[07:40:23] 开始编译 howto-isolating-extensions
+      [18/38] howto-remote_debugging 结束（退出码 0，用时 7.6s）
+[07:40:23] 开始编译 howto-instrumentation
+      [19/38] howto-mro 结束（退出码 0，用时 5.3s）
+[07:40:26] 开始编译 howto-a-conceptual-overview-of-asyncio
+      [20/38] howto-urllib2 结束（退出码 0，用时 5.5s）
+[07:40:29] 开始编译 howto-gdb_helpers
+      [21/38] howto-isolating-extensions 结束（退出码 0，用时 5.5s）
+[07:40:29] 开始编译 howto-curses
+      [22/38] howto-instrumentation 结束（退出码 0，用时 5.8s）
+[07:40:32] 开始编译 howto-sorting
+      [23/38] howto-a-conceptual-overview-of-asyncio 结束（退出码 0，用时 5.4s）
+[07:40:34] 开始编译 howto-sockets
+      [24/38] howto-gdb_helpers 结束（退出码 0，用时 5.4s）
+[07:40:34] 开始编译 howto-free-threading-extensions
+      [25/38] howto-curses 结束（退出码 0，用时 5.2s）
+[07:40:37] 开始编译 howto-perf_profiling
+      [26/38] howto-sorting 结束（退出码 0，用时 5.1s）
+[07:40:39] 开始编译 howto-ipaddress
+      [27/38] howto-sockets 结束（退出码 0，用时 4.7s）
+[07:40:39] 开始编译 howto-timerfd
+      [28/38] howto-free-threading-extensions 结束（退出码 0，用时 5.0s）
+[07:40:42] 开始编译 howto-annotations
+      [29/38] howto-perf_profiling 结束（退出码 0，用时 4.9s）
+[07:40:42] 开始编译 howto-free-threading-python
+      [30/38] howto-timerfd 结束（退出码 0，用时 3.0s）
+[07:40:44] 开始编译 howto-argparse-optparse
+      [31/38] howto-ipaddress 结束（退出码 0，用时 4.8s）
+[07:40:46] 开始编译 howto-pyporting
+      [32/38] howto-argparse-optparse 结束（退出码 0，用时 2.8s）
+[07:40:47] 开始编译 howto-cporting
+      [33/38] howto-annotations 结束（退出码 0，用时 4.9s）
+[07:40:47] 开始编译 howto-clinic
+      [34/38] howto-free-threading-python 结束（退出码 0，用时 4.5s）
+      [35/38] howto-cporting 结束（退出码 0，用时 2.6s）
+      [36/38] howto-clinic 结束（退出码 0，用时 2.6s）
+      [37/38] howto-pyporting 结束（退出码 0，用时 3.6s）
+      [38/38] library 结束（退出码 0，用时 486.8s）
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/library.pdf'
+Title:           Python 标准库
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:45:52 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           2360
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       12726748 bytes
+Optimized:       no
+PDF version:     1.5
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/c-api.pdf'
+Title:           Python C API 参考手册
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:40:18 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           491
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       3231684 bytes
+Optimized:       no
+PDF version:     1.5
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/reference.pdf'
+Title:           Python 语言参考手册
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:38:31 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           226
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       1995654 bytes
+Optimized:       no
+PDF version:     1.5
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/builtins.pdf'
+Title:           Python 内置参考手册
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:38:36 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           190
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       1772133 bytes
+Optimized:       no
+PDF version:     1.5
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/using.pdf'
+Title:           Python安装和使用
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:39:05 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           154
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       3173460 bytes
+Optimized:       no
+PDF version:     1.5
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/tutorial.pdf'
+Title:           Python 教程
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:39:05 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           158
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       1611044 bytes
+Optimized:       no
+PDF version:     1.5
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/extending.pdf'
+Title:           扩展和嵌入 Python 解释器
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:39:28 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           111
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       1318334 bytes
+Optimized:       no
+PDF version:     1.5
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/faq.pdf'
+Title:           Python 常见问题
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:39:27 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           119
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       1508932 bytes
+Optimized:       no
+PDF version:     1.5
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/howto-logging-cookbook.pdf'
+Title:           日志专题手册
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:39:42 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           63
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       861873 bytes
+Optimized:       no
+PDF version:     1.5
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/whatsnew.pdf'
+Title:           Python 3.14 有什么新变化
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:39:53 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           50
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       719923 bytes
+Optimized:       no
+PDF version:     1.5
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/installing.pdf'
+Title:           安装 Python 模块
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:39:53 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           59
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       912578 bytes
+Optimized:       no
+PDF version:     1.5
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/howto-descriptor.pdf'
+Title:           描述器指南
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:40:00 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           19
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       430658 bytes
+Optimized:       no
+PDF version:     1.5
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/howto-regex.pdf'
+Title:           正则表达式指南
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:40:01 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           17
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       417625 bytes
+Optimized:       no
+PDF version:     1.5
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/howto-enum.pdf'
+Title:           Enum 指南
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:40:09 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           23
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       392486 bytes
+Optimized:       no
+PDF version:     1.5
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/howto-functional.pdf'
+Title:           函数式编程指引
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:40:08 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           18
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       430366 bytes
+Optimized:       no
+PDF version:     1.5
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/howto-logging.pdf'
+Title:           日志指南
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:40:15 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           15
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       484498 bytes
+Optimized:       no
+PDF version:     1.5
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/howto-argparse.pdf'
+Title:           argparse 教程
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:40:15 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           13
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       277876 bytes
+Optimized:       no
+PDF version:     1.5
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/howto-unicode.pdf'
+Title:           Unicode 指南
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:40:21 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           11
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       364303 bytes
+Optimized:       no
+PDF version:     1.5
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/howto-remote_debugging.pdf'
+Title:           远程调试附加协议
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:40:23 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           12
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       406031 bytes
+Optimized:       no
+PDF version:     1.5
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/howto-mro.pdf'
+Title:           Python 2.3 方法解析顺序
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:40:23 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           10
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       371134 bytes
+Optimized:       no
+PDF version:     1.5
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/howto-urllib2.pdf'
+Title:           如何利用 urllib 包获取网络资源
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:40:26 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           9
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       315053 bytes
+Optimized:       no
+PDF version:     1.5
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/howto-isolating-extensions.pdf'
+Title:           隔离扩展模块
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:40:28 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           9
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       354136 bytes
+Optimized:       no
+PDF version:     1.5
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/howto-instrumentation.pdf'
+Title:           使用 DTrace 和 SystemTap 检测 CPython
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:40:29 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           10
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       197600 bytes
+Optimized:       no
+PDF version:     1.5
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/howto-a-conceptual-overview-of-asyncio.pdf'
+Title:           asyncio 的概念概述
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:40:32 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           8
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       344732 bytes
+Optimized:       no
+PDF version:     1.5
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/howto-gdb_helpers.pdf'
+Title:           使用 GDB 调试 C API 扩展和 CPython 内部代码
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:40:34 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           9
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       206606 bytes
+Optimized:       no
+PDF version:     1.5
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/howto-curses.pdf'
+Title:           用 Python 进行 Curses 编程
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:40:34 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           7
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       341652 bytes
+Optimized:       no
+PDF version:     1.5
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/howto-sorting.pdf'
+Title:           排序的技术
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:40:37 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           7
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       235991 bytes
+Optimized:       no
+PDF version:     1.5
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/howto-sockets.pdf'
+Title:           套接字编程指南
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:40:39 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           5
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       337110 bytes
+Optimized:       no
+PDF version:     1.5
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/howto-free-threading-extensions.pdf'
+Title:           自由线程的 C API 扩展支持
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:40:39 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           6
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       264651 bytes
+Optimized:       no
+PDF version:     1.5
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/howto-perf_profiling.pdf'
+Title:           Python 对 Linux perf 性能分析器的支持
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:40:42 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           6
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       179465 bytes
+Optimized:       no
+PDF version:     1.5
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/howto-ipaddress.pdf'
+Title:           ipaddress 模块介绍
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:40:43 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           6
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       205945 bytes
+Optimized:       no
+PDF version:     1.5
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/howto-timerfd.pdf'
+Title:           定时器文件描述符指南
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:40:42 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           4
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       144329 bytes
+Optimized:       no
+PDF version:     1.5
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/howto-annotations.pdf'
+Title:           注解最佳实践
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:40:47 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           5
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       182420 bytes
+Optimized:       no
+PDF version:     1.5
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/howto-free-threading-python.pdf'
+Title:           Python 对自由线程的支持
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:40:47 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           5
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       241724 bytes
+Optimized:       no
+PDF version:     1.5
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/howto-argparse-optparse.pdf'
+Title:           将 optparse 代码迁移至 argparse
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:40:46 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           2
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       94261 bytes
+Optimized:       no
+PDF version:     1.5
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/howto-pyporting.pdf'
+Title:           如何将 Python 2 代码移植到 Python 3
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:40:50 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           2
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       65117 bytes
+Optimized:       no
+PDF version:     1.5
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/howto-cporting.pdf'
+Title:           将扩展模块移植到 Python 3
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:40:49 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           1
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       50834 bytes
+Optimized:       no
+PDF version:     1.5
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/howto-clinic.pdf'
+Title:           Argument Clinic 的用法
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:40:49 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           1
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       18336 bytes
+Optimized:       no
+PDF version:     1.5
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/library.pdf'
+Title:           Python 标准库
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:45:52 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           2360
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       12726748 bytes
+Optimized:       no
+PDF version:     1.5
+[ok]       OK   library  2360 页（latexmk 退出码 0，用时 486.8s）
+[ok]       索引：13146 个页码链接　非字母标题 有　断点 19056　最长条目 193 字符　非法字节 0
+[warn]       注意：1 处汉字没有字形可用（內）→ 字体链里没有 CJK 字体
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/c-api.pdf'
+Title:           Python C API 参考手册
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:40:18 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           491
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       3231684 bytes
+Optimized:       no
+PDF version:     1.5
+[ok]       OK   c-api  491 页（latexmk 退出码 0，用时 151.7s）
+[ok]       索引：3045 个页码链接　非字母标题 有　断点 7630　最长条目 99 字符　非法字节 0
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/reference.pdf'
+Title:           Python 语言参考手册
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:38:31 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           226
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       1995654 bytes
+Optimized:       no
+PDF version:     1.5
+[ok]       OK   reference  226 页（latexmk 退出码 0，用时 45.3s）
+[ok]       索引：1724 个页码链接　非字母标题 有　断点 907　最长条目 99 字符　非法字节 0
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/builtins.pdf'
+Title:           Python 内置参考手册
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:38:36 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           190
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       1772133 bytes
+Optimized:       no
+PDF version:     1.5
+[ok]       OK   builtins  190 页（latexmk 退出码 0，用时 49.5s）
+[ok]       索引：1091 个页码链接　非字母标题 有　断点 426　最长条目 99 字符　非法字节 0
+[warn]       注意：1 处汉字没有字形可用（佉）→ 字体链里没有 CJK 字体
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/using.pdf'
+Title:           Python安装和使用
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:39:05 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           154
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       3173460 bytes
+Optimized:       no
+PDF version:     1.5
+[ok]       OK   using  154 页（latexmk 退出码 0，用时 33.9s）
+[ok]       索引：755 个页码链接　非字母标题 有　断点 421　最长条目 107 字符　非法字节 0
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/tutorial.pdf'
+Title:           Python 教程
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:39:05 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           158
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       1611044 bytes
+Optimized:       no
+PDF version:     1.5
+[ok]       OK   tutorial  158 页（latexmk 退出码 0，用时 29.6s）
+[ok]       索引：280 个页码链接　非字母标题 有　断点 38　最长条目 99 字符　非法字节 0
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/extending.pdf'
+Title:           扩展和嵌入 Python 解释器
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:39:28 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           111
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       1318334 bytes
+Optimized:       no
+PDF version:     1.5
+[ok]       OK   extending  111 页（latexmk 退出码 0，用时 23.2s）
+[ok]       索引：234 个页码链接　非字母标题 有　断点 36　最长条目 99 字符　非法字节 0
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/faq.pdf'
+Title:           Python 常见问题
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:39:27 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           119
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       1508932 bytes
+Optimized:       no
+PDF version:     1.5
+[ok]       OK   faq  119 页（latexmk 退出码 0，用时 21.7s）
+[ok]       索引：236 个页码链接　非字母标题 有　断点 18　最长条目 99 字符　非法字节 0
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/howto-logging-cookbook.pdf'
+Title:           日志专题手册
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:39:42 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           63
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       861873 bytes
+Optimized:       no
+PDF version:     1.5
+[ok]       OK   howto-logging-cookbook  63 页（latexmk 退出码 0，用时 15.0s）
+[warn]       索引：4 个页码链接　非字母标题 无　断点 0　最长条目 5 字符　非法字节 0
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/whatsnew.pdf'
+Title:           Python 3.14 有什么新变化
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:39:53 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           50
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       719923 bytes
+Optimized:       no
+PDF version:     1.5
+[ok]       OK   whatsnew  50 页（latexmk 退出码 0，用时 24.7s）
+[warn]       索引：88 个页码链接　非字母标题 无　断点 25　最长条目 54 字符　非法字节 0
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/installing.pdf'
+Title:           安装 Python 模块
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:39:53 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           59
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       912578 bytes
+Optimized:       no
+PDF version:     1.5
+[ok]       OK   installing  59 页（latexmk 退出码 0，用时 10.7s）
+[ok]       索引：217 个页码链接　非字母标题 有　断点 18　最长条目 99 字符　非法字节 0
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/howto-descriptor.pdf'
+Title:           描述器指南
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:40:00 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           19
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       430658 bytes
+Optimized:       no
+PDF version:     1.5
+[ok]       OK   howto-descriptor  19 页（latexmk 退出码 0，用时 7.7s）
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/howto-regex.pdf'
+Title:           正则表达式指南
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:40:01 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           17
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       417625 bytes
+Optimized:       no
+PDF version:     1.5
+[ok]       OK   howto-regex  17 页（latexmk 退出码 0，用时 7.7s）
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/howto-enum.pdf'
+Title:           Enum 指南
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:40:09 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           23
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       392486 bytes
+Optimized:       no
+PDF version:     1.5
+[ok]       OK   howto-enum  23 页（latexmk 退出码 0，用时 8.7s）
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/howto-functional.pdf'
+Title:           函数式编程指引
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:40:08 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           18
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       430366 bytes
+Optimized:       no
+PDF version:     1.5
+[ok]       OK   howto-functional  18 页（latexmk 退出码 0，用时 7.6s）
+[warn]       索引：3 个页码链接　非字母标题 无　断点 0　最长条目 23 字符　非法字节 0
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/howto-logging.pdf'
+Title:           日志指南
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:40:15 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           15
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       484498 bytes
+Optimized:       no
+PDF version:     1.5
+[ok]       OK   howto-logging  15 页（latexmk 退出码 0，用时 6.8s）
+[ok]       索引：2 个页码链接　非字母标题 有　断点 4　最长条目 49 字符　非法字节 0
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/howto-argparse.pdf'
+Title:           argparse 教程
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:40:15 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           13
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       277876 bytes
+Optimized:       no
+PDF version:     1.5
+[ok]       OK   howto-argparse  13 页（latexmk 退出码 0，用时 6.3s）
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/howto-unicode.pdf'
+Title:           Unicode 指南
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:40:21 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           11
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       364303 bytes
+Optimized:       no
+PDF version:     1.5
+[ok]       OK   howto-unicode  11 页（latexmk 退出码 0，用时 5.4s）
+[warn]       索引：1 个页码链接　非字母标题 无　断点 0　最长条目 23 字符　非法字节 0
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/howto-remote_debugging.pdf'
+Title:           远程调试附加协议
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:40:23 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           12
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       406031 bytes
+Optimized:       no
+PDF version:     1.5
+[ok]       OK   howto-remote_debugging  12 页（latexmk 退出码 0，用时 7.6s）
+[warn]       索引：4 个页码链接　非字母标题 无　断点 6　最长条目 34 字符　非法字节 0
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/howto-mro.pdf'
+Title:           Python 2.3 方法解析顺序
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:40:23 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           10
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       371134 bytes
+Optimized:       no
+PDF version:     1.5
+[ok]       OK   howto-mro  10 页（latexmk 退出码 0，用时 5.3s）
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/howto-urllib2.pdf'
+Title:           如何利用 urllib 包获取网络资源
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:40:26 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           9
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       315053 bytes
+Optimized:       no
+PDF version:     1.5
+[ok]       OK   howto-urllib2  9 页（latexmk 退出码 0，用时 5.5s）
+[warn]       索引：2 个页码链接　非字母标题 无　断点 0　最长条目 5 字符　非法字节 0
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/howto-isolating-extensions.pdf'
+Title:           隔离扩展模块
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:40:28 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           9
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       354136 bytes
+Optimized:       no
+PDF version:     1.5
+[ok]       OK   howto-isolating-extensions  9 页（latexmk 退出码 0，用时 5.5s）
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/howto-instrumentation.pdf'
+Title:           使用 DTrace 和 SystemTap 检测 CPython
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:40:29 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           10
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       197600 bytes
+Optimized:       no
+PDF version:     1.5
+[ok]       OK   howto-instrumentation  10 页（latexmk 退出码 0，用时 5.8s）
+[warn]       索引：24 个页码链接　非字母标题 无　断点 120　最长条目 60 字符　非法字节 0
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/howto-a-conceptual-overview-of-asyncio.pdf'
+Title:           asyncio 的概念概述
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:40:32 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           8
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       344732 bytes
+Optimized:       no
+PDF version:     1.5
+[ok]       OK   howto-a-conceptual-overview-of-asyncio  8 页（latexmk 退出码 0，用时 5.4s）
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/howto-gdb_helpers.pdf'
+Title:           使用 GDB 调试 C API 扩展和 CPython 内部代码
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:40:34 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           9
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       206606 bytes
+Optimized:       no
+PDF version:     1.5
+[ok]       OK   howto-gdb_helpers  9 页（latexmk 退出码 0，用时 5.4s）
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/howto-curses.pdf'
+Title:           用 Python 进行 Curses 编程
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:40:34 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           7
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       341652 bytes
+Optimized:       no
+PDF version:     1.5
+[ok]       OK   howto-curses  7 页（latexmk 退出码 0，用时 5.2s）
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/howto-sorting.pdf'
+Title:           排序的技术
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:40:37 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           7
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       235991 bytes
+Optimized:       no
+PDF version:     1.5
+[ok]       OK   howto-sorting  7 页（latexmk 退出码 0，用时 5.1s）
+[warn]       索引：1 个页码链接　非字母标题 无　断点 0　最长条目 21 字符　非法字节 0
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/howto-sockets.pdf'
+Title:           套接字编程指南
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:40:39 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           5
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       337110 bytes
+Optimized:       no
+PDF version:     1.5
+[ok]       OK   howto-sockets  5 页（latexmk 退出码 0，用时 4.7s）
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/howto-free-threading-extensions.pdf'
+Title:           自由线程的 C API 扩展支持
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:40:39 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           6
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       264651 bytes
+Optimized:       no
+PDF version:     1.5
+[ok]       OK   howto-free-threading-extensions  6 页（latexmk 退出码 0，用时 5.0s）
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/howto-perf_profiling.pdf'
+Title:           Python 对 Linux perf 性能分析器的支持
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:40:42 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           6
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       179465 bytes
+Optimized:       no
+PDF version:     1.5
+[ok]       OK   howto-perf_profiling  6 页（latexmk 退出码 0，用时 4.9s）
+[warn]       索引：4 个页码链接　非字母标题 无　断点 6　最长条目 30 字符　非法字节 0
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/howto-ipaddress.pdf'
+Title:           ipaddress 模块介绍
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:40:43 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           6
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       205945 bytes
+Optimized:       no
+PDF version:     1.5
+[ok]       OK   howto-ipaddress  6 页（latexmk 退出码 0，用时 4.8s）
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/howto-timerfd.pdf'
+Title:           定时器文件描述符指南
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:40:42 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           4
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       144329 bytes
+Optimized:       no
+PDF version:     1.5
+[ok]       OK   howto-timerfd  4 页（latexmk 退出码 0，用时 3.0s）
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/howto-annotations.pdf'
+Title:           注解最佳实践
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:40:47 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           5
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       182420 bytes
+Optimized:       no
+PDF version:     1.5
+[ok]       OK   howto-annotations  5 页（latexmk 退出码 0，用时 4.9s）
+[warn]       索引：4 个页码链接　非字母标题 无　断点 1　最长条目 57 字符　非法字节 0
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/howto-free-threading-python.pdf'
+Title:           Python 对自由线程的支持
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:40:47 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           5
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       241724 bytes
+Optimized:       no
+PDF version:     1.5
+[ok]       OK   howto-free-threading-python  5 页（latexmk 退出码 0，用时 4.5s）
+[warn]       索引：4 个页码链接　非字母标题 无　断点 2　最长条目 23 字符　非法字节 0
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/howto-argparse-optparse.pdf'
+Title:           将 optparse 代码迁移至 argparse
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:40:46 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           2
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       94261 bytes
+Optimized:       no
+PDF version:     1.5
+[ok]       OK   howto-argparse-optparse  2 页（latexmk 退出码 0，用时 2.8s）
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/howto-pyporting.pdf'
+Title:           如何将 Python 2 代码移植到 Python 3
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:40:50 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           2
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       65117 bytes
+Optimized:       no
+PDF version:     1.5
+[ok]       OK   howto-pyporting  2 页（latexmk 退出码 0，用时 3.6s）
+[warn]       索引：1 个页码链接　非字母标题 无　断点 0　最长条目 23 字符　非法字节 0
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/howto-cporting.pdf'
+Title:           将扩展模块移植到 Python 3
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:40:49 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           1
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       50834 bytes
+Optimized:       no
+PDF version:     1.5
+[ok]       OK   howto-cporting  1 页（latexmk 退出码 0，用时 2.6s）
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex/howto-clinic.pdf'
+Title:           Argument Clinic 的用法
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:40:49 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           1
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       18336 bytes
+Optimized:       no
+PDF version:     1.5
+[ok]       OK   howto-clinic  1 页（latexmk 退出码 0，用时 2.6s）
+tex=38  pdf=38  ind=38　总用时 8m07s
+[warn] ★ 2/38 册的编译日志里有汉字缺字形（builtins、library）
+[warn]   少数册子属正常：上游正文里夹的生僻符号/古字，FreeFont 没有字形（如 howto-unicode 的 ♞♟）。
+----- 步骤 7 编译 PDF：完成（8m07s）38 册全部编译成功，22 册带索引（分组标题 + 页码超链接 + 长条目断点，共 38 个 .ind）
+
+===== 步骤 7b 索引自检 =====
+$ fix-index . --check
+OK：38 个 .ind 都齐了（分组标题 + 页码超链接）
+[ok] 索引自检通过：38 个 .ind，页码链接 20870 个，非字母标题 10 处，断点 28714 个，非法字节 0
+$ fix-index . --check
+OK：38 个 .ind 都齐了（分组标题 + 页码超链接）
+$ fix-index .
+文件                                              删坏标题    非字母    数字     页码链接      断点     残留非法
+-------------------------------------------------------------------------------------------
+builtins.ind                                       0      0     0        0       0        0
+c-api.ind                                          0      0     0        0       0        0
+extending.ind                                      0      0     0        0       0        0
+faq.ind                                            0      0     0        0       0        0
+howto-a-conceptual-overview-of-asyncio.ind         0      0     0        0       0        0
+howto-annotations.ind                              0      0     0        0       0        0
+howto-argparse-optparse.ind                        0      0     0        0       0        0
+howto-argparse.ind                                 0      0     0        0       0        0
+howto-clinic.ind                                   0      0     0        0       0        0
+howto-cporting.ind                                 0      0     0        0       0        0
+howto-curses.ind                                   0      0     0        0       0        0
+howto-descriptor.ind                               0      0     0        0       0        0
+howto-enum.ind                                     0      0     0        0       0        0
+howto-free-threading-extensions.ind                0      0     0        0       0        0
+howto-free-threading-python.ind                    0      0     0        0       0        0
+howto-functional.ind                               0      0     0        0       0        0
+howto-gdb_helpers.ind                              0      0     0        0       0        0
+howto-instrumentation.ind                          0      0     0        0       0        0
+howto-ipaddress.ind                                0      0     0        0       0        0
+howto-isolating-extensions.ind                     0      0     0        0       0        0
+howto-logging-cookbook.ind                         0      0     0        0       0        0
+howto-logging.ind                                  0      0     0        0       0        0
+howto-mro.ind                                      0      0     0        0       0        0
+howto-perf_profiling.ind                           0      0     0        0       0        0
+howto-pyporting.ind                                0      0     0        0       0        0
+howto-regex.ind                                    0      0     0        0       0        0
+howto-remote_debugging.ind                         0      0     0        0       0        0
+howto-sockets.ind                                  0      0     0        0       0        0
+howto-sorting.ind                                  0      0     0        0       0        0
+howto-timerfd.ind                                  0      0     0        0       0        0
+howto-unicode.ind                                  0      0     0        0       0        0
+howto-urllib2.ind                                  0      0     0        0       0        0
+installing.ind                                     0      0     0        0       0        0
+library.ind                                        0      0     0        0       0        0
+reference.ind                                      0      0     0        0       0        0
+tutorial.ind                                       0      0     0        0       0        0
+using.ind                                          0      0     0        0       0        0
+whatsnew.ind                                       0      0     0        0       0        0
+-------------------------------------------------------------------------------------------
+共 38 个 .ind，0 个被改动：删坏标题 0  非字母标题 0  数字标题 0  页码链接 0  断点 0
+  ↳ 退出码 0，用时 0.3s
+[ok] 索引非法字节自检：日志里 Invalid UTF-8 共 0 条（应为 0），详见 /home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/index-fix.log
+----- 步骤 7b 索引自检：完成（1s）索引自检通过（分组标题 + 页码超链接 + 长条目断点齐备）
+
+===== 步骤 8 收集 / 验收 / 重命名 =====
+[ok] 复制 38 个 PDF 到 /home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122（跳过 3 个插图 PDF）
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/tutorial.pdf'
+Title:           Python 教程
+Author:          Python documentation authors
+Creator:         LaTeX with hyperref
+Producer:        xdvipdfmx (20220710)
+CreationDate:    Sun Nov 22 07:39:05 2026 UTC
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           158
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       1611044 bytes
+Optimized:       no
+PDF version:     1.5
+样本 tutorial.pdf：页数 158　纸型 595.28 x 841.89 pts (A4)
+$ pdffonts '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/tutorial.pdf'
+name                                 type              encoding         emb sub uni object ID
+------------------------------------ ----------------- ---------------- --- --- --- ---------
+CYENHD+FreeSansBold-Identity-H       CID Type 0C       Identity-H       yes yes yes      4  0
+DXOHLP+FandolHei-Bold-Identity-H     CID Type 0C       Identity-H       yes yes no       6  0
+STTHFA+FreeSansBoldOblique-Identity-H CID Type 0C       Identity-H       yes yes yes      8  0
+MCMAVX+FreeSans-Identity-H           CID Type 0C       Identity-H       yes yes yes     17  0
+BHTLQB+FreeSerifBold-Identity-H      CID Type 0C       Identity-H       yes yes yes     19  0
+MCWUOL+FandolSong-Bold-Identity-H    CID Type 0C       Identity-H       yes yes no      21  0
+OTFNWL+FreeSerif-Identity-H          CID Type 0C       Identity-H       yes yes yes     25  0
+VJYQSE+FandolSong-Regular-Identity-H CID Type 0C       Identity-H       yes yes no      27  0
+SWZIEL+FreeMono-Identity-H           CID Type 0C       Identity-H       yes yes yes     41  0
+TRETVC+FandolKai-Regular-Identity-H  CID Type 0C       Identity-H       yes yes no     209  0
+AVWQMA+FandolHei-Regular-Identity-H  CID Type 0C       Identity-H       yes yes no     220  0
+VGANHP+FreeSerifItalic-Identity-H    CID Type 0C       Identity-H       yes yes yes    230  0
+VJFLQT+FreeMonoBold-Identity-H       CID Type 0C       Identity-H       yes yes yes    235  0
+AQCWMC+FreeMonoOblique-Identity-H    CID Type 0C       Identity-H       yes yes yes    238  0
+UTRYIR+FandolFang-Regular-Identity-H CID Type 0C       Identity-H       yes yes no     246  0
+JSMGAV+CMMI5                         Type 1C           Builtin          yes yes no     323  0
+NBRVTU+CMSY5                         Type 1C           Builtin          yes yes yes    324  0
+[ok] Fandol 字体命中 6 条（中文排版正常）
+$ name-map --check
+OK  name_map 自检通过（40 个条目，编号 0901 0902 0903 0904 0905 0906 0907 0908 0909 0910 0911 0912 0913 0914 0915 0916 0917 0918 0919 0920 0921 0922 0923 0924 0925 0926 0927 0928 0929）
+    配置来源：外部配置生效：/home/runner/work/python-doc-pdf-zh/python-doc-pdf-zh/sphinx-pdf/volumes.json（40 条，9 前置 / 29 指南 / 2 尾部）
+      映射表自检：    配置来源：外部配置生效：/home/runner/work/python-doc-pdf-zh/python-doc-pdf-zh/sphinx-pdf/volumes.json（40 条，9 前置 / 29 指南 / 2 尾部）
+$ rename-pdf /home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122 --version 3.14
+重命名（/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122，版本 3.14）
+  已改名 38 册
+  已是目标名 38 册（幂等，无需处理）
+  本版本本就没有 2 册（版本门控，正常）：09分发 Python 模块、0929迁移到自由线程的稳定 ABI（abi3t）
+      · distributing —— 上游 3.14 分支没有这篇（最低版本 0.0+）
+      · howto-abi3t-migration —— 上游 3.14 分支没有这篇（最低版本 3.15+）
+  提示：`09Python 指南.pdf` 这类总册在 3.14 分支编不出来 —— conf.py 只逐个收 howto-*.rst，没有 howto/index 总册条目。
+RENAMED 38
+KEPT 38
+MISSING 0
+UNPRODUCED 2
+UNKNOWN 0
+EXTRA 0
+FAILED 0
+  ↳ 退出码 0，用时 0.0s
+      重命名（/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122，版本 3.14）
+[ok]       已改名 38 册
+[ok]       已是目标名 38 册（幂等，无需处理）
+      本版本本就没有 2 册（版本门控，正常）：09分发 Python 模块、0929迁移到自由线程的稳定 ABI（abi3t）
+      · distributing —— 上游 3.14 分支没有这篇（最低版本 0.0+）
+      · howto-abi3t-migration —— 上游 3.14 分支没有这篇（最低版本 3.15+）
+      提示：`09Python 指南.pdf` 这类总册在 3.14 分支编不出来 —— conf.py 只逐个收 howto-*.rst，没有 howto/index 总册条目。
+[ok] 已重命名 38 册，已是目标名 38 册（本版本本就没有 2 册）
+$ report /home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122 /home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/cpython/Doc/build/latex --version 3.14
+# 分册 PDF 验收报告
+
+- 生成时间：2026-11-22 07:46
+- 版本：Python 文档 **3.14**（中文，python-docs-zh-cn 3.14）
+- 构建：Sphinx 8.2.3 + `latex_engine='xelatex'` + `-D language=zh_CN` + TeX Live 2025
+- 册数：**38**　总页数：**4221**　总体积：**35.5 MB**
+- 有书签的册子：**35/38**
+- 索引里的非法 UTF-8 字节（`Invalid UTF-8` 日志条数）合计：**0**
+- 封面标题已中文化：**38/38**
+  （全部中文）
+
+## 逐册明细
+
+| 册子 | 页数 | 体积 (MB) | 书签 | 链接 (内部跳转) | 索引非法字节 | 封面首行 |
+|-|-:|-:|-:|-:|-:|-:|
+| 01Python 3.14 有什么新变化.pdf | 50 | 0.69 | 145 | 699 (283) | — | Python 3.14 有什么新变化 |
+| 02Python 教程.pdf | 158 | 1.54 | 173 | 878 (782) | — | Python 教程 |
+| 03Python安装和使用.pdf | 154 | 3.03 | 171 | 1707 (1474) | — | Python 安装和使用 |
+| 04Python 语言参考手册.pdf | 226 | 1.90 | 307 | 4124 (3945) | — | Python 语言参考手册 |
+| 05Python 标准库.pdf | 2360 | 12.14 | 2105 | 37557 (35806) | — | Python 标准库 |
+| 06扩展和嵌入 Python 解释器.pdf | 111 | 1.26 | 86 | 697 (621) | — | 扩展和嵌入 Python 解释器 |
+| 07Python C API 参考手册.pdf | 491 | 3.08 | 362 | 12742 (12588) | — | Python C API 参考手册 |
+| 08安装 Python 模块.pdf | 59 | 0.87 | 47 | 619 (539) | — | 安装 Python 模块 |
+| 0901asyncio 的概念概述.pdf | 8 | 0.33 | 9 | 12 (9) | — | asyncio 的概念概述 |
+| 0902注解最佳实践.pdf | 5 | 0.17 | 6 | 14 (10) | — | 注解最佳实践 |
+| 0903argparse 教程.pdf | 13 | 0.27 | 12 | 13 (12) | — | argparse 教程 |
+| 0904描述器指南.pdf | 19 | 0.41 | 28 | 65 (56) | — | 描述器指南 |
+| 0905Enum 指南.pdf | 23 | 0.37 | 44 | 46 (46) | — | Enum 指南 |
+| 0906函数式编程指引.pdf | 18 | 0.41 | 26 | 46 (30) | — | 函数式编程指引 |
+| 0907ipaddress模块介绍.pdf | 6 | 0.20 | 10 | 10 (10) | — | ipaddress 模块介绍 |
+| 0908日志指南.pdf | 15 | 0.46 | 24 | 32 (30) | — | 日志指南 |
+| 0909日志专题手册.pdf | 63 | 0.82 | 55 | 88 (66) | — | 日志专题手册 |
+| 0910正则表达式指南.pdf | 17 | 0.40 | 24 | 27 (26) | — | 正则表达式指南 |
+| 0911排序的技术.pdf | 7 | 0.23 | 11 | 19 (12) | — | 排序的技术 |
+| 0912Unicode 指南.pdf | 11 | 0.35 | 20 | 36 (19) | — | Unicode 指南 |
+| 0913如何利用 urllib 包获取网络资源.pdf | 9 | 0.30 | 18 | 35 (25) | — | 如何利用 urllib 包获取网络资源 |
+| 0914用 Python 进行 Curses 编程.pdf | 7 | 0.33 | 8 | 17 (8) | — | 用 Python 进行 Curses 编程 |
+| 0915Python 对自由线程的支持.pdf | 5 | 0.23 | 20 | 24 (18) | — | Python 对自由线程的支持 |
+| 0916自由线程的 C API 扩展支持.pdf | 6 | 0.25 | 20 | 27 (21) | — | 自由线程的 C API 扩展支持 |
+| 0917隔离扩展模块.pdf | 9 | 0.34 | 26 | 26 (24) | — | 隔离扩展模块 |
+| 0918Python 2.3 方法解析顺序.pdf | 10 | 0.35 | 6 | 14 (9) | — | Python 2.3 方法解析顺序 |
+| 0919套接字编程指南.pdf | 5 | 0.32 | 9 | 10 (9) | — | 套接字编程指南 |
+| 0920定时器文件描述符指南.pdf | 4 | 0.14 | 1 | 1 (1) | — | 定时器文件描述符指南 |
+| 0921将扩展模块移植到 Python 3.pdf | 1 | 0.05 | 0（无小节） | 2 (0) | — | 将扩展模块移植到 Python 3 |
+| 0922使用 GDB 调试 C API 扩展和 CPython 内部代码.pdf | 9 | 0.20 | 12 | 14 (12) | — | 使用 GDB 调试 C API 扩展和 CPython |
+| 0923使用 DTrace 和 SystemTap 检测CPython.pdf | 10 | 0.19 | 9 | 33 (33) | — | 使用 DTrace 和 SystemTap 检测 |
+| 0924Python 对 Linux perf 性能分析器的支持.pdf | 6 | 0.17 | 4 | 9 (8) | — | Python 对 Linux perf 性能分析器的支持 |
+| 0925远程调试附加协议.pdf | 12 | 0.39 | 10 | 20 (15) | — | 远程调试附加协议 |
+| 0926将 optparse 代码迁移至 argparse.pdf | 2 | 0.09 | 0（无小节） | 0 (0) | — | 将 optparse 代码迁移至 argparse |
+| 0927Argument Clinic 的用法.pdf | 1 | 0.02 | 0（无小节） | 1 (0) | — | Argument Clinic 的用法 |
+| 0928如何将 Python 2 代码移植到 Python 3.pdf | 2 | 0.06 | 2 | 11 (3) | — | 如何将 Python 2 代码移植到 Python 3 |
+| 10Python 常见问题.pdf | 119 | 1.44 | 240 | 946 (773) | — | Python 常见问题 |
+| 11Python 内置参考手册.pdf | 190 | 1.69 | 130 | 3043 (2938) | — | Python 内置参考手册 |
+
+## 核对项
+
+| 项目 | 参考样张 | 本次产物 |
+|-|-|-|
+| 纸型 | A4（595.28 × 841.89 pt） | A4 |
+| 封面标题 | **英文**（`The Python Language Reference`、`Python Tutorial` …，因为 `latex_documents` 不走 `.po`） | **中文**（本轮按要求中文化，**有意与样张不同**） |
+| 封面地址块 | PSF + `docs@python.org` | 同款 |
+| 页脚版本 | 发行版本 3.14.x | 发行版本 3.14 |
+| 中文字体 | FandolSong / FandolHei / FandolKai / FandolFang | 同族 |
+| 西文字体 | FreeSerif / FreeSans / FreeMono | 同族 |
+| 正文前目录 | 带点线 + 页码，3 级 | 同款 |
+| PDF 书签 | 有 | 有（1~2 页跳转占位页除外） |
+| 内部超链接 | 有 | 有 |
+| 索引末尾 | 无 `�` | **无 `�`** |
+
+
+## 每步耗时
+
+开始 2026-11-22 07:31:57
+
+| 步骤 | 用时 | 结果 |
+|-|-:|-|
+| 步骤 0 前置检查 | 0s | ✔　Python/TeX 工具链就绪；TeX Live = ；版本 3.14（分支 3.14） |
+| 步骤 1 获取 CPython 源码 | 4s | ✔　CPython 3.14 源码就绪，版本号 3.14.10 |
+| 步骤 2 准备中文翻译 | 2s | ✔　翻译源 zh-cn（分支 3.14） |
+| 步骤 3 安装 locales | 1s | ✔　544 个 .po 已就位 |
+| 步骤 4 虚拟环境与依赖 | 11s | ✔　venv 就绪，sphinx 8.2.3 |
+| 步骤 5 构建 HTML | 0s | ✔　已跳过 |
+| 步骤 6 构建 LaTeX 源 | 5m28s | ✔　38 个册子 .tex 已生成 |
+| 步骤 6b 封面标题中文化 | 0s | ✔　封面/页眉标题已中文化（11 册） |
+| 步骤 7 编译 PDF | 8m07s | ✔　38 册全部编译成功，22 册带索引（分组标题 + 页码超链接 + 长条目断点，共 38 个 .ind） |
+| 步骤 7b 索引自检 | 1s | ✔　索引自检通过（分组标题 + 页码超链接 + 长条目断点齐备） |
+| **合计（各步相加）** | **13m54s** | |
+
+> 步骤 6 细分：`读入 3m57s（15 篇，-j 4，约 4 篇/分） · 写出 5s`
+[报告已写入] /home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/验收报告.md
+  ↳ 退出码 0，用时 7.2s
+[ok] 验收报告：/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/验收报告.md
+$ xelatex --version
+XeTeX 3.141592653-2.6-0.999995 (TeX Live 2023/Debian)
+kpathsea version 6.3.5
+Copyright 2023 SIL International, Jonathan Kew and Khaled Hosny.
+There is NO warranty.  Redistribution of this software is
+covered by the terms of both the XeTeX copyright and
+the Lesser GNU General Public License.
+For more information about these matters, see the file
+named COPYING and the XeTeX source.
+Primary author of XeTeX: Jonathan Kew.
+Compiled with ICU version 74.2; using 74.2
+Compiled with zlib version 1.3; using 1.3
+Compiled with FreeType2 version 2.13.2; using 2.13.2
+Compiled with Graphite2 version 1.3.14; using 1.3.14
+Compiled with HarfBuzz version 8.3.0; using 8.3.0
+Compiled with libpng version 1.6.43; using 1.6.43
+Compiled with pplib version v2.05 less toxic i hope
+Compiled with fontconfig version 2.15.0; using 2.15.0
+      验收报告：TeX Live 年份按实测写成 2023（主程序模板里写死的是 2025）
+----- 步骤 8 收集 / 验收 / 重命名：完成（7s）产物 38 个 PDF 已就绪 → /home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122
+
+===== 步骤 9 合并成一册 =====
+$ name-map --check
+OK  name_map 自检通过（40 个条目，编号 0901 0902 0903 0904 0905 0906 0907 0908 0909 0910 0911 0912 0913 0914 0915 0916 0917 0918 0919 0920 0921 0922 0923 0924 0925 0926 0927 0928 0929）
+    配置来源：外部配置生效：/home/runner/work/python-doc-pdf-zh/python-doc-pdf-zh/sphinx-pdf/volumes.json（40 条，9 前置 / 29 指南 / 2 尾部）
+      映射表自检：    配置来源：外部配置生效：/home/runner/work/python-doc-pdf-zh/python-doc-pdf-zh/sphinx-pdf/volumes.json（40 条，9 前置 / 29 指南 / 2 尾部）
+$ merge-pdf /home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122 --version 3.14 --list
+Python的新变化
+Python 教程
+Python安装和使用
+Python 语言参考手册
+Python 内置参考手册
+Python 标准库
+扩展和嵌入 Python 解释器
+Python/C API 参考手册
+安装 Python 模块
+Python 指南   （分组，指向第一个子项）
+    asyncio 的概念概述
+    注解最佳实践
+    argparse 教程
+    描述器指南
+    Enum 指南
+    函数式编程指引
+    ipaddress 模块介绍
+    日志指南
+    日志专题手册
+    正则表达式指南
+    排序的技术
+    Unicode 指南
+    如何利用 urllib 包获取网络资源
+    用 Python 进行 Curses 编程
+    Python 对自由线程的支持
+    自由线程的 C API 扩展支持
+    隔离扩展模块
+    Python 2.3 方法解析顺序
+    套接字编程指南
+    定时器文件描述符指南
+    将扩展模块移植到 Python 3
+    使用 GDB 调试 C API 扩展和 CPython 内部代码
+    使用 DTrace 和 SystemTap 检测 CPython
+    Python 对 Linux perf 性能分析器的支持
+    远程调试附加协议
+    将 optparse 代码迁移至 argparse
+    Argument Clinic 的用法
+    如何将 Python 2 代码移植到 Python 3
+Python 常见问题
+
+共 38 册 + 1 个分组节点；/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122 里缺 0 册
+   本版本本就没有 2 册（版本门控，不算缺册）：09分发 Python 模块、0929迁移到自由线程的稳定 ABI（abi3t）
+MISSING 0
+UNPRODUCED 2
+UNKNOWN 0
+      共 38 册 + 1 个分组节点；/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122 里缺 0 册
+      本版本本就没有 2 册（版本门控，不算缺册）：09分发 Python 模块、0929迁移到自由线程的稳定 ABI（abi3t）
+      （其中 2 册是**本版本本就没有**的，不算缺册 —— 有些 howto 是后来的版本才加的）
+$ merge-pdf /home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122 --version 3.14 --full-version 3.14.10
+合并 38 册 → Python 3.14.10 文档 20261122.pdf
+  页数合计 4221
+  书内跳转链接：重映射 60244 条
+OK  Python 3.14.10 文档 20261122.pdf  4221 页  49.9 MB  书签 4219 个  书内跳转链接 60244 条
+  ↳ 退出码 0，用时 18.8s
+      页数合计 4221
+      书内跳转链接：重映射 60244 条
+$ pdfinfo '/home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122/Python 3.14.10 文档 20261122.pdf'
+Title:           Python 3.14.10 文档 20261122
+Producer:        sphinx-pdf merge-pdf.py (pypdf)
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           4221
+Encrypted:       no
+Page size:       595.28 x 841.89 pts (A4)
+Page rot:        0
+File size:       52372759 bytes
+Optimized:       no
+PDF version:     1.5
+[ok]       Python 3.14.10 文档 20261122.pdf　4221 页　49.9 MB　用时 18s
+----- 步骤 9 合并成一册：完成（18s）合并册 Python 3.14.10 文档 20261122.pdf（4221 页）→ /home/runner/work/_temp/build/Python 3.14.10 PDF 文档 20261122
+
+===== 步骤 10 清理过程文件 =====
+[warn] 清理范围是「不清理」，跳过
+----- 步骤 10 清理过程文件：完成（0s）已跳过
+
+# 构建结束，用时 14m23s
