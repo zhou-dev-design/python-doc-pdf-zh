@@ -1197,16 +1197,45 @@ jobs:
           TZ: Asia/Shanghai
         run: |
           set -uo pipefail
+          V="${{ matrix.version }}"
           DATE="$(date +%Y%m%d)"
           echo "构建日期：$DATE"
+          # builder.py 里的 PY / TEXBIN 是作者本机绝对路径，CI 用环境变量覆盖：
+          # 解释器 = 当前这个，TeX 走系统 PATH（/usr/bin）。
+          export WNS_PY="$(command -v python)"
+          unset WNS_TEXBIN
           mkdir -p changelog-out
-          python ci/changelogs/build_changelog_pdf.py \
-            --versions "${{ matrix.version }}" \
-            --outdir changelog-out \
-            --workdir changelog-work \
-            --date "$DATE" \
-            --mirror auto \
-            --report "changelog-out/report-${{ matrix.version }}.md"
+          # ★ 直接调上游 CLI，不再包一层脚本：
+          #   `--mode changelog` 的出厂默认值（toc-depth 3 / bookmark 5 / 连续排版 /
+          #   页脚只页码 / tight 间距）就是 output/3.9-3.15 那几本的排版，
+          #   在别处再抄一份默认值只会跟上游悄悄分叉。
+          #   一个 job 只编一个版本（matrix），所以也不需要循环。
+          if ! python ci/changelogs/builder.py \
+                 --version "$V" --mode changelog \
+                 --outdir changelog-out --workdir changelog-work \
+                 --mirror auto; then
+            echo "::error::Python $V 完整更新日志构建失败（看上面的 @@FAIL@@ 行）"
+            exit 1
+          fi
+          SRC="changelog-out/Python $V 完整更新日志.pdf"
+          [ -f "$SRC" ] || { echo "::error::构建返回成功但没有 $SRC"; exit 1; }
+          # 发布用的 ASCII 名（GitHub 附件名会把中文换成点号）
+          ASCII="Python-$V-changelog-$DATE.pdf"
+          cp "$SRC" "changelog-out/$ASCII"
+          # 页数/大小用 pdfinfo 读，不手写（写死的数字会和产物对不上）
+          PAGES="$(pdfinfo "$SRC" 2>/dev/null | awk -F': *' '/^Pages/{print $2}')"
+          MB="$(awk -v b="$(stat -c %s "$SRC")" 'BEGIN{printf "%.1f", b/1048576}')"
+          {
+            echo "**Python $V 完整更新日志**（$DATE）"
+            echo ""
+            echo "| 版本 | 页数 | 大小 | 附件名 |"
+            echo "|-|-|-|-|"
+            echo "| $V | ${PAGES:-—} | ${MB} MB | \`$ASCII\` |"
+          } > "changelog-out/report-$V.md"
+          # 中间产物别留在 runner 上：每版 100~360 MB，五个版本能把磁盘吃满
+          rm -rf "changelog-work/build_changelog_${V/./_}"
+          echo "--- 产物 ---"
+          ls -l changelog-out/*.pdf
 
       - name: 上传 PDF（失败也传：已成功的版本照常发布，失败的保留上一版）
         if: always()

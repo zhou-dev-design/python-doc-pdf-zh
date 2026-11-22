@@ -157,8 +157,15 @@ changelogs    Python 完整更新日志（3.9–3.15）
   属于它的补丁记录（只取这一个版本的部分，不含 whatsnew 正文）。
 - **构建器直接复用**本机 `whatsnew-studio/builder.py`：`ci/changelogs/builder.py` 是它的逐字副本
   （只多了 `WNS_PY` / `WNS_TEXBIN` 两个环境变量），所以版式、册名（`Python 3.11 完整更新日志`）、
-  目录/书签层级与 `whatsnew-studio/output/3.9-3.15` 里那几本**一致**。入口是
-  `ci/changelogs/build_changelog_pdf.py`（循环调 `builder.build(mode="changelog")`）。
+  目录/书签层级与 `whatsnew-studio/output/3.9-3.15` 里那几本**一致**。入口就是它自己的 CLI：
+
+  ```bash
+  python ci/changelogs/builder.py --version 3.11 --mode changelog \
+      --outdir changelog-out --workdir changelog-work
+  ```
+
+  CI 一个 job 编一个版本（matrix），不另包一层脚本 —— 那些默认值（toc-depth 3、书签 5、
+  连续排版、页脚只页码）本来就是上游的出厂值，再抄一份只会跟上游分叉。
 - **每天重建 → 同名附件原地替换**；文件名带日期，前一天那份会被自动清掉。
 - 某版本某天构建失败：**保留上一次的附件**并告警，不会因为一天失败就少一本；
   一个版本都编不出来时，release 原样不动。
@@ -170,7 +177,7 @@ changelogs    Python 完整更新日志（3.9–3.15）
 | 目的 | 做法 |
 |-|-|
 | 这一轮先别跑 | 手跑时把 `changelogs` 勾成 `false`（`workflow_dispatch` 的输入项） |
-| 代码整个撤掉 | `git revert <加入这一路的 commit>` —— 改动只在**一个** commit 里，主流程一行没动 |
+| 代码整个撤掉 | `git revert --no-commit <这条链路的所有 commit> && git commit`（连续几个 commit，一条 revert 一起撤）；主流程一行没动 |
 | 连 release 一起清掉 | `gh release delete changelogs --yes --cleanup-tag`（只删这个 tag，不碰 `v3.x` 那几条线） |
 
 ---
@@ -261,7 +268,6 @@ sphinx-pdf/
   version-titles.json                   # 完整版本号缓存（中英文站 h1 取较新）
 ci/changelogs/                          # 更新日志（tag=changelogs），与上面的文档册无关
   builder.py                            # whatsnew-studio/builder.py 的逐字副本（+ WNS_PY/WNS_TEXBIN）
-  build_changelog_pdf.py                # 入口：3.11~3.15 各一本「完整更新日志」
   frozen/Python-3.9-changelog.pdf       # 已冻结（EOL），直接随仓库发布
   frozen/Python-3.10-changelog.pdf
 构建Python文档PDF-完整步骤.md             # 逐步操作 + 故障排查表
