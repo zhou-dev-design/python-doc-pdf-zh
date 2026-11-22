@@ -487,8 +487,12 @@ jobs:
           # ★ 用 find 而不是 ls：构建根名字里有空格和中文，ls 在 set -e 下会误杀
           ROOT="$(find "$BASE" -maxdepth 1 -type d -name 'Python * PDF 文档 *' | sort | tail -1)"
           echo "root=$ROOT" >> "$GITHUB_OUTPUT"
+          # ★ 不要写成 `ls … | head -20`：head 提前关管道会让 ls 吃 EPIPE，
+          #   在 `set -o pipefail` 下整个步骤判负 —— 2026-11-22 的 3.14 就是这么假红的
+          #   （产物 38 册 + 合并册全在，只是这行返回 2）。sed 会读到底，不截断写入方。
           echo "=== 产物（$ROOT）==="
-          ls -la "$ROOT" | head -20
+          [ -n "$ROOT" ] && [ -d "$ROOT" ] || { echo "::error::没找到构建根：$BASE"; exit 1; }
+          ls -la "$ROOT" | sed -n '1,25p'
 
       # ★★ 2026-11-02 新增：上一轮「.log 里没有任何 ! 」+「每册 PDF 只有 1 页」+
       #   「ind=0」三条互相矛盾 —— 光 grep `^! ` 定不了位。这一段专门只回答一个问题：
