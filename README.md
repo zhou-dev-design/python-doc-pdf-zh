@@ -154,8 +154,8 @@ changelogs    Python 完整更新日志（3.9–3.15）
 ```
 
 - **内容**：该版本 `Doc/whatsnew/changelog.rst` 的中文译文 + `Misc/NEWS.d` 里属于它的补丁记录。
-- **构建**：`ci/changelogs/builder.py` 是 `whatsnew-studio/builder.py` 的逐字副本（多 `WNS_PY`/`WNS_TEXBIN`），
-  直接调它自己的 CLI，版式与 `whatsnew-studio/output/3.9-3.15` 一致：
+- **构建**：`ci/changelogs/builder.py` 直接跑 `--mode changelog`（它是 whatsnew-studio
+  构建器的逐字副本，只多了 `WNS_PY`/`WNS_TEXBIN` 两个环境变量）：
   `python ci/changelogs/builder.py --version 3.11 --mode changelog --outdir changelog-out --workdir changelog-work`
 - **每天重建** → 同名附件原地替换、旧日期的自动清掉；某天某版本失败则保留上一版并告警，
   一本都没编出来时 release 不动。
@@ -255,7 +255,7 @@ sphinx-pdf/
   volumes.json                          # ★ 分册真源（可外置覆盖，读坏退回内置表）
   version-titles.json                   # 完整版本号缓存（中英文站 h1 取较新）
 ci/changelogs/                          # 更新日志（tag=changelogs），与上面的文档册无关
-  builder.py                            # whatsnew-studio/builder.py 的逐字副本（+ WNS_PY/WNS_TEXBIN）
+  builder.py                            # whatsnew-studio 构建器的逐字副本（+ WNS_PY/WNS_TEXBIN）
   frozen/Python-3.9-changelog.pdf       # 已冻结（EOL），直接随仓库发布
   frozen/Python-3.10-changelog.pdf
 构建Python文档PDF-完整步骤.md             # 逐步操作 + 故障排查表
