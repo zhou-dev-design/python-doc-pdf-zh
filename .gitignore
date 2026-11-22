@@ -31,3 +31,7 @@ sphinx-pdf/_tmp*.json
 # 提交上去对别人全是错的。程序找不到时会用内置默认值自己生成。
 sphinx-pdf/gui/config.json
 sphinx-pdf/gui/config-multi.json
+
+# 更新日志构建的中间目录与产物（CI 里用完即删；本地跑时也别提交）
+changelog-out/
+changelog-work/

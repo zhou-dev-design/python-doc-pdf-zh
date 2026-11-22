@@ -53,6 +53,11 @@ on:
         type: choice
         options: ["true", "false"]
         default: "true"
+      changelogs:
+        description: "是否构建「完整更新日志」（独立 release：tag=changelogs；与文档册互不影响）"
+        type: choice
+        options: ["true", "false"]
+        default: "true"
       archive_only:
         description: "只做归档（把 EOL 版本的 release 挪进 old 分支），不构建 —— 勾 true 时跳过所有 build"
         type: choice
@@ -1083,3 +1088,312 @@ jobs:
             sleep 3
           done
           echo "::warning::README 推送失败（下次构建会再试）"
+
+  # ---------------------------------------------------------------- 更新日志（3.9–3.15）
+  # ★ 与上面的文档册**完全独立**：上面出「五版本 × 38 册」的文档 PDF，这里只出
+  #   「每个大版本一本完整更新日志」；产物、release、失败域都不交叉。
+  # ★ 复用而不是重写：ci/changelogs/builder.py 是 whatsnew-studio/builder.py 的
+  #   逐字副本（只多了 WNS_PY / WNS_TEXBIN 两个环境变量），调用方式与本地一致
+  #   （mode=changelog），所以版式、册名、目录层级都跟
+  #   whatsnew-studio/output/3.9-3.15 里那几本对得上。
+  # ★ 3.9 / 3.10 已冻结（EOL，NEWS 不再更新）：不再重建，直接上传仓库里的副本
+  #   （ci/changelogs/frozen/），省两轮构建。
+  changelogs:
+    needs: prepare
+    # 手跑时可以把 changelogs 勾成 false 单独跳过这一路（不想动代码时的「停用开关」）
+    if: github.event.inputs.changelogs != 'false' && github.event.inputs.archive_only != 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 150
+    strategy:
+      fail-fast: false
+      # 五个版本各占一个 runner，互不影响；单个版本失败不拖累其它版本
+      max-parallel: 5
+      matrix:
+        version: ["3.11", "3.12", "3.13", "3.14", "3.15"]
+    name: changelog ${{ matrix.version }}
+    steps:
+      - name: 取代码
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 1
+
+      - name: 恢复 apt 缓存（与 build job 同一个 key，命中就不再下载）
+        # 与 build job 共用同一份缓存：包列表相同 ⇒ 哈希相同 ⇒ 先跑完的那个 job
+        # 存进去，另一个直接命中（约 250 MB / 41 个包）。
+        uses: actions/cache@v4
+        with:
+          path: ~/apt-cache
+          key: apt-${{ runner.os }}-${{ hashFiles('.github/workflows/build-pdf-linux.yml') }}
+          restore-keys: |
+            apt-${{ runner.os }}-
+
+      - name: 装系统依赖（TeX Live + 中文字体）
+        run: |
+          set -x
+          mkdir -p "$HOME/apt-cache"
+          sudo mkdir -p /var/cache/apt/archives/partial
+          if ls "$HOME"/apt-cache/*.deb >/dev/null 2>&1; then
+            echo "命中 apt 缓存：$(ls "$HOME"/apt-cache/*.deb | wc -l) 个 .deb"
+            sudo cp -n "$HOME"/apt-cache/*.deb /var/cache/apt/archives/ || true
+          else
+            echo "没有 apt 缓存（这一轮较慢，下一轮起就快了）"
+          fi
+          sudo apt-get update -o Acquire::Retries=3 \
+            || { sleep 5; sudo apt-get update -o Acquire::Retries=3; }
+          # 与 build job 同一份包列表：whatsnew 册要 xeCJK + Fandol（texlive-lang-chinese）、
+          # FreeSerif/Sans/Mono（fonts-freefont-otf）、latexmk + xelatex，
+          # 以及 pdfinfo（poppler-utils）用来读页数。
+          # ★ 额外要 texlive-latex-recommended：Sphinx 的 .tex 会 \usepackage{cmap}，
+          #   少了它 xelatex 第一页就挂（`File 'cmap.sty' not found`），而这一步
+          #   要等到 latexmk 才报，白等 6 分钟。
+          PKGS="git curl ca-certificates latexmk texlive-xetex texlive-latex-extra texlive-latex-recommended texlive-binaries texlive-fonts-recommended texlive-lang-chinese lmodern fonts-freefont-otf fonts-dejavu fonts-liberation fonts-texgyre fonts-noto-cjk poppler-utils libcairo2"
+          APTOPTS="-o Acquire::Retries=3 -o Acquire::http::Pipeline-Depth=10 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30"
+          if ! timeout 900 sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends $APTOPTS $PKGS; then
+            echo "::error::批量安装失败或超时，改为逐包定位（每个包 300 秒上限）"
+            for p in $PKGS; do
+              timeout 300 sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends $APTOPTS "$p" \
+                || echo "::warning::包 $p 装不上（或超时）"
+            done
+          fi
+          sudo cp -n /var/cache/apt/archives/*.deb "$HOME/apt-cache/" 2>/dev/null || true
+          echo "--- 关键工具 ---"
+          for t in latexmk xelatex makeindex pdfinfo; do
+            printf '%-10s %s\n' "$t" "$(command -v $t || echo MISSING)"
+          done
+          echo "--- CJK 宏包与字体 ---"
+          # ★ 硬失败：这些 .sty 缺一个，xelatex 会在第一页就挂，而那时已经
+          #   花了几分钟下载 + Sphinx。宁可在装完包的两秒内停下。
+          MISS=()
+          for f in xeCJK.sty ctex.sty fandol.sty cmap.sty fancyvrb.sty framed.sty \
+                   tcolorbox.sty needspace.sty upquote.sty fontspec.sty; do
+            p="$(kpsewhich "$f" 2>/dev/null || true)"
+            if [ -n "$p" ]; then printf '%-14s %s\n' "$f" "$p"
+            else printf '%-14s MISSING\n' "$f"; MISS+=("$f"); fi
+          done
+          if [ "${#MISS[@]}" -gt 0 ]; then
+            echo "::error::缺宏包：${MISS[*]}（apt 包里应该有，检查 texlive-latex-recommended / -extra）"
+            exit 1
+          fi
+          fc-list "FandolSong" | head -2
+
+      - name: 装构建用的 Python（Sphinx 9 + babel + blurb）
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          check-latest: true
+
+      - name: 装 Python 依赖
+        run: |
+          python -m pip install --quiet --upgrade pip
+          # ★ 与本地 whatsnew-studio 的「系统 Sphinx 9.2」对齐（3.11+ 分支都走它；
+          #   3.9/3.10 才需要隔离的 8.2.3，而那两个版本已冻结，这里不编）
+          python -m pip install --quiet "sphinx>=9,<10" babel blurb
+          python -c "import sphinx, babel; print('sphinx', sphinx.__version__, '| babel', babel.__version__)"
+
+      - name: 构建 Python ${{ matrix.version }} 完整更新日志
+        env:
+          # 日期用北京时间（与 README/release 其它地方口径一致）
+          TZ: Asia/Shanghai
+        run: |
+          set -uo pipefail
+          DATE="$(date +%Y%m%d)"
+          echo "构建日期：$DATE"
+          mkdir -p changelog-out
+          python ci/changelogs/build_changelog_pdf.py \
+            --versions "${{ matrix.version }}" \
+            --outdir changelog-out \
+            --workdir changelog-work \
+            --date "$DATE" \
+            --mirror auto \
+            --report "changelog-out/report-${{ matrix.version }}.md"
+
+      - name: 上传 PDF（失败也传：已成功的版本照常发布，失败的保留上一版）
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: changelog-${{ matrix.version }}
+          # 只传 ASCII 名那一份（发布用）；中文原名在本轮 job 里只作对照，不重复占空间
+          path: changelog-out/Python-${{ matrix.version }}-changelog-*.pdf
+          retention-days: 7
+          if-no-files-found: warn
+
+      - name: 报告写进 job 摘要
+        if: always()
+        run: |
+          f="changelog-out/report-${{ matrix.version }}.md"
+          if [ -f "$f" ]; then cat "$f" >> "$GITHUB_STEP_SUMMARY"
+          else echo "没有报告（构建可能没跑到最后，看上面的日志）" >> "$GITHUB_STEP_SUMMARY"; fi
+
+  # ---------------------------------------------------------------- 更新日志：汇总发布
+  # ★ 单独一个 job 收口，理由与 summary 相同：五个 job 并发上传同一个 release 必然打架。
+  # ★ 发布模型：**一个常驻 release**（tag=changelogs），附件固定 7 个：
+  #     Python-3.9-changelog.pdf   ← 冻结，仓库里带
+  #     Python-3.10-changelog.pdf  ← 冻结，仓库里带
+  #     Python-3.1X-changelog-<日期>.pdf ×5（每天原地更新，旧日期自动清掉）
+  #   为什么附件名用 ASCII：GitHub 会把中文名换成点号（`Python.3.11.…pdf`），
+  #   挂上去反而认不出是哪一版（与主 release 的分册同一处理方式）。
+  changelogs-publish:
+    needs: [changelogs]
+    # 手动触发时 push_branch=false 表示只看构建、不发布；
+    # changelogs=false 时这一路整个不跑（没有任何新产物，不必空转）
+    if: always() && github.event.inputs.push_branch != 'false' && github.event.inputs.changelogs != 'false'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: 取代码（要 ci/changelogs/frozen 里冻结的两本）
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 1
+
+      - name: 取回各版本的 PDF
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          pattern: changelog-*
+          path: in
+          merge-multiple: true
+
+      - name: 建/改 release 并上传（先传后清，清的是「过期日期」而非本轮附件）
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TZ: Asia/Shanghai
+        run: |
+          set -euo pipefail
+          ls -l in 2>/dev/null || echo "（没有取到任何构建产物）"
+          python3 - <<'PY'
+          import os, re, shutil, subprocess, sys, pathlib, datetime
+
+          TAG = "changelogs"
+          TITLE = "Python 完整更新日志（3.9–3.15）"
+          DATE = datetime.datetime.now().strftime("%Y%m%d")
+          stage = pathlib.Path(os.environ["RUNNER_TEMP"]) / "chlog-stage"
+          shutil.rmtree(stage, ignore_errors=True)
+          stage.mkdir(parents=True)
+
+          def sh(*cmd, check=True):
+              # 显式 utf-8 + errors=replace：pdfinfo 在非 UTF-8 locale 下会输出本地编码，
+              # 默认解码会在 reader 线程里抛 UnicodeDecodeError，把整个发布步骤带崩。
+              r = subprocess.run(cmd, capture_output=True, text=True,
+                                 encoding="utf-8", errors="replace")
+              if check and r.returncode != 0:
+                  sys.exit("命令失败：%s\n%s\n%s" % (" ".join(cmd), r.stdout[-2000:], r.stderr[-2000:]))
+              return r
+
+          # ---------- 1) 摆附件：冻结的两本 + 本轮构建出来的 ----------
+          for p in sorted(pathlib.Path("ci/changelogs/frozen").glob("*.pdf")):
+              shutil.copy2(p, stage / p.name)
+          got = sorted(pathlib.Path("in").glob("*.pdf")) if pathlib.Path("in").is_dir() else []
+          for p in got:
+              shutil.copy2(p, stage / p.name)
+          expected = sorted(p.name for p in stage.glob("*.pdf"))
+          built = sorted({m.group(1) for n in expected
+                          if (m := re.match(r"^Python-(3\.\d+)-changelog-\d{8}\.pdf$", n))})
+          print("本轮附件 %d 个；今天构建成功：%s" % (len(expected), ", ".join(built) or "无"))
+          if not built:
+              # 一个都没编出来：不建 release、也不动已有附件（保住上一版）
+              print("::warning::本轮没有任何版本构建成功，release 保持原样")
+              sys.exit(0)
+
+          # ---------- 2) 说明文字（页数用 pdfinfo 读，不手写）----------
+          def pages(p):
+              r = sh("pdfinfo", str(p), check=False)
+              for line in r.stdout.splitlines():
+                  if line.lower().startswith("pages:"):
+                      return line.split(":", 1)[1].strip()
+              return "—"
+
+          FROZEN = ("3.9", "3.10")
+
+          def make_notes(names):
+              """按「发布页上真实存在的附件」生成说明，所以包含沿用上次的那几本。"""
+              rows = []
+              for name in sorted(names, key=lambda n: [int(x) for x in re.findall(r"\d+", n)[:2]]):
+                  ver = (re.match(r"^Python-(3\.\d+)-", name) or [None, "?"])[1]
+                  if ver in FROZEN:
+                      state = "已冻结"
+                  elif ver in built:
+                      state = "本轮重建"
+                  else:
+                      state = "沿用上次"
+                  p = stage / name
+                  if p.is_file():
+                      size, pg = "%.1f MB" % (p.stat().st_size / 1048576), pages(p)
+                  else:
+                      size, pg = "—", "—"          # 沿用上次的那几本，本地没有文件
+                  rows.append("| %s | %s | %s | %s | `%s` |" % (ver, state, pg, size, name))
+              return "\n".join([
+                  "**Python 完整更新日志 · 构建日期 %s（北京时间）**" % DATE,
+                  "",
+                  "每个大版本一本，内容 = 该版本 `Doc/whatsnew/changelog.rst` 的中文译文"
+                  " + 该版本自己 `Misc/NEWS.d` 里属于它的补丁记录（3.9/3.10 为冻结版）。",
+                  "",
+                  "| 版本 | 状态 | 页数 | 大小 | 附件名 |",
+                  "|-|-|-|-|-|",
+                  *rows,
+                  "",
+                  "> 3.11–3.15 每天随主工作流重建一次，**同名附件原地替换**（附件名带日期，"
+                  "旧日期的那份会被清掉）。",
+                  "> 某天某版本没编出来就标「沿用上次」，附件保留上一版、不会少一本。",
+                  "> 附件名是 ASCII：GitHub 会把中文附件名替换成点号，"
+                  "中文原名请见各版本的 PDF 标题（`Python 3.11 完整更新日志`）。",
+                  "> 3.9 / 3.10 已 EOL，NEWS 不再更新，这两本**不再重建**。",
+                  "> 页面底部的 `Source code (zip/tar.gz)` 是 GitHub 按 tag 自动生成的，"
+                  "与本项目产物无关。",
+              ]) + "\n"
+
+          nf = pathlib.Path(os.environ["RUNNER_TEMP"]) / "chlog-notes.md"
+          nf.write_text(make_notes(expected), encoding="utf-8")
+
+          # ---------- 3) 建或改 release ----------
+          if sh("gh", "release", "view", TAG, check=False).returncode == 0:
+              sh("gh", "release", "edit", TAG, "--title", TITLE, "--notes-file", str(nf))
+          else:
+              sh("gh", "release", "create", TAG, "--title", TITLE, "--notes-file", str(nf))
+
+          # ---------- 4) 上传（--clobber：同名直接替换）----------
+          sh("gh", "release", "upload", TAG, "--clobber", *[str(stage / n) for n in expected])
+
+          # ---------- 5) 清掉过期附件 ----------
+          # ★ 只清「同一版本更早日期的文件」和「不认识的残留」；
+          #   本轮失败的版本**保留上一版**（否则一天失败就把那本弄没了）。
+          actual = [a for a in sh("gh", "release", "view", TAG, "--json", "assets",
+                                  "--jq", ".assets[].name").stdout.split("\n") if a.strip()]
+          keep = set(expected)
+          for a in actual:
+              m = re.match(r"^Python-(3\.\d+)-changelog-(\d{8})\.pdf$", a)
+              if m and m.group(1) not in built:
+                  keep.add(a)      # 本轮没编出来的版本：留着上次那份
+          stale = [a for a in actual if a not in keep]
+          for a in stale:
+              sh("gh", "release", "delete-asset", TAG, a, "--yes")
+              print("  清掉过期附件：%s" % a)
+
+          # ---------- 6) 核对 ----------
+          final = [a for a in sh("gh", "release", "view", TAG, "--json", "assets",
+                                 "--jq", ".assets[].name").stdout.split("\n") if a.strip()]
+          missing = [n for n in expected if n not in final]
+          extra = [a for a in final if a not in keep]
+          print("release %s：%d 个附件（本轮期望 %d 个）" % (TAG, len(final), len(expected)))
+          for a in sorted(final):
+              print("  %s" % a)
+
+          # ---------- 7) 用「发布页上真实的附件清单」重写说明 ----------
+          #   不能只列本轮编出来的：某版本失败时它的旧附件还在页面上，
+          #   说明里少一行会让人以为丢了。
+          notes = make_notes(final)
+          nf.write_text(notes, encoding="utf-8")
+          sh("gh", "release", "edit", TAG, "--notes-file", str(nf))
+          step = os.environ.get("GITHUB_STEP_SUMMARY")
+          if step:
+              with open(step, "a", encoding="utf-8") as f:
+                  f.write(notes + "\n")
+          if missing or extra:
+              sys.exit("::error::附件核对不通过 —— 缺 %s；多 %s" % (missing or "无", extra or "无"))
+          # 构建失败但保留了上一版的版本，明确警告出来
+          lost = [v for v in ("3.11", "3.12", "3.13", "3.14", "3.15") if v not in built]
+          if lost:
+              print("::warning::本轮未构建成功：%s（附件保留的是上一版）" % ", ".join(lost))
+          print("✔ https://github.com/%s/releases/tag/%s" % (os.environ["GITHUB_REPOSITORY"], TAG))
+          PY

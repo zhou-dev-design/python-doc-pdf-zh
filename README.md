@@ -67,6 +67,9 @@ GitHub Actions（每天自动一次）
    └──┬────┬──┘
       │    └──► archive-eol：把 EOL 版本的 release 挪进 old 分支后删除（幂等）
       │
+      ├────────► changelogs：每个大版本一本「完整更新日志」（3.11~3.15 五 job 并行，
+      │                     3.9/3.10 冻结不上传重建）→ 独立 release：tag=changelogs
+      │
    ┌──▼────────────────────────────────────────────────┐
    │ 1 装 TeX Live / poppler / 中文字体 / cairo         │
    │ 2 装该版本 Python（actions/setup-python）          │
@@ -137,6 +140,38 @@ old 分支
 
 它是**幂等**的（release 已不在就跳过），每次运行都无条件过一遍。只想归档、不构建：手跑时
 `archive_only=true`。代码对 3.10 的支持**没有删**，把 `"3.10"` 加回 `KNOWN_VERSIONS` 即可重建。
+
+### 更新日志（tag = `changelogs`）
+
+同一个工作流每天还并行出一套**完整更新日志**（每个大版本一本），单独放一个常驻 release：
+
+```
+changelogs    Python 完整更新日志（3.9–3.15）
+├── Python-3.9-changelog.pdf                冻结（EOL，NEWS 不再变），随仓库带
+├── Python-3.10-changelog.pdf               同上
+├── Python-3.11-changelog-20261122.pdf      ← 每天重建，文件名带北京时间日期
+└── … 3.12 / 3.13 / 3.14 / 3.15
+```
+
+- **内容** = 该版本 `Doc/whatsnew/changelog.rst` 的中文译文 + 该版本自己 `Misc/NEWS.d` 里
+  属于它的补丁记录（只取这一个版本的部分，不含 whatsnew 正文）。
+- **构建器直接复用**本机 `whatsnew-studio/builder.py`：`ci/changelogs/builder.py` 是它的逐字副本
+  （只多了 `WNS_PY` / `WNS_TEXBIN` 两个环境变量），所以版式、册名（`Python 3.11 完整更新日志`）、
+  目录/书签层级与 `whatsnew-studio/output/3.9-3.15` 里那几本**一致**。入口是
+  `ci/changelogs/build_changelog_pdf.py`（循环调 `builder.build(mode="changelog")`）。
+- **每天重建 → 同名附件原地替换**；文件名带日期，前一天那份会被自动清掉。
+- 某版本某天构建失败：**保留上一次的附件**并告警，不会因为一天失败就少一本；
+  一个版本都编不出来时，release 原样不动。
+- 附件名是 ASCII（中文名会被 GitHub 换成点号），中文原名在 PDF 标题里。
+- 与文档册**互不干扰**：不同 job、不同 tag、不同失败域 —— 更新日志挂了不影响当天的文档册发布。
+
+**回退/停用**（三条路，从轻到重）：
+
+| 目的 | 做法 |
+|-|-|
+| 这一轮先别跑 | 手跑时把 `changelogs` 勾成 `false`（`workflow_dispatch` 的输入项） |
+| 代码整个撤掉 | `git revert <加入这一路的 commit>` —— 改动只在**一个** commit 里，主流程一行没动 |
+| 连 release 一起清掉 | `gh release delete changelogs --yes --cleanup-tag`（只删这个 tag，不碰 `v3.x` 那几条线） |
 
 ---
 
@@ -224,6 +259,11 @@ sphinx-pdf/
   build-sphinx-pdf.sh / rename-pdf.sh   # 纯 bash 一键（步骤 0~10）/ 英文 PDF 改名
   volumes.json                          # ★ 分册真源（可外置覆盖，读坏退回内置表）
   version-titles.json                   # 完整版本号缓存（中英文站 h1 取较新）
+ci/changelogs/                          # 更新日志（tag=changelogs），与上面的文档册无关
+  builder.py                            # whatsnew-studio/builder.py 的逐字副本（+ WNS_PY/WNS_TEXBIN）
+  build_changelog_pdf.py                # 入口：3.11~3.15 各一本「完整更新日志」
+  frozen/Python-3.9-changelog.pdf       # 已冻结（EOL），直接随仓库发布
+  frozen/Python-3.10-changelog.pdf
 构建Python文档PDF-完整步骤.md             # 逐步操作 + 故障排查表
 ```
 
