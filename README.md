@@ -67,8 +67,8 @@ GitHub Actions（每天自动一次）
    └──┬────┬──┘
       │    └──► archive-eol：把 EOL 版本的 release 挪进 old 分支后删除（幂等）
       │
-      ├────────► changelogs：每个大版本一本「完整更新日志」（3.11~3.15 五 job 并行，
-      │                     3.9/3.10 冻结不上传重建）→ 独立 release：tag=changelogs
+      ├────────► changelogs：3.11~3.15 各一本「完整更新日志」→ release tag=changelogs
+      │                     （3.9/3.10 已冻结，直接用仓库里那两本）
       │
    ┌──▼────────────────────────────────────────────────┐
    │ 1 装 TeX Live / poppler / 中文字体 / cairo         │
@@ -143,42 +143,30 @@ old 分支
 
 ### 更新日志（tag = `changelogs`）
 
-同一个工作流每天还并行出一套**完整更新日志**（每个大版本一本），单独放一个常驻 release：
+同一个工作流每天另外出一套「完整更新日志」，一个版本一本，单独一个 release：
 
 ```
 changelogs    Python 完整更新日志（3.9–3.15）
-├── Python-3.9-changelog.pdf                冻结（EOL，NEWS 不再变），随仓库带
-├── Python-3.10-changelog.pdf               同上
-├── Python-3.11-changelog-20261122.pdf      ← 每天重建，文件名带北京时间日期
+├── Python-3.9-changelog.pdf             3.9 / 3.10 已冻结（EOL），随仓库带
+├── Python-3.10-changelog.pdf
+├── Python-3.11-changelog-20261122.pdf   每天重建，文件名带北京时间日期
 └── … 3.12 / 3.13 / 3.14 / 3.15
 ```
 
-- **内容** = 该版本 `Doc/whatsnew/changelog.rst` 的中文译文 + 该版本自己 `Misc/NEWS.d` 里
-  属于它的补丁记录（只取这一个版本的部分，不含 whatsnew 正文）。
-- **构建器直接复用**本机 `whatsnew-studio/builder.py`：`ci/changelogs/builder.py` 是它的逐字副本
-  （只多了 `WNS_PY` / `WNS_TEXBIN` 两个环境变量），所以版式、册名（`Python 3.11 完整更新日志`）、
-  目录/书签层级与 `whatsnew-studio/output/3.9-3.15` 里那几本**一致**。入口就是它自己的 CLI：
+- **内容**：该版本 `Doc/whatsnew/changelog.rst` 的中文译文 + `Misc/NEWS.d` 里属于它的补丁记录。
+- **构建**：`ci/changelogs/builder.py` 是 `whatsnew-studio/builder.py` 的逐字副本（多 `WNS_PY`/`WNS_TEXBIN`），
+  直接调它自己的 CLI，版式与 `whatsnew-studio/output/3.9-3.15` 一致：
+  `python ci/changelogs/builder.py --version 3.11 --mode changelog --outdir changelog-out --workdir changelog-work`
+- **每天重建** → 同名附件原地替换、旧日期的自动清掉；某天某版本失败则保留上一版并告警，
+  一本都没编出来时 release 不动。
+- 附件名是 ASCII（GitHub 会把中文换成点号），中文原名在 PDF 标题里。
+- 与文档册不同 job / tag / 失败域，互不影响。
 
-  ```bash
-  python ci/changelogs/builder.py --version 3.11 --mode changelog \
-      --outdir changelog-out --workdir changelog-work
-  ```
-
-  CI 一个 job 编一个版本（matrix），不另包一层脚本 —— 那些默认值（toc-depth 3、书签 5、
-  连续排版、页脚只页码）本来就是上游的出厂值，再抄一份只会跟上游分叉。
-- **每天重建 → 同名附件原地替换**；文件名带日期，前一天那份会被自动清掉。
-- 某版本某天构建失败：**保留上一次的附件**并告警，不会因为一天失败就少一本；
-  一个版本都编不出来时，release 原样不动。
-- 附件名是 ASCII（中文名会被 GitHub 换成点号），中文原名在 PDF 标题里。
-- 与文档册**互不干扰**：不同 job、不同 tag、不同失败域 —— 更新日志挂了不影响当天的文档册发布。
-
-**回退/停用**（三条路，从轻到重）：
-
-| 目的 | 做法 |
+| 回退/停用 | 做法 |
 |-|-|
-| 这一轮先别跑 | 手跑时把 `changelogs` 勾成 `false`（`workflow_dispatch` 的输入项） |
-| 代码整个撤掉 | `git revert --no-commit <这条链路的所有 commit> && git commit`（连续几个 commit，一条 revert 一起撤）；主流程一行没动 |
-| 连 release 一起清掉 | `gh release delete changelogs --yes --cleanup-tag`（只删这个 tag，不碰 `v3.x` 那几条线） |
+| 这一轮不跑 | 手跑时把 `changelogs` 勾成 `false` |
+| 代码撤掉 | `git revert --no-commit <本功能的几个 commit> && git commit`（主流程一行没动） |
+| 连 release | `gh release delete changelogs --yes --cleanup-tag`（不碰 `v3.x` 那几条线） |
 
 ---
 
