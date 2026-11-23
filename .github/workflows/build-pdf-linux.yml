@@ -376,8 +376,10 @@ jobs:
           set +e
           cd "$RUNNER_TEMP"
           echo "=== kpsewhich（CJK 宏包是否存在）==="
-          for f in xeCJK.sty ctex.sty fandol.sty fontspec.sty sphinx.sty; do
-            printf '%-14s %s\n' "$f" "$(kpsewhich "$f" || echo MISSING)"
+          # 注意 `fandol.sty` 在 TeX Live 里根本不存在（Fandol 只有 OTF），
+          # 别再把它列进来当判据 —— 2026-11-23 就是这样误杀了五个 job。
+          for f in xeCJK.sty ctex.sty fontspec.sty FandolSong-Regular.otf sphinx.sty; do
+            printf '%-26s %s\n' "$f" "$(kpsewhich "$f" || echo MISSING)"
           done
           echo "=== fc-match（fontconfig 实际会选哪个文件）==="
           for f in "FreeSerif" "FreeSans" "FreeMono" "Noto Serif CJK SC"; do
@@ -1161,21 +1163,43 @@ jobs:
           for t in latexmk xelatex makeindex pdfinfo; do
             printf '%-10s %s\n' "$t" "$(command -v $t || echo MISSING)"
           done
-          echo "--- CJK 宏包与字体 ---"
-          # ★ 硬失败：这些 .sty 缺一个，xelatex 会在第一页就挂，而那时已经
-          #   花了几分钟下载 + Sphinx。宁可在装完包的两秒内停下。
-          MISS=()
-          for f in xeCJK.sty ctex.sty fandol.sty cmap.sty fancyvrb.sty framed.sty \
-                   tcolorbox.sty needspace.sty upquote.sty fontspec.sty; do
-            p="$(kpsewhich "$f" 2>/dev/null || true)"
-            if [ -n "$p" ]; then printf '%-14s %s\n' "$f" "$p"
-            else printf '%-14s MISSING\n' "$f"; MISS+=("$f"); fi
+          echo "--- CJK 宏包与字体（只打印，不判定）---"
+          # ★★ 2026-11-23 的教训：这里原来对一串 .sty 做**硬校验**，其中列了
+          #   `fandol.sty` —— 而 Fandol 在 TeX Live 里**只有 OTF、没有 .sty**
+          #   （实测 noble 的 texlive-lang-chinese 里就是
+          #     texmf-dist/fonts/opentype/public/fandol/Fandol*.otf）。
+          #   结果五个 job 全被这条假判据打死，环境其实一点问题都没有。
+          #   ⇒ 名字清单只打印；真正的判据是下一步「能不能排一页中文」。
+          for f in xeCJK.sty ctex.sty cmap.sty fancyvrb.sty framed.sty fontspec.sty \
+                   FandolSong-Regular.otf FandolHei-Regular.otf FandolFang-Regular.otf; do
+            printf '%-26s %s\n' "$f" "$(kpsewhich "$f" 2>/dev/null || echo MISSING)"
           done
-          if [ "${#MISS[@]}" -gt 0 ]; then
-            echo "::error::缺宏包：${MISS[*]}（apt 包里应该有，检查 texlive-latex-recommended / -extra）"
-            exit 1
+
+      - name: 中文排版冒烟（5 秒；缺字体就别白等 3 分钟下载）
+        # 用与 builder.py 完全相同的字体设置排一页，通了就说明这一册能编；
+        # 不通就立刻停，而不是等 Sphinx 跑完、latexmk 报一堆看不懂的错。
+        run: |
+          set -uo pipefail
+          cat > "$RUNNER_TEMP/wns-canary.tex" <<'TEX'
+          \documentclass{article}
+          \usepackage{xeCJK}
+          \setCJKmainfont{FandolSong-Regular.otf}[BoldFont=FandolHei-Bold.otf]
+          \setCJKsansfont{FandolHei-Regular.otf}
+          \setCJKmonofont{FandolFang-Regular.otf}
+          \begin{document}
+          中文测试 Hello
+          \end{document}
+          TEX
+          if ( cd "$RUNNER_TEMP" \
+               && xelatex -interaction=nonstopmode -halt-on-error wns-canary.tex \
+                    > wns-canary.log 2>&1 ); then
+            echo "✔ Fandol 中文排版正常"
+            exit 0
           fi
-          fc-list "FandolSong" | head -2
+          echo "::error::xelatex 排不了 Fandol 中文（缺字体或 xeCJK）"
+          grep -nE '^! |Missing character|not a native|Font .* does not|not found' \
+            "$RUNNER_TEMP/wns-canary.log" | head -10 || true
+          exit 1
 
       - name: 装构建用的 Python（Sphinx 9 + babel + blurb）
         uses: actions/setup-python@v5
