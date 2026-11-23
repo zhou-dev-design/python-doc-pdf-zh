@@ -26,9 +26,11 @@
 #   2) TEXBIN 目录不存在时置空串，run() 不再往 PATH 前面塞空段（空段=当前目录）；
 #   3) http_get 对 api.github.com 带上 GITHUB_TOKEN（匿名 60 次/小时，CI 必 403）；
 #   4) `--mirror` 显式指定时不探测，只用那一个（CI 传「直连」＝只用官网）；
-#   5) 头部这段说明。
+#   5) workdir/outdir 与交给子进程的路径一律绝对化 —— 子进程 cwd=Doc，相对路径
+#      会被它按 Doc 解析，.tex 就写到 Doc/ 底下去了（CI 传相对 --outdir 时必踩）；
+#   6) 头部这段说明。
 # 为什么复制而不 import：CI 只 checkout 本仓库，拿不到同级的 whatsnew-studio。
-# 同步方法：上游 builder.py 更新后重新覆盖本文件，再把这 4 处改回来（约 20 行）。
+# 同步方法：上游 builder.py 更新后重新覆盖本文件，再把这 5 处改回来（约 25 行）。
 # 版式/命名一律以上游为准，本文件不做任何“改进”——这里只是搬运。
 from __future__ import annotations
 
@@ -628,6 +630,9 @@ def legacy_sphinx_env(workdir: pathlib.Path):
 
 def sphinx_latex(doc: pathlib.Path, outlatex: pathlib.Path,
                  extra_env: dict | None = None):
+    # 交给子进程的路径一律绝对化（子进程 cwd=doc，相对路径会按 doc 解析）
+    doc = pathlib.Path(doc).resolve()
+    outlatex = pathlib.Path(outlatex).resolve()
     if outlatex.is_dir() and any(outlatex.glob("*.fdb_latexmk")):
         try:
             outlatex.rename(outlatex.parent / ("latex_prev_%d" % int(time.time())))
@@ -639,9 +644,10 @@ def sphinx_latex(doc: pathlib.Path, outlatex: pathlib.Path,
             cwd=doc, timeout=3600, extra_env=extra_env)
     tex = outlatex / "whatsnew_all.tex"
     if not tex.is_file():
-        raise RuntimeError("Sphinx 未产出 .tex：\n" +
-                           (r.stdout or "")[-2500:] + "\n" + (r.stderr or "")[-2500:])
-    log("Sphinx 完成：%.2f MB" % (tex.stat().st_size / 1048576))
+        raise RuntimeError("Sphinx 未产出 .tex（返回码 %s，期望位置 %s）：\n%s\n%s"
+                           % (r.returncode, tex,
+                              (r.stdout or "")[-2500:], (r.stderr or "")[-2500:]))
+    log("Sphinx 完成：%.2f MB（%s）" % (tex.stat().st_size / 1048576, tex))
     return tex
 
 
@@ -1101,8 +1107,12 @@ def build(cfg):
     不要直接手改 work 下的 conf.py/.tex（下次构建会覆盖）。
     """
     ver, mode = cfg["version"], cfg["mode"]
-    work = pathlib.Path(cfg["workdir"])
-    outdir = pathlib.Path(cfg["outdir"])
+    # ★ 必须绝对化：Sphinx / latexmk 都以 cwd=<别的目录> 起子进程，而传过去的
+    #   outlatex 若是相对路径，会被子进程按它的 cwd 解析 —— 于是 .tex 写进了
+    #   Doc/changelog-work/... 而我们回仓库根找 work/... ，表现成「Sphinx 未产出 .tex」。
+    #   本机测试习惯传绝对路径，所以这个坑只在 CI（传 relative --outdir/--workdir）暴露。
+    work = pathlib.Path(cfg["workdir"]).resolve()
+    outdir = pathlib.Path(cfg["outdir"]).resolve()
     root = work / ("build_%s_%s" % (mode, ver.replace(".", "_")))
     doc = root / "Doc"
     po_root = root / "zh_po"
@@ -1179,6 +1189,15 @@ def build(cfg):
         if not any((po_root / "whatsnew").glob("*.po")):
             raise RuntimeError("中文 po 下载失败，无法继续")
         log("下载完成（失败 %d 个）" % fails)
+        # 下载器把「该分支没有这个文件」和「网络失败」都算进 fails，所以不能一律失败；
+        # 但骨架文件缺了就一定编不出来，早点给出人话，别让它拖到 Sphinx 才报
+        # FileNotFoundError: conf.py（那种报错看不出是下载没下全）。
+        skeleton = [doc / "conf.py", doc / "tools" / "extensions"]
+        lost = [p.name for p in skeleton if not p.exists()]
+        if lost or not any((doc / "tools" / "extensions").glob("*.py")):
+            raise RuntimeError(
+                "下载不完整：缺 %s（失败 %d 个文件）。换个 --mirror 重跑即可，"
+                "已下好的文件会复用。" % (lost or ["tools/extensions/*.py"], fails))
         emit("PCT", "26")
 
     step("生成变更日志数据", 27)
