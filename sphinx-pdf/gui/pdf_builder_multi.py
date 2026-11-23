@@ -123,37 +123,17 @@ CLEAN_MODES: list[tuple[str, str]] = [
 ]
 
 #: Doc/ 之外的、被文档正文引用到的资源目录 —— 稀疏克隆必须一起带上。
-#:   ★ 3.15 起 Doc/whatsnew/3.15.rst 与 Doc/library/profiling.sampling.rst 写了
-#:     `.. image:: ../../Lib/profiling/sampling/_assets/tachyon-logo.png`，
-#:     图片在 **Lib/** 下（Doc 之外）。漏取它的后果很隐蔽：
-#:       Sphinx 找不到图片时**不报错**，只留一条 "File ... not found" 软警告，
-#:       然后把**原始相对路径**原样写进 .tex —— Windows 上分隔符是反斜杠，
-#:       于是 `..\Lib\profiling\sampling\_assets\tachyon-logo.png` 里的
-#:       `\Lib` `\profiling` `\_assets` 全成了未定义控制序列 → xelatex 报错、
-#:       latexmk 退出码 12 → 整个册子（本例 library / whatsnew）出不来 PDF。
-#:     实测：39 册里就这 2 册挂，而报错点离病根隔了 20 分钟 + 两层工具。
-#: 稀疏检出的路径（`--filter=blob:none` 下，**只有列在这里的文件才真拉 blob**）。
+#:   漏取的后果全是静默的：literalinclude 找不到 → 该章整章空白；image 找不到 →
+#:   原始相对路径（含反斜杠）进 .tex → \Lib 成未定义控制序列 → latexmk 退 12。
+#:   判据不是「Doc 需要什么」，而是「Doc 引用了哪些 Doc/ 之外的文件」，可直接量：
+#:   `tools/check-doc-refs.py <Doc 目录>`（步骤 6 之前几秒内拦住，GUI 与 bash 同一份实现）。
 #:
-#: ★ 判据不是「Doc 需要什么」，而是「Doc 引用了哪些 Doc/ 之外的文件」——
-#:   这件事可以直接量出来，别靠记：`tools/check-doc-refs.py <Doc 目录>`。
-#:
-#:   Doc                 ← 正文（同时含 Doc/tools/、Doc/locales/）
-#:   Misc/NEWS.d         ← Doc/Makefile 的 build 目标要拼 NEWS
-#:   Include             ← Doc/tools/extensions/patchlevel.py 读 Include/patchlevel.h
-#:                         取版本号（漏了它 Sphinx 直接崩）
-#:   Grammar             ← reference/grammar.rst 用 literalinclude 引
-#:                         Grammar/python.gram，即《完整的语法规范》整章正文
-#:   Parser              ← library/ast.rst 用 literalinclude 引 Parser/Python.asdl
-#:   Lib/profiling/sampling ← 3.15 的 Tachyon 文档引这里的配图
-#:
-#: ★★ 漏掉一条的后果**是静默的**，这是本项目最贵的一类坑：
-#:   · literalinclude / include 找不到文件 → Sphinx 只留一条 warning、`.tex` 里
-#:     什么都不写 → **PDF 里整章空白**（3.13/3.14/3.15 的《完整的语法规范》
-#:     整章只剩标题 + 两行引言；实测该章本该 20 多页）
-#:   · image / figure 找不到文件 → 把**原始相对路径**原样写进 `.tex`，Windows 上
-#:     分隔符是反斜杠 → `\Lib` `\profiling` 成了未定义控制序列 → latexmk 退出码 12
-#:   两种都得等构建完才看得出来，所以现在由 `tools/check-doc-refs.py` 在
-#:   步骤 6 之前几秒内拦住（GUI 与 bash 调的是同一份实现）。
+#:   Doc                     ← 正文（含 Doc/tools/、Doc/locales/）
+#:   Misc/NEWS.d             ← Doc/Makefile 的 build 目标要拼 NEWS
+#:   Include                 ← patchlevel.py 读 Include/patchlevel.h 取版本号
+#:   Grammar                 ← reference/grammar.rst 用 literalinclude 引 Python.gram
+#:   Parser                  ← library/ast.rst 用 literalinclude 引 Python.asdl
+#:   Lib/profiling/sampling  ← 3.15 Tachyon 文档的配图
 SPARSE_PATHS: list[str] = [
     "Doc",
     "Misc/NEWS.d",
@@ -1468,19 +1448,10 @@ class Pipeline:
         #   注意这里**故意覆盖**外部环境：本程序所有子进程的输出都要进日志，
         #   日志里出现转义序列没有任何好处。（`strip_ansi()` 是第二道防线。）
         env["NO_COLOR"] = "1"
-        # ★★ 坑：Windows 版 perl 一看到 LC_ALL / LANG 是非 C 的 locale，
-        #   就把文件名按那个编码处理，而 Windows 的文件 API 走 ANSI 代码页 ——
-        #   于是**凡是路径里带中文的文件全都打不开**（本机路径含「Python 文档」）：
-        #     Latexmk: I cannot read the rc-file 'latexmkrc'
-        #     Cannot write file 'whatsnew.aux'
-        #     runscript.tlu:933: ...\tlperl\bin\perl.exe: No such file or directory
-        #   后果是 latexmk 退出码 12、整册不出 PDF，而**报错完全不提编码**。
-        #   本机实测（`latexmk -v` 里 "cannot read the rc-file" 出现次数）：
-        #     LC_ALL=C.UTF-8 → 1   LC_ALL=zh_CN.GBK → 1   LC_ALL=C → 0   清空 → 0
-        #   也就是说 git-bash 里常见的 LC_ALL=C.UTF-8（甚至 GBK）都会中招，
-        #   而用户从资源管理器双击启动时没有这些变量 —— 同一份配置、两种结局。
-        #   Python 侧不受影响（上面两个 PYTHON* 已经把编码钉死 UTF-8），
-        #   所以直接清掉，回到「双击启动」那套已验证可用的环境。
+        # ★★ Windows 版 perl + 非 C locale = 路径带中文的文件全打不开 ★★
+        # Latexmk 报 "cannot read the rc-file" / "Cannot write file 'x.aux'"，退出码 12
+        # 且完全不提编码。实测 C.UTF-8 与 zh_CN.GBK 都中招，C 与清空正常。
+        # Python 侧编码已由上面的 PYTHON* 钉死，这里直接清掉，回到双击启动那套环境。
         if IS_WIN:
             for k in ("LC_ALL", "LANG", "LC_CTYPE"):
                 env.pop(k, None)
@@ -2806,17 +2777,10 @@ class Pipeline:
         self._guard_doc_refs()
 
         # ★★ conf.py 的 SVG 转换器：rsvg → cairosvg ★★
-        #   conf.py 的可选扩展里写死 'sphinxcontrib.rsvgconverter'，它要调外部程序
-        #   rsvg-convert（Windows 上没有），结果是只留一行软告警、SVG 原样进 LaTeX，
-        #   之后报 `! LaTeX Error: Cannot determine size of graphic in xxx.svg`，
-        #   c-api.pdf 直接编不过。
-        #
-        # ★★ 判据是「这一版的 Doc 里**到底有没有 SVG**」，不是「conf.py 里有没有
-        #   这串字」—— 后者会把 3.10~3.12 整批误杀（2026-11-03 实测）：
-        #     3.10 的 conf.py 只有 236 行，压根没有 SVG 转换器；
-        #     3.12 的 `_OPTIONAL_EXTENSIONS` 只有 `sphinxext.opengraph`；
-        #     `sphinxcontrib.rsvgconverter` 是 3.13 才随 SVG 插图一起加进来的。
-        #   老版本既没有 SVG、也不需要转换器，硬要求「必须改名成功」= 步骤 6 必失败。
+        # 'sphinxcontrib.rsvgconverter' 要调 rsvg-convert（Windows 没有），SVG 会原样
+        # 进 LaTeX 并报 Cannot determine size of graphic，c-api 直接编不过。
+        # ★ 判据是「这一版 Doc 里有没有 .svg」，不是「conf.py 里有没有那串字」——
+        #   后者会误杀 3.10~3.12（SVG 插图与转换器都是 3.13 才引入的）。
         txt = read_text_safe(conf)
         old = "sphinxcontrib.rsvgconverter"
         new = "sphinxcontrib.cairosvgconverter"
@@ -2841,14 +2805,10 @@ class Pipeline:
             raise Fail(f"文档里有 {len(svgs)} 处 SVG 插图，却没能把它写进 conf.py：\n"
                        f"  {new}\n  请手工看 {conf} 里的 extensions 是怎么写的。")
 
-        # ★★ gettext_compact —— 老版本 conf.py 缺这一行，后果是整册英文 ★★
-        #   Sphinx 默认 gettext_compact = True，含义是「同一顶层目录共用一份 .mo」
-        #   （`library/*` 全去找 `locales/zh_CN/LC_MESSAGES/library.mo`）。
-        #   而 python-docs-zh-cn 是**每页一个 .po**（`library/array.po`），
-        #   于是 Sphinx 一个 catalog 都匹配不上 —— 正文全英文、**0 条 warning**、
-        #   进度 100%、页数书签索引全都正常。实测 3.10 的 conf.py 只有 236 行、
-        #   压根没有这一项；3.13+ 才有，所以此前从没暴露。
-        #   幂等：已经写了这行的版本原样不动。
+        # ★★ gettext_compact —— 老 conf.py 缺这行就是整册英文 ★★
+        # 默认 True = 同一顶层目录共用一份 .mo（library/* 全找 library.mo），而译稿是
+        # 每页一个 .po → 一个 catalog 都匹配不上：整册英文、0 warning、进度 100%。
+        # 3.13+ 上游才有这行，老版本由这里补；已有的不动。
         txt2 = read_text_safe(conf)
         if "gettext_compact" not in txt2:
             conf.write_text(
@@ -2860,17 +2820,10 @@ class Pipeline:
                          "（不加这行，逐页译文一个都匹配不上，正文会整册英文）",
                          level="warn")
 
-        # ★★ papersize 归一化：3.11 的 conf.py 写的是 'a4'，LaTeX 不认 ★★
-        #   Sphinx 把 latex_elements['papersize'] **原样**拼进文档类：
-        #       \documentclass[a4,10pt]{sphinxmanual}
-        #   而合法的纸张选项是 a4paper / letterpaper / a5paper…… `a4` 不是。
-        #   LaTeX 不报错，只丢一句 `Unused global option(s): [a4]`（日志里几乎看不见），
-        #   然后按文档类默认的 **letterpaper** 排完整册。
-        #   实测：3.11.18 的成品是 612×792pt（Letter），版心中位 540pt；
-        #         3.12 及以后是 595×842pt（A4），版心中位 523.3pt。
-        #   上游 3.12 已自己改成 'a4paper'（注释也从 ('letter' or 'a4') 改了），
-        #   所以这里只在遇到旧写法时补 paper 后缀，其余版本原样不动。
-        #   注意：改纸型会让 3.11 整册重排（页数/页码/溢出台账全变），属预期。
+        # ★★ papersize 归一化：3.11 的 conf.py 写 'a4'，LaTeX 不认 ★★
+        # Sphinx 原样拼成 \documentclass[a4,10pt]{...}，合法值是 a4paper；LaTeX 只留
+        # 一句 Unused global option(s)，然后按默认 letterpaper 排完整册（612×792pt）。
+        # 只在遇到旧写法时补 paper 后缀，3.12+ 上游自己写对了。
         txt_paper = read_text_safe(conf)
         mp = re.search(r"""('papersize'\s*:\s*')([A-Za-z0-9]+)(')""", txt_paper)
         if mp and not mp.group(2).endswith("paper"):
@@ -2881,39 +2834,24 @@ class Pipeline:
                          "（原值不是 LaTeX 纸张选项，会被静默忽略，整册回落成 Letter）",
                          level="ok")
 
-        # ★★ 表格不再强制 longtable（2026-11-19 回滚）★★
-        #   2026-11-17 曾加过一个 hook：≥10 行的表格一律改 longtable，用来修
-        #   9 处「表格压页脚」。它确实修好了压页脚，但把 library / c-api 两册的
-        #   书签全弄丢了 —— 日志里 longtable 每遍都报
-        #   "Table widths have changed. Rerun LaTeX."，latexmk 跑到上限不收敛、
-        #   退出码 12，PDF 停在第一遍（目录空、书签 0、2270 页全 undefined）。
-        #   已试过两种修法（给无 :widths: 的表补列宽 / 把 \linewidth 钉回
-        #   \textwidth），真实文档里都不收敛，所以回到 Sphinx 默认的
-        #   tabular/tabulary：书签优先。
-        #   压页脚那 9 处改用逐表 :class: longtable（只动那几张表，不全局改），
-        #   详见 2026-11-19 的工作日志。
+        # ★★ 表格不强制 longtable（2026-11-19 回滚）★★
+        # 曾加过「≥10 行一律 longtable」的 hook：压页脚修好了，但 library / c-api 的
+        # 书签全丢 —— longtable 每遍报 "Table widths have changed"，latexmk 不收敛
+        # 退 12，PDF 停在第一遍（目录空、2270 页 undefined）。补列宽、钉 \textwidth
+        # 都不收敛。所以回到 tabular/tabulary（书签优先）；要跨页的表单独加
+        # :class: longtable。
 
-        # ★★ 不可断长串的根治（2026-11-17，Sphinx 官方文档 + 源码核对）★★
-        #   背景：\emergencystretch 只能救正文段落；表格单元格和 code-block 里的
-        #   长标识符（`PyUnstable_ThreadState_ResetLock` 这类）还是断不开。
-        #   实测 3.15.2 合并册 18 页正文越过版心，最狠画到 x=600.5pt（A4 只有 595.3pt）。
-        #   Sphinx 官方机制（源码 sphinxlatexliterals.sty / sphinxpackageoptions.sty）：
-        #     ① code-block：`verbatimforcewraps` 强制硬折行（≥5.4 才有此键，
-        #        现行构建 3.11=sphinx7.2 / 3.12=8.2 / 3.13+=8.x 都满足；给 3.10 用的
-        #        sphinx 3.4.3 没有这个键，\sphinxsetup 遇未知键会报错，所以有版本守卫）
-        #     ② inline code / 表格单元格：Sphinx 只在 . , ; ? ! / \ 处给断点，
-        #        **下划线不在列表里**，纯 hex 串更是一个断点都没有。
-        #        writer 把 _ 转义成 \_，所以在 \sphinxcode / \sphinxupquote（都是
-        #        单参数 \protected\def）内重定义 \_ = 输出字符 + \allowbreak。
-        #        字符码直出（\char95）而非 \let 保存原含义 —— 嵌套安全：
-        #        writer 输出是 \sphinxcode{\sphinxupquote{...}}，两层包装会各自
-        #        重定义 \_，若用 \let 捕获，第二层捕获到的是第一层改过的 \_，
-        #        会无限递归（TeX capacity exceeded，实测踩过）。
-        #     ③ 不用 \XeTeXlinebreaklocale "zh"：ICU 断行对拉丁字母串无效
-        #        （UAX#14 无论 locale 都不在字母间断行），实测无效。
-        #   实证（sphinx 8.2.3 + xelatex 最小项目）：120pt 超宽 → Overfull 0，
-        #   长标识符在 `_` 处干净断行，短标识符不受影响，code 行硬折行带 `,→` 续行标。
-        #   ★ 幂等：靠 conf.py 里的 PYPDF_LINEBREAK_V2 标记判断。
+        # ★★ 不可断长串的根治（2026-11-17）★★
+        # \emergencystretch 只救正文段落；表格单元格与 code-block 里的长标识符仍断不开。
+        # Sphinx 官方机制：
+        #   ① code-block：`verbatimforcewraps`（Sphinx ≥5.4；3.10 的 3.4.3 没这个键，
+        #      遇未知键会报错，故有版本守卫）
+        #   ② inline code / 表格单元格：只在 . , ; ? ! / \ 处给断点，下划线不在列表里。
+        #      故在 \sphinxcode / \sphinxupquote 内重定义 \_ = 字符 + \allowbreak；
+        #      字符用 \char95 直出而不用 \let —— 两层包装会各自重定义，\let 会捕获
+        #      上一层改过的 \_ 并无限递归（TeX capacity exceeded，实测踩过）
+        #   ③ 不用 \XeTeXlinebreaklocale "zh"：ICU 断行对拉丁字母串无效
+        # ★ 幂等：靠 conf.py 里的 PYPDF_LINEBREAK_V2 标记判断。
         conf_txt3 = read_text_safe(conf)
         if "PYPDF_LINEBREAK_V2" not in conf_txt3:
             conf_txt3 += r'''
@@ -2969,19 +2907,13 @@ latex_elements["preamble"] += r"""
                          "硬折行 + 下划线断点 + 字母数字串每 5 位断点"
                          "（根治中文表格与 hex/长数字横向溢出）", level="ok")
 
-        # ★★ 没有 :widths: 的表：补列宽，让它们能折行（2026-11-21）★★
-        #   11-21 那批实测：剩下的「出纸」页几乎全是**表格**——HTTP 状态码表的
-        #   (Experimental)、cr_* 属性表的 sys.set_coroutine_origin_tracking_depth()、
-        #   内置函数参数表被切成 sta / nlocals。它们在 PDF 里都是**一整行冲出纸外、
-        #   连中文都不换行**，因为 Sphinx 对没有 :widths: 的表生成 {ll}：
-        #   l 列取内容自然宽度、整行不换行，\allowbreak 断点对这种列完全无效
-        #   （实测连 `_` 都不断）。
-        #   修法：doctree 层补 'colwidths-given' class + 列宽 → Sphinx 生成 \X{a}{b}
-        #   （p{} 列，可折行）。列宽按单元格文字长度估（CJK 记 2、ASCII 记 1），
-        #   每列至少 10%，免得第一列被压成一条。
-        #   ★ 绝不加 'longtable'：longtable 要把实测列宽写进 .aux 并多遍收敛，
-        #     表宽一漂 latexmk 就退 12、PDF 停在第一遍、书签全丢（2026-11-19
-        #     library/c-api 事故）。tabular 不写 LT@ 记录，不存在这个问题。
+        # ★★ 没有 :widths: 的表补列宽（2026-11-21）★★
+        # Sphinx 对无 :widths: 的表生成 {ll}：列宽取内容自然宽度、整行不换行，
+        # 长标识符和中文都直接冲出纸外（\allowbreak 对 l 列无效）。
+        # 修法：doctree 层补 'colwidths-given' + 列宽（CJK 记 2、ASCII 记 1，每列 ≥10%），
+        # Sphinx 便生成可折行的 \X{a}{b}（p{} 列）。
+        # ★ 绝不加 'longtable'：它要把实测列宽写进 .aux 并多遍收敛，表宽一漂
+        #   latexmk 就退 12、PDF 停在第一遍、书签全丢。
         conf_txt4 = read_text_safe(conf)
         if "PYPDF_TABLE_WIDTHS" not in conf_txt4:
             conf_txt4 += r'''
@@ -3221,21 +3153,11 @@ def setup(app):
           拷一份到 latex 目录（ASCII 名 makeindex-fix.py），再用 PATH 里的 python 启动。
         """
         name = tex.stem
-        # ★ 不再手删中间产物 ★（2026-09-27 改）
-        #   以前这里 unlink 掉 pdf/aux/toc/out/ind/ilg/idx/log/fdb_latexmk/fls
-        #   十个后缀，是为了防 latexmk 认为「已是最新」而跳过重排（改了 .rst 却
-        #   编不出新内容）。但每册 10 个 × 38 册 = **380 次删除**，在受管环境里会
-        #   撞上「批量删除保护」（单个 turn 累计 50 次就要人工确认）：后台跑直接被
-        #   拦，每册都报 `SAFE_DELETE_BULK_CONFIRM_REQUIRED`，整轮编译判失败。
-        #   改用 latexmk 自带的 `-gg`：忽略依赖数据库、强制把各步骤重跑一遍
-        #   （.aux/.toc/.idx 的删与重建都在 latexmk 进程内部完成，不经过调用方），
-        #   效果与手删等价，却不会产生删除风暴。
-        #   ⚠️ 旧 .pdf 由 latexmk 覆盖；只有它真的失败时旧 PDF 才会留下，而收尾
-        #      「PDF 存在且非空」的判据仍然有效。
-        # ★ 索引样式文件不写死 ★ Sphinx 从 1.x 到 8.x 一直叫 python.ist，但这是它的
-        #   内部命名，不是承诺。3.4.3 这种五年老的版本上万一换了名，写死 `-s python.ist`
-        #   会让 makeindex 直接失败 → .ind=0 → 每册都没有索引（且 PDF 看着「正常」）。
-        #   这里按目录里的实际文件取：优先 python.ist，否则取第一个 *.ist，都没有就不加 -s。
+        # ★ 不手删中间产物：每册 10 个后缀 × 38 册 = 380 次删除，会撞上批量删除保护
+        #   （SAFE_DELETE_BULK_CONFIRM_REQUIRED），后台跑整轮判失败。改用 latexmk 的
+        #   `-gg`：忽略依赖库强制重跑，删除都在它进程内部完成。
+        # ★ .ist 不写死：Sphinx 一直叫 python.ist，但那是内部命名。按目录实际文件取
+        #   （优先 python.ist，否则第一个 *.ist，都没有就不加 -s）。
         ist = ""
         if (latex / "python.ist").is_file():
             ist = "-s python.ist "
@@ -3456,24 +3378,10 @@ def setup(app):
                                  f"（退出码 {rc_}，用时 {secs_:.1f}s）", level="meta")
 
         # ── 失败册串行重试（★ 偶发故障的兜底）──────────────────────────────
-        # ★★ 为什么必须要有这一步 ★★
-        #   并发编译实测出现过 `xelatex.exe: fwrite: Broken pipe`：xelatex 写到
-        #   某一页时管道断掉、进程返回 1，latexmk 于是报
-        #     `pdflatex: Command for 'pdflatex' gave return code 1` + 退出码 12，
-        #   而那一册的 `.log` 里**一条 LaTeX 错误都没有**（TeX 自己的诊断是
-        #   “Broken pipe”，与 .rst 内容无关）。3.15 实测：39 册里 2 册中招
-        #   （howto-sorting / howto-logging-cookbook），而且落在**不同批次**；
-        #   把这两册单独重编，一次就成功 —— 典型的偶发（进程/管道/杀软实时扫描
-        #   17 MB 的 .tex 与几百 MB 的中间文件）。
-        #   这类失败不该让用户自己去发现「重跑一次就好了」，所以这里自动兜。
-        #   思路与 `merge-pdf.py` 那个 WinError 5 退避重试一致。
-        # ⚠️ 重试**串行**跑：并发本来就是把负载摊开，重试时让路反而更容易过。
-        # ⚠️ 触发判据 = **本次运行退出码非 0** 或 **没出 PDF**。
-        #   ★ 为什么不能只看「PDF 在不在」：上一轮留下的旧 PDF 还在，某册这轮
-        #     编崩了也会被判「成功」—— 重试逻辑就形同虚设（这正是它一开始的漏洞）。
-        #   ★ 为什么不能只看「退出码」：latexmk 对「最后一页越界/rerun 未收敛」
-        #     这类长尾会保守地返回非 0，但 PDF 完全可用 —— 所以**最终验收**仍以
-        #     「PDF 存在且非空」为准（见下面 `pdf_n < tex_n` 那两行）。
+        # 并发编译出现过 `fwrite: Broken pipe`：xelatex 返回 1、latexmk 退 12，而
+        # `.log` 里一条 LaTeX 错误都没有（3.15 实测 39 册里 2 册中招，单独重编即好）。
+        # 判据＝本次退出码非 0 **或** 没出 PDF（只看 PDF 会被上一轮的旧文件骗过）；
+        # 最终验收仍以「PDF 存在且非空」为准。重试串行跑，让路更容易过。
         RETRY_ROUNDS = 2
         for attempt in range(1, RETRY_ROUNDS + 1):
             if attempt == 1:

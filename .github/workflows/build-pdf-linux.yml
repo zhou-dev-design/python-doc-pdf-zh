@@ -3,28 +3,14 @@ name: 构建 Python 中文文档 PDF（Linux）
 # ★ 这是仓库里**唯一**的流水线（Windows 那条已于 2026-11-02 删除）。
 #   仓库是公开的 ⇒ Actions 分钟数不限，每天跑五个版本也没有额度问题。
 on:
-  # ★ 触发时刻：UTC 00:47 = 北京 08:47。**实测出稿 14:52–16:50，平均 15:47**。
+  # 触发时刻：UTC 00:47 = 北京 08:47。近 16 次（11-06~11-21）实测出稿 14:52–16:50（均值 15:46），
+  # 排队延迟均值 6h43、构建均值 17m10s；对外只承诺 14:50–17:00。
   #
-  #   GitHub 的定时只是“尽力而为”。本仓库近十六次实测（run #28–#41、#51–#52；cron 均为
-  #   UTC 00:47，括号内为排队延迟，时刻均为北京时间）：
-  #     11-06 15:26 → 15:42 (6h39)     11-13 15:22 → 15:41 (6h35)
-  #     11-07 14:37 → 14:52 (5h51)     11-14 15:04 → 15:18 (6h17)
-  #     11-08 14:44 → 14:59 (5h58)     11-15 15:14 → 15:33 (6h28)
-  #     11-09 15:14 → 15:30 (6h28)     11-16 15:20 → 15:34 (6h34)
-  #     11-10 15:46 → 16:05 (7h00)     11-17 16:31 → 16:50 (7h45)  ← 最长
-  #     11-11 15:12 → 15:30 (6h26)     11-18 15:58 → 16:09 (7h11)
-  #     11-12 15:45 → 16:03 (6h58)     11-19 15:58 → 16:19 (7h11)
-  #     11-20 15:48 → 16:06 (7h01)     11-21 15:44 → 16:08 (6h57)
-  #   延迟均值 6h42（5h51–7h45）；跑完均值 17m10s（10m49–24m01）。
-  #   出稿密集段 15:10–16:10（12/16）；对外只给“14:50–17:00”。
+  # ★★ 为什么不能再早：构建根名与 release 标题里的日期取的是 UTC 日期，启动一旦落在
+  #   UTC 16:00–24:00（北京 00–08 点）文件名就差一天。00:47 是「延迟为 0 也不跨天」的
+  #   最早时刻；分钟取 47 是避开 :00 的整点洪峰。
   #
-  #   ★★ 为什么是 00:47、不能再早：构建根名与 release 标题里的日期取的是 UTC 日期
-  #   （主程序 time.strftime("%Y%m%d")）。启动一旦落在 UTC 16:00–24:00（北京 00–08 点），
-  #   文件名就会与北京日期差一天。00:47 是"即使排队延迟变成 0 也不跨天"的最早时刻
-  #   （启动必然 ≥ 00:00 UTC）；要在这个时刻踩坑，延迟得涨到 15h13m 以上。
-  #   分钟取 47 则是避开整点洪峰（:00 最挤，:42~:52 实测只剩 1.6 / 0.2 分钟）。
-  #
-  #   要立刻出稿：用 workflow_dispatch（同参数、同结果，只是不走 cron 队列）。
+  # 要立刻出稿：workflow_dispatch（同参数、同结果，只是不走 cron 队列）。
   schedule:
     - cron: "47 0 * * *"        # UTC 00:47 = 北京 08:47（实测 14:52–16:50 出稿）
   workflow_dispatch:
@@ -64,13 +50,8 @@ on:
         options: ["false", "true"]
         default: "false"
 
-  # ★ 2026-11-19 晚：**已删除 push 触发**。曾临时加过一条「git push 即构建」的通道
-  #   （用提交信息里的 [ci-run] 前缀开开关），用于没有 token 时验证修复。删掉的理由：
-  #     - 开关藏在提交信息里，语义脆弱：正文提到标记就误触发过一次，白跑 25 分钟；
-  #     - 每次普通提交都会多出一个 skipped 的 run，污染 Actions 列表；
-  #     - 真要跑就用 workflow_dispatch：versions / books / push_branch 都能在网页上填，
-  #       比改写提交信息清楚得多。
-  #   ⚠️ 不要为了「方便」再把 push 加回来 —— 日常出稿已由下面的 cron 覆盖。
+  # 已删除 push 触发：开关藏在提交信息里易误触发，且每次提交都多一个 skipped run。
+  # 要跑请用 workflow_dispatch（versions / books / push_branch 都能填）。
 permissions:
   contents: write               # 要往仓库推分支
 
@@ -112,16 +93,10 @@ jobs:
               f.write("versions=" + ",".join(vs) + "\n")
           PY
 
-      # ★★ 每次构建都对着官方文档站核一遍版本号，变了就提交 ★★
-      #   为什么必须"每次"、而且必须真的写回仓库：
-      #     完整版本号（→ 构建根名 → release 的 tag）的唯一口径是官方文档站标题，
-      #     中英文站各取 h1、**取较新者**（`docs.python.org/zh-cn/3.1X/` 与
-      #     `docs.python.org/3.1X/`）。只用中文站不够：那边等翻译分支重建，滞后过
-      #     （zh-cn/3.7 停在 3.7.13，英文站已是 3.7.17）。
-      #     缓存停在 3.15.2、而上游已经发了 3.15.3 时，构建出来的 TAG 还是 v3.15.2 —— 于是
-      #       ① 不会产生新 tag，旧 release 也就**不会**被归档到 old；
-      #       ② 新内容被原地覆盖成旧名字（内容新、文件名旧，且不报任何错）。
-      #     所以这一步不是"复核提醒"，而是**必须做成功的前置动作**。
+      # ★★ 每次构建都对着官方文档站核版本号，变了就提交 ★★
+      # 完整版本号（→ 构建根名 → release tag）的唯一口径是官方站 h1，中英文站取较新
+      # 那个（中文站滞后过：zh-cn/3.7 停在 3.7.13）。缓存旧了会照旧名覆盖 release、
+      # 不产生新 tag，旧版也就不归档 —— 全程零报错。所以这是必须成功的前置动作。
       - name: 刷新版本号缓存（对着官方文档站，变了就提交）
         env:
           VERSIONS: ${{ steps.m.outputs.versions }}
@@ -166,11 +141,9 @@ jobs:
           旧 release 也就不会归档；下一轮会重试"
 
   # ---------------------------------------------------------------- 归档 EOL
-  # ★ 停止支持的版本：把 release 里的附件挪进 old 分支的 <tag>/ 目录，然后删掉
-  #   release（--cleanup-tag 连 tag 一起清）。与发布步骤里「补丁版升级时归档上一版」
-  #   是同一套做法，只是这里的触发条件是「版本线 EOL」而不是「出了新补丁版」。
-  #   幂等：release 已经不在了就跳过，所以每次运行都能无条件跑一遍。
-  #   加一个版本：往 EOL_TAGS 里添一个 tag 即可。
+  # 把 release 附件挪进 old 分支的 <tag>/，再删 release（--cleanup-tag 连 tag）。
+  # 与发布时「补丁版升级归档上一版」同套路，只是触发条件换成版本线 EOL。
+  # 幂等（release 不在就跳过），加版本＝往 EOL_TAGS 添 tag。
   archive-eol:
     needs: prepare
     runs-on: ubuntu-24.04
@@ -185,10 +158,8 @@ jobs:
           # ── 停止支持的版本清单（tag）────────────────────────────────
           #   3.10.22：Python 3.10 于 2026-10-31 EOL（官方停止安全更新）
           EOL_TAGS="v3.10.22"
-          # ────────────────────────────────────────────────────────
-          # ★ gh 必须显式带 -R：这个 job 没有 actions/checkout，工作目录不是 git
-          #   仓库 —— 不加 -R 时 `gh release view` 会报 "not a git repository" 并返回
-          #   非 0，看起来跟「release 不存在」一模一样（2026-11-03 就这么静默跳过了）。
+          # ★ gh 必须带 -R：这个 job 没有 checkout，不是 git 仓库；不加 -R 时
+          #   `gh release view` 报 "not a git repository"，和「release 不存在」一个样。
           echo "repo=$GITHUB_REPOSITORY"
           TODO=()
           for t in $EOL_TAGS; do
@@ -275,10 +246,8 @@ jobs:
           fetch-depth: 1
 
       - name: 恢复 apt 缓存（省掉每轮约 250 MB 下载）
-        # ★ 为什么需要：runner 每次都是全新机器，TeX Live + 字体约 250 MB / 41 个包，
-        #   实测有一轮光下载就花了 9 分钟（fonts-noto-cjk 单个 61 MB，带宽只有几百 KB/s）。
-        #   把 .deb 缓存起来，命中后 apt 直接从本地装，不用再下。
-        #   key 里带 workflow 的哈希：改了包列表就自动换一份缓存。
+        # ★ runner 每次全新，TeX + 字体约 250 MB / 41 包（实测最慢一轮下载 9 分钟）。
+        #   缓存 .deb，命中后本地装；key 带 workflow 哈希，改包列表自动换一份。
         uses: actions/cache@v4
         with:
           path: ~/apt-cache
@@ -302,15 +271,11 @@ jobs:
           # 2) 抓索引（带重试）
           sudo apt-get update -o Acquire::Retries=3 \
             || { echo "apt-get update 失败，5 秒后重试"; sleep 5; sudo apt-get update -o Acquire::Retries=3; }
-          # 字体包：项目自己的日志检查里出现过 `... in font [FreeSansBold.otf]` 的字形告警，
-          # 说明文档链上会用到 FreeSerif/FreeSans/FreeMono 这几族；Ubuntu 镜像默认不装，先备着。
-          # ⚠️ 但 2026-11-02 实测：装上这些字体之后，xelatex 的 nullfont 警告**依旧出现**，
-          #   所以「缺字体」不是那次失败的根因（真正原因见 canary 步骤的结论）。
+          # 字体包：文档链会用到 FreeSerif/Sans/Mono，镜像默认不装。
+          # （装上也仍有 nullfont 警告，它不是失败根因。）
           PKGS="git curl ca-certificates latexmk texlive-xetex texlive-latex-extra texlive-binaries texlive-fonts-recommended texlive-lang-chinese lmodern fonts-freefont-otf fonts-dejavu fonts-liberation fonts-texgyre fonts-noto-cjk poppler-utils libcairo2"
-          # ★ 硬超时 + 单连接超时：
-          #   apt 默认**没有**下载超时，镜像限速/卡住时会无限等（实测卡在 61 MB 的
-          #   fonts-noto-cjk 上 9 分钟不动，最后只能手动取消整个 job）。
-          #   这里给整步 900 秒、单连接 30 秒的硬上限：宁可失败重跑，也不要干等。
+          # ★ apt 默认没有下载超时，卡住会无限等（实测停在 61 MB 上 9 分钟）。
+          #   整步 900 秒、单连接 30 秒封顶：宁可重跑，不干等。
           APTOPTS="-o Acquire::Retries=3 -o Acquire::http::Pipeline-Depth=10 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30"
           if ! timeout 900 sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends $APTOPTS $PKGS; then
             # 一次性装失败时逐包重试：这样日志里能直接看出是哪个包的问题
@@ -338,12 +303,9 @@ jobs:
             fi
           done
 
-      # ★ 无需下载替换二进制：Ubuntu 24.04 的 apt `texlive-binaries 2023.20230311` 里
-      #   那个 xdvipdfmx 就是**官方 PDF 报的 20220710**（2026-11-22 从 deb 里 strings 查证）。
-      #   官方构建机同样是 PSF 规范的 Ubuntu 24.04 + 发行版 texlive 包，所以这里从
-      #   「打补丁对齐」变成了「本来就一致」；只留一条断言，镜像哪天回退能在日志里看见。
-      #   （旧做法：apt 是 2021.20210626→20210609，故从 TL2023 historic archive 下
-      #     dvipdfmx r65877 覆盖安装；那个 URL 属历史归档，已随本次切换移除。）
+      # ★ 无需替换二进制：Ubuntu 24.04 的 apt texlive-binaries 里那个 xdvipdfmx 就是官方
+      #   PDF 报的 20220710，官方构建机也是 Ubuntu 24.04 + 发行版 texlive 包 —— 从「打补丁
+      #   对齐」变成「本来就一致」。只留一条断言，镜像哪天回退能在日志里看见。
       - name: 确认排版引擎为 xdvipdfmx 20220710
         run: |
           VER="$(xdvipdfmx --version 2>&1 | head -1)"
@@ -367,10 +329,8 @@ jobs:
             || echo "::warning::装不上 rar —— 发布时会跳过 RAR 包（PDF 照发）"
 
       - name: canary：xelatex 中文/字体冒烟（5 秒，失败不算作业失败）
-        # ★ 为什么要这一段：完整构建要 15 分钟，而「latexmk 退出码 12、每册 1.5 秒、
-        #   只有 1 页」这种失败，根因往往就是 xelatex 连第一页都排不出来。
-        #   这里用两个 6 行的最小文档把「xeCJK 有没有 CJK 字体」「FreeSerif/Sans/Mono
-        #   在不在」分别验一遍，几秒钟就能定位，不用等一整轮。
+        # ★ 完整构建 15 分钟，而「退出码 12 / 每册 1 页」往往只是 xelatex 排不出第一页。
+        #   两个 6 行最小文档分别验「xeCJK 有没有 CJK 字体」「FreeSerif/Sans/Mono 在不在」。
         continue-on-error: true
         run: |
           set +e
@@ -435,15 +395,10 @@ jobs:
       - name: 逻辑自检（平台胶水层，不联网）
         run: python ci/linux/selftest.py
 
-      # ★ 命名口径自检：文件名里的完整版本号取自**官方文档站标题**
-      #   （docs.python.org/zh-cn/3.13/ 的 h1 = `Python 3.13.18 文档`），
-      #   缓存在 sphinx-pdf/version-titles.json。文档站一发新版，这一步就会
-      #   打出「缓存是 3.13.18 → 需更新」，提醒我们跑 `--tool titles --write`。
-      #   取不到网络只警告：命名继续用缓存，绝不因此挡掉整轮构建。
-      # ★ 复核（不是"提醒"）：prepare 已经把官方标题写进 version-titles.json 并提交，
-      #   这里再对着官方核一次。**不一致就是硬失败** —— 说明 prepare 的推送没成功，
-      #   继续跑只会用旧版本号覆盖旧 release（内容新、名字旧，且不报错）。
-      #   只有「官方站点取不到」（rc=2）才降级为警告，那是网络问题，不是配置问题。
+      # ★ 命名口径：完整版本号取自官方文档站 h1（缓存在 sphinx-pdf/version-titles.json），
+      #   取不到网络只警告，命名继续用缓存。
+      # ★ 复核：prepare 已把官方标题写回并提交，这里再核一次；**不一致就是硬失败**
+      #   —— 说明推送没成功，继续跑只会用旧版本号覆盖旧 release（内容新、名字旧、不报错）。
       - name: 版本号口径复核（与官方不一致 = 失败）
         run: |
           set +e
@@ -501,13 +456,9 @@ jobs:
           [ -n "$ROOT" ] && [ -d "$ROOT" ] || { echo "::error::没找到构建根：$BASE"; exit 1; }
           ls -la "$ROOT" | sed -n '1,25p'
 
-      # ★★ 2026-11-02 新增：上一轮「.log 里没有任何 ! 」+「每册 PDF 只有 1 页」+
-      #   「ind=0」三条互相矛盾 —— 光 grep `^! ` 定不了位。这一段专门只回答一个问题：
-      #   **一册到底死在哪儿**。判据从上到下越来越硬：
-      #     ① .tex 体积    → 极小 = 步骤 6 只写了个壳（那就不是 xelatex 的锅）
-      #     ② .log 尾部    → xelatex 最后一句是什么（`No pages of output` / 半行截断 = 进程被杀）
-      #     ③ latexmk 原话 → 它是「第 1 遍就失败」还是「第 1 遍成功、makeindex 卡住」
-      #     ④ 手工复跑     → 绕过 latexmk，直接看 xelatex 的退出码与真话
+      # ★★ 「一册到底死在哪儿」专项探针（.log 里没有 `!`、每册 1 页、ind=0 三条矛盾时用）。
+      #   判据越来越硬：① .tex 体积极小＝只写了个壳 ② .log 尾部最后一句是什么
+      #   ③ latexmk 原话（第 1 遍就失败 / makeindex 卡住）④ 绕过 latexmk 手工复跑。
       - name: 🔬 显微镜：一册到底怎么死的（.tex 体积 / .log 尾部 / latexmk 原话 / 手工复跑）
         if: failure()
         run: |
@@ -681,11 +632,8 @@ jobs:
             ${{ runner.temp }}/build/Python * PDF 文档 */验收报告.md
             ${{ runner.temp }}/build/Python * PDF 文档 */*.log
 
-      # ★ 失败时把「显微镜」的证据推到 ci-logs 分支。
-      #   为什么非要多这一步：runner 上的日志要拿 token 才能读（公开仓库也一样），
-      #   而 raw.githubusercontent.com 谁都能读 —— 把证据落进一个孤儿分支，排错时
-      #   一条 curl 就能拿到原文，不用截图、不用登录。
-      #   体积控制：每份只留尾部 40 KB（TeX 日志动辄几 MB × 39 册会超仓库限制）。
+      # ★ 失败时把证据推到 ci-logs 分支：runner 日志要 token 才能读，而 raw 谁都能读，
+      #   排错一条 curl 就拿到原文。每份只留尾部 40 KB，免得撑爆仓库。
       - name: 把诊断日志推到 ci-logs 分支（不登录也能读）
         if: failure()
         env:
@@ -763,13 +711,10 @@ jobs:
           TAG="v$FULL"                                    # 不带日期 → 一条线只有一个 release
           TITLE="Python $FULL 文档（$DATE）"
           # ---------- 1) 摆一个「ASCII 名」的暂存目录 ----------
-          # ★ 2026-11-03 起的发布模型：Release 里**只放两样**
-          #     · 合并册 PDF（英文名）
-          #     · 打包了全部分册（中文原名）+ 验收报告的 RAR
-          #   为什么：GitHub 附件名只接受 ASCII，39 个分册名全被服务端改成点号
-          #   （`01Python 3.15 有什么新变化.pdf` → `01Python.3.15.pdf`），
-          #   既要维护一张映射表、又占 40+ 个附件位。单册改为「从 RAR 里取」后，
-          #   附件固定 2 个、名字永远正确、不用同步映射表。
+          # 发布模型：Release 只放两样 —— 合并册 PDF（英文名）+ 装了全部分册（中文原名）
+          # 与验收报告的 RAR。GitHub 附件名只接受 ASCII，39 个分册名会被改成点号
+          # （`01Python 3.15 有什么新变化.pdf` → `01Python.3.15.pdf`），单册改用
+          # 「从 RAR 里取」后附件固定 2 个、名字永远正确、不用维护映射表。
           STAGE="$RUNNER_TEMP/assets-$FULL"
           rm -rf "$STAGE"; mkdir -p "$STAGE"
           EXP=()                                  # 期望出现在 release 里的附件名
@@ -932,10 +877,8 @@ jobs:
           fi
 
           # ---------- 6) 先清掉「不在本轮名单里」的旧附件，再上传 ----------
-          # ★ 顺序很关键：**先清后传**。
-          #   上一版是「先传后清」，判据拿本地名（中文）跟服务端名（ASCII 化）比，
-          #   一个都匹配不上 → 把刚传上去的 41 个附件（含 RAR）当「过期」全删了，
-          #   而删除也返回 0，步骤还报绿。先清后传则最坏情况只是短暂空，随即被填满。
+          # ★ 顺序关键：先清后传。先传后清时，拿本地中文名比服务端 ASCII 名一个都
+          #   匹配不上，会把刚传的附件当「过期」全删，而删除也返回 0、步骤还报绿。
           gh release view "$TAG" --json assets --jq '.assets[].name' 2>/dev/null | while IFS= read -r a; do
             [ -n "$a" ] || continue
             if ! printf '%s\n' "${EXP[@]}" | grep -Fxq -- "$a"; then
@@ -1025,9 +968,8 @@ jobs:
           fi
 
   # ---------------------------------------------------------------- 汇总 README
-  # ★ 五个 build job 并发，谁都不该去改 README（同一文件必然打架）。
-  #   这里在全部 build 结束后统一收口：下载各版本的 build-info，只替换
-  #   README 里两个标记之间的表格（其余部分一个字不动）。
+  # ★ 五个 build job 并发，谁都不该改 README；这里在全部结束后统一收口，
+  #   只替换两个标记之间的表格，其余一字不动。
   summary:
     # 也依赖 prepare：要靠它的 matrix 算出「这轮应该有几个版本」
     needs: [prepare, build]
@@ -1058,10 +1000,8 @@ jobs:
           set -uo pipefail
           echo "拿到的 build-info："
           ls -1 infos 2>/dev/null || echo "  （没有）"
-          # ★ 2026-11-04 的坑：每个 artifact 里的文件原本都叫 build-info.json，
-          #   而下载用了 merge-multiple: true → 五个同名文件解压到同一目录、
-          #   互相覆盖，最后只剩一个（只有 3.15 被写进表格）。
-          #   现在文件名带版本号；这里再核一次数量，少了就明确报警。
+          # ★ 每个 artifact 里的文件都叫 build-info.json，下载又用了 merge-multiple，
+          #   五份会互相覆盖（曾只剩 3.15 进表）。文件名带版本号，这里再核数量。
           EXPECT="$(printf '%s' "$MATRIX" | python3 -c 'import json,sys;print(len(json.load(sys.stdin)["version"]))')"
           GOT="$(ls -1 infos/*.json 2>/dev/null | wc -l)"
           echo "拿到 $GOT 个版本的数据，本轮应有 $EXPECT 个"
@@ -1092,14 +1032,10 @@ jobs:
           echo "::warning::README 推送失败（下次构建会再试）"
 
   # ---------------------------------------------------------------- 更新日志（3.9–3.15）
-  # ★ 与上面的文档册**完全独立**：上面出「五版本 × 38 册」的文档 PDF，这里只出
-  #   「每个大版本一本完整更新日志」；产物、release、失败域都不交叉。
-  # ★ 复用而不是重写：ci/changelogs/builder.py 是 whatsnew-studio/builder.py 的
-  #   逐字副本（只多了 WNS_PY / WNS_TEXBIN 两个环境变量），调用方式与本地一致
-  #   （mode=changelog），所以版式、册名、目录层级都跟
-  #   whatsnew-studio/output/3.9-3.15 里那几本对得上。
-  # ★ 3.9 / 3.10 已冻结（EOL，NEWS 不再更新）：不再重建，直接上传仓库里的副本
-  #   （ci/changelogs/frozen/），省两轮构建。
+  # ★ 与文档册完全独立：产物、release、失败域都不交叉。
+  # ★ 不重写：ci/changelogs/builder.py 取自 whatsnew-studio（mode=changelog），
+  #   所以册名、目录层级、版式与本地一致。
+  # ★ 3.9 / 3.10 已冻结（EOL，NEWS 不再更新），直接上传 ci/changelogs/frozen/ 里的副本。
   changelogs:
     needs: prepare
     # 手跑时可以把 changelogs 勾成 false 单独跳过这一路（不想动代码时的「停用开关」）
@@ -1143,12 +1079,9 @@ jobs:
           fi
           sudo apt-get update -o Acquire::Retries=3 \
             || { sleep 5; sudo apt-get update -o Acquire::Retries=3; }
-          # 与 build job 同一份包列表：whatsnew 册要 xeCJK + Fandol（texlive-lang-chinese）、
-          # FreeSerif/Sans/Mono（fonts-freefont-otf）、latexmk + xelatex，
-          # 以及 pdfinfo（poppler-utils）用来读页数。
+          # 与 build job 同一份包列表（CJK 字体、latexmk/xelatex、pdfinfo 读页数）。
           # ★ 额外要 texlive-latex-recommended：Sphinx 的 .tex 会 \usepackage{cmap}，
-          #   少了它 xelatex 第一页就挂（`File 'cmap.sty' not found`），而这一步
-          #   要等到 latexmk 才报，白等 6 分钟。
+          #   少了它 xelatex 第一页就挂，而且要等到 latexmk 才报，白等 6 分钟。
           PKGS="git curl ca-certificates latexmk texlive-xetex texlive-latex-extra texlive-latex-recommended texlive-binaries texlive-fonts-recommended texlive-lang-chinese lmodern fonts-freefont-otf fonts-dejavu fonts-liberation fonts-texgyre fonts-noto-cjk poppler-utils libcairo2"
           APTOPTS="-o Acquire::Retries=3 -o Acquire::http::Pipeline-Depth=10 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30"
           if ! timeout 900 sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends $APTOPTS $PKGS; then
@@ -1164,12 +1097,9 @@ jobs:
             printf '%-10s %s\n' "$t" "$(command -v $t || echo MISSING)"
           done
           echo "--- CJK 宏包与字体（只打印，不判定）---"
-          # ★★ 2026-11-23 的教训：这里原来对一串 .sty 做**硬校验**，其中列了
-          #   `fandol.sty` —— 而 Fandol 在 TeX Live 里**只有 OTF、没有 .sty**
-          #   （实测 noble 的 texlive-lang-chinese 里就是
-          #     texmf-dist/fonts/opentype/public/fandol/Fandol*.otf）。
-          #   结果五个 job 全被这条假判据打死，环境其实一点问题都没有。
-          #   ⇒ 名字清单只打印；真正的判据是下一步「能不能排一页中文」。
+          # ★★ 这串名字只打印、不做判定：`fandol.sty` 在 TeX Live 里根本不存在（Fandol
+          #   只有 OTF），拿它当判据曾把五个 job 全误杀。真正的判据是下一步「能不能
+          #   排一页中文」。
           for f in xeCJK.sty ctex.sty cmap.sty fancyvrb.sty framed.sty fontspec.sty \
                    FandolSong-Regular.otf FandolHei-Regular.otf FandolFang-Regular.otf; do
             printf '%-26s %s\n' "$f" "$(kpsewhich "$f" 2>/dev/null || echo MISSING)"
@@ -1233,12 +1163,9 @@ jobs:
           export WNS_PY="$(command -v python)"
           unset WNS_TEXBIN
           mkdir -p changelog-out
-          # ★ 直接调上游 CLI，不再包一层脚本：
-          #   `--mode changelog` 的出厂默认值（toc-depth 3 / bookmark 5 / 连续排版 /
-          #   页脚只页码 / tight 间距）就是既有成品册的排版，在别处再抄一份默认值
-          #   只会跟上游悄悄分叉。一个 job 只编一个版本（matrix），不需要循环。
-          # ★ `--mirror 直连`：runner 在 GitHub 内网，raw.githubusercontent.com
-          #   本来就能直连（实测 0.16s），不需要也不该走第三方镜像。
+          # ★ 直接调它的 CLI，不再包一层脚本：版式固定为 toc-depth 3 / 书签 5 /
+          #   连续排版 / 页脚只页码 / tight，就是成品册的样子。
+          # ★ --mirror 直连：runner 在 GitHub 内网，raw 实测 0.16s，不该走第三方镜像。
           if ! python ci/changelogs/builder.py \
                  --version "$V" --mode changelog \
                  --outdir changelog-out --workdir changelog-work \
@@ -1284,13 +1211,10 @@ jobs:
           else echo "没有报告（构建可能没跑到最后，看上面的日志）" >> "$GITHUB_STEP_SUMMARY"; fi
 
   # ---------------------------------------------------------------- 更新日志：汇总发布
-  # ★ 单独一个 job 收口，理由与 summary 相同：五个 job 并发上传同一个 release 必然打架。
-  # ★ 发布模型：**一个常驻 release**（tag=changelogs），附件固定 7 个：
-  #     Python-3.9-changelog.pdf   ← 冻结，仓库里带
-  #     Python-3.10-changelog.pdf  ← 冻结，仓库里带
-  #     Python-3.1X-changelog-<日期>.pdf ×5（每天原地更新，旧日期自动清掉）
-  #   为什么附件名用 ASCII：GitHub 会把中文名换成点号（`Python.3.11.…pdf`），
-  #   挂上去反而认不出是哪一版（与主 release 的分册同一处理方式）。
+  # ★ 单独一个 job 收口：五个 job 并发上传同一 release 必然打架。
+  # ★ 一个常驻 release（tag=changelogs），附件固定 7 个：3.9/3.10 冻结件 +
+  #   3.11–3.15 各一本带日期（每天原地更新，旧日期自动清掉）。
+  #   附件名用 ASCII：GitHub 会把中文名换成点号，挂上去认不出是哪一版。
   changelogs-publish:
     needs: [changelogs]
     # 手动触发时 push_branch=false 表示只看构建、不发布；

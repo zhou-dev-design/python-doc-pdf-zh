@@ -80,9 +80,9 @@ import time
 from dataclasses import asdict
 from pathlib import Path
 
-# ---------------------------------------------------------------------------
+# ==========================================================================
 # 一、把主程序当库导入（不做任何修改）
-# ---------------------------------------------------------------------------
+# ==========================================================================
 REPO = Path(__file__).resolve().parents[2]
 GUI_DIR = Path(os.environ.get("PDFBUILD_GUI_DIR") or (REPO / "sphinx-pdf" / "gui"))
 if str(GUI_DIR) not in sys.path:
@@ -107,9 +107,9 @@ def say(msg: str = "") -> None:
         pass
 
 
-# ---------------------------------------------------------------------------
+# ==========================================================================
 # 二、解释器探测：版本 → 本机真实存在的 python
-# ---------------------------------------------------------------------------
+# ==========================================================================
 def _ver_tuple(text: str) -> tuple[int, int] | None:
     """从 `Python 3.13.18` / `3.13.18` 里取出 (3, 13)。"""
     out: list[int] = []
@@ -179,9 +179,9 @@ def find_interpreter(ver: str, mapping: dict[str, str] | None = None) -> str:
     return sys.executable                 # ③ 都不行 → 至少能跑
 
 
-# ---------------------------------------------------------------------------
+# ==========================================================================
 # 三、平台胶水层：只覆盖 3 个方法
-# ---------------------------------------------------------------------------
+# ==========================================================================
 class LinuxPipeline(M.Pipeline):
     """在 POSIX 上跑得起来的 Pipeline（其余逻辑一律继承）。"""
 
@@ -381,36 +381,13 @@ class LinuxPipeline(M.Pipeline):
 # ---------------------------------------------------------------------------
 # 三·五、POSIX 修补：makeindex-fix.py 里写死的 Windows 专属参数
 # ---------------------------------------------------------------------------
-# ★★ 2026-11-02 查到的真根因（CI 上「每册都失败」的真凶，查了一整天才挖出来）★★
-#
-#   现象（第 7 步）：每册 `latexmk 退出码 12`、PDF 里没有索引、`.ind` 一个都没有，
-#   而 `<册>.log` 里**一条 LaTeX 错误都没有** —— 典型的「静默失败」，判据全绿。
-#
-#   真话在 latexmk 的转录里（`python` 跑 makeindex-fix.py 时崩了）：
-#       Run number 1 of rule 'makeindex <册>.idx'
-#       Running 'python makeindex-fix.py -s python.ist -o "<册>.ind" "<册>.idx"'
-#       Traceback (most recent call last):
-#         File ".../makeindex-fix.py", line 550, in fidx_main
-#           rc = subprocess.run(cmd, creationflags=CREATE_NO_WINDOW).returncode
-#       ValueError: creationflags is only supported on Windows platforms
-#       Collected error summary:
-#         makeindex <册>.idx: Command for 'makeindex <册>.idx' gave return code 256
-#       Latexmk: Errors, so I did not complete making targets
-#
-#   因果链：主程序 `_emit_makeindex_fix()` 释放的自包含脚本，文件头写死了
-#       CREATE_NO_WINDOW = 0x08000000
-#   → fix-index 段里 `subprocess.run(cmd, creationflags=CREATE_NO_WINDOW)` 在 POSIX
-#     上直接抛 ValueError → python 退出码 1（latexmk 记成 256）→ latexmk 在
-#     「第 2 遍之前的 makeindex 规则」上中止 → **只留下第 1 遍的 PDF**：
-#     目录空白、满屏 ??、没有索引，但页面内容和 `.log` 看着都正常。
-#   ⇒ 所以之前「没有 TeX 错误」的结论不是漏看，而是**根本没出错**：xelatex 单独跑
-#     退出码是 0、PDF 页数也对（howto-argparse 13 页）。坏的是索引这一步。
-#
-#   ⚠️ 主程序里同名常量的定义本身是对的：
-#        CREATE_NO_WINDOW = getattr(subprocess, "CREATE_NO_WINDOW", 0) if IS_WIN else 0
-#      只是**释放出去那份脚本**把值写死了。项目约定不改 pdf_builder_multi.py，
-#      所以在这里把它换成本平台的正确值（Windows 上行为一字不变，根本不会走到这里）。
-#      上游若把那一行改成 f"CREATE_NO_WINDOW = {CREATE_NO_WINDOW}"，本函数自动失效。
+# ★★ 真根因：每册 latexmk 退出码 12、没有索引、`.ind` 全缺，而 `<册>.log` 里
+#   一条 LaTeX 错误都没有。真话在 latexmk 的转录里 —— 它跑 makeindex 时，主程序
+#   释放的 makeindex-fix.py 用 `subprocess.run(..., creationflags=...)`，在 POSIX
+#   上直接 ValueError → python 退 1（记成 256）→ latexmk 在「第 2 遍之前的
+#   makeindex 规则」中止 → 只留第 1 遍的 PDF：目录空白、满屏 ??、无索引。
+#   主程序里那个常量本身按平台取值，只是**释放出去的脚本**把值写死了；项目约定
+#   不改 pdf_builder_multi.py，故在此换成本平台的值（Windows 上行为一字不变）。
 def _patch_emitted_makeindex_fix(dest) -> None:
     """把释放出来的 makeindex-fix.py 里那行 Windows 常量改成本平台的值。"""
     try:
@@ -443,9 +420,9 @@ if IS_POSIX:
     M._emit_makeindex_fix = _emit_makeindex_fix_posix
 
 
-# ---------------------------------------------------------------------------
+# ==========================================================================
 # 四、配置：把 Windows 默认值换成本机真实路径
-# ---------------------------------------------------------------------------
+# ==========================================================================
 class DirectSourceConfig(M.Config):
     """所有源码/译文**只从 github.com 直连抓**，不试任何镜像站。
 
@@ -522,9 +499,9 @@ def pick_steps(cfg) -> list[int] | None:
     return steps or None
 
 
-# ---------------------------------------------------------------------------
+# ==========================================================================
 # 五、体检（不联网、不建大目录）
-# ---------------------------------------------------------------------------
+# ==========================================================================
 def preflight(args, base_dir: str) -> int:
     rows: list[tuple[str, str, str]] = []
 
@@ -622,9 +599,9 @@ def preflight(args, base_dir: str) -> int:
     return 0
 
 
-# ---------------------------------------------------------------------------
+# ==========================================================================
 # 六、构建（单版本；多版本时按版本各起一个子进程）
-# ---------------------------------------------------------------------------
+# ==========================================================================
 def run_one(args, ver: str, base_dir: str) -> int:
     cfg = build_config(_one_version_args(args, ver), base_dir)
     rep = M.ConsoleReporter(args.verbose)
@@ -724,9 +701,9 @@ def fan_out(args, base_dir: str) -> int:
     return 0
 
 
-# ---------------------------------------------------------------------------
+# ==========================================================================
 # 七、命令行
-# ---------------------------------------------------------------------------
+# ==========================================================================
 def default_base() -> str:
     return (os.environ.get("PDFBUILD_BASE")
             or str(Path.home() / "python-doc-build"))

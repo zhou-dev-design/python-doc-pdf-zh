@@ -172,33 +172,16 @@ git_refresh() {  # $1=仓库目录  $2=分支  $3=显示名
 }
 
 log "1/10 取 CPython $CPYTHON_BRANCH 的 Doc 源码（稀疏克隆）"
-# ★ 需要检出的路径（顺序无关）：
-#   Doc            —— 文档源
-#   Misc/NEWS.d    —— Doc/Makefile 的 build 目标要的
-#   Include        —— Doc/tools/extensions/patchlevel.py 要读 Include/patchlevel.h，
-#                     漏了它 Sphinx 第一秒就崩（FileNotFoundError）
-#   Lib/profiling/sampling —— ★ 3.15 新增：Doc/whatsnew/3.15.rst 与
-#                     Doc/library/profiling.sampling.rst 写了
-#                     `.. image:: ../../Lib/profiling/sampling/_assets/tachyon-logo.png`，
-#                     图片在 Doc 之外。漏取的后果极隐蔽：Sphinx 找不到图片**不报错**，
-#                     只留一条 "File ... not found" 软警告，然后把**原始相对路径**
-#                     原样写进 .tex —— Windows 上分隔符是反斜杠，于是
-#                     `..\Lib\profiling\...` 里的 \Lib \profiling \_assets
-#                     全成了未定义控制序列 → xelatex 报错、latexmk 退出码 12
-#                     → 整册（library / whatsnew）出不来 PDF。
-# ★ 稀疏检出的路径（--filter=blob:none 下，只有这里的文件才真拉 blob）。
-#   判据不是「Doc 需要什么」，而是「Doc 引用了哪些 Doc/ 之外的文件」——
-#   这件事可以直接量出来，别靠记：`python <MAIN> --tool check-doc-refs <Doc 目录>`。
+# ★ 需要检出的路径（＝Doc 引用了哪些 Doc/ 之外的文件，可直接量，别靠记）：
 #     Doc                    ← 正文
 #     Misc/NEWS.d            ← Doc/Makefile 的 build 目标
 #     Include                ← patchlevel.py 读 Include/patchlevel.h（漏了直接崩）
-#     Grammar                ← reference/grammar.rst 引 Grammar/python.gram
-#                              （即《完整的语法规范》整章正文，20 多页）
+#     Grammar                ← reference/grammar.rst 引 Grammar/python.gram（整章正文）
 #     Parser                 ← library/ast.rst 引 Parser/Python.asdl
 #     Lib/profiling/sampling ← 3.15 Tachyon 文档的配图
-#   ★★ 漏一条的后果是**静默**的：literalinclude/include 缺 → Sphinx 只留 warning、
-#      .tex 里什么都不写 → PDF 里整章空白；image/figure 缺 → 反斜杠路径进 .tex →
-#      latexmk 退出码 12。两种都要等构建完才看得出来，所以第 6 步之前先自检一次。
+#   ★★ 漏一条的后果是静默的：literalinclude/include 缺 → 只留 warning、.tex 里不写 →
+#      PDF 整章空白；image/figure 缺 → 反斜杠路径进 .tex → latexmk 退 12。
+#      自检：`python <MAIN> --tool check-doc-refs <Doc 目录>`（第 6 步之前几秒拦下）。
 SPARSE_PATHS="Doc Misc/NEWS.d Include Grammar Parser Lib/profiling/sampling"
 
 # 稀疏检出（幂等，只补差集）——「已有克隆」也要跑：老目录里可能缺后加的路径。
@@ -476,36 +459,23 @@ log "6b/10 把英文封面标题换成中文"
 # ------------------------- 7. 编译 PDF --------------------------------------
 log "7/10 编译 PDF（并发 latexmk ＋ 覆盖 \$makeindex）"
 # ★★ 不要用 make -j ★★
-#   `make` 在这里解析到的是 MSYS 版（/f/msys64/usr/bin/make），它靠 Cygwin 的
-#   fork 模拟建子进程。并行多路 + 巨型 .tex（library.tex 17MB）会把 fork 压垮：
-#       [main] make 1268 dofork: child -1 - forked process 43284 died unexpectedly,
-#              retry 0, exit code 0xC000026B, errno 11
-#       make: *** [Makefile:72: howto-mro.pdf] Error 127
-#   症状：成片 Error 127（子进程根本没起来），另有几册 Error 4 并留下
-#         70~90 KB 的残缺 PDF（文件在、内容是残的，pdfinfo 读不出页数）。
-#   → 改成串行逐册，用 latexmk（单个 perl 进程）替代 make -j。
+#   这里的 make 是 MSYS 版，靠 Cygwin 的 fork 模拟建子进程；并行 + 巨型 .tex
+#   （library.tex 17MB）会把 fork 压垮：成片 Error 127、少数册留 70~90 KB 残缺 PDF。
+#   → 串行逐册，用 latexmk（单个 perl 进程）替代 make -j。
 #
 # ★★ latexmk 必须用 -e 覆盖 $makeindex ★★
-#   latexmkrc 里生成的是 $makeindex = 'internal xindy ...'（不带 -s python.ist），
-#   xindy 吃不了 makeindex 格式的 python.ist → 返回 256 → latexmk 中止在第 2 遍前、
-#   退出码 12 → PDF 看着正常，其实只是第 1 遍产物：正文前目录空白、满屏 '??'。
-#   -e 在 -r latexmkrc 之后求值，故能覆盖。
+#   latexmkrc 里是 $makeindex = 'internal xindy ...'（不带 -s python.ist），xindy 吃不了
+#   makeindex 格式的 ist → 返回 256 → 中止在第 2 遍前、退 12 → PDF 只是第 1 遍产物
+#   （目录空白、满屏 ??）。-e 在 -r latexmkrc 之后求值，故能覆盖。
 #
-# ★★ 覆盖成的不再是裸 makeindex，而是「makeindex + 修 .ind」的 --tool fix-index ★★
-#   索引要满足三件事，全部在这一层解决：
-#     · 非字母条目在最前 + 加粗「非字母」/「数字」分组标题
-#     · 每条页码都是可点的超链接（\hyperpage）
-#     · 不再出现 �（makeindex 按字节截断中文组标题留下的非法 UTF-8）
-#   latexmk 的次序是 xelatex → makeindex → xelatex → xelatex，把 makeindex 换成
-#   fix-index.py（参数完全兼容 makeindex），第 2 遍 xelatex 就直接读到修好的 .ind，
-#   一遍编译同时拿到「分组标题 + 可点页码」，不用事后重排（38 册省半小时）。
+# ★★ 覆盖成的是「makeindex + 修 .ind」的 --tool fix-index（不是裸 makeindex）★★
+#   一次解决三件事：非字母条目在前且有分组标题、页码可点（\hyperpage）、不再出现
+#   makeindex 按字节截断中文留下的非法 UTF-8。次序 xelatex→makeindex→xelatex×2，
+#   第 2 遍就能读到修好的 .ind，38 册省半小时。
 #
-# ⚠️ -e 的命令里只能出现 ASCII：latexmk 按 UTF-8 解析 -e，路径带中文（…/Python 文档/…）
-#    会直接报 Malformed UTF-8 character (fatal)。所以先把 fix-index.py 拷一份到 latex
-#    目录（ASCII 名 makeindex-fix.py），再用 PATH 里的 python 启动（venv 的 Scripts
-#    目录已在第 4 步插进 PATH）。
-#
-# ★ LATEXOPTS 必须给 -interaction=nonstopmode，否则 TeX 在批处理里等 stdin 挂死。
+# ⚠️ -e 的命令里只能有 ASCII：latexmk 按 UTF-8 解析 -e，路径带中文会报
+#    Malformed UTF-8 character (fatal)。故先把脚本拷成 ASCII 名再启动。
+# ★ LATEXOPTS 必须带 -interaction=nonstopmode，否则 TeX 在批处理里等 stdin 挂死。
 export LATEXOPTS='-interaction=nonstopmode'
 : >"$ROOT/pdf-build.log"
 
