@@ -1219,6 +1219,10 @@ jobs:
         env:
           # 日期用北京时间（与 README/release 其它地方口径一致）
           TZ: Asia/Shanghai
+          # ★ api.github.com 的**匿名额度只有 60 次/小时**，而托管 runner 的出口 IP
+          #   是共享的 —— 五个 job 一起跑必然 403（2026-11-23 实测：目录树 API 403，
+          #   连 jsDelivr 兜底也 403）。带上 token 变成 5000 次/小时。
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -uo pipefail
           V="${{ matrix.version }}"
@@ -1231,13 +1235,14 @@ jobs:
           mkdir -p changelog-out
           # ★ 直接调上游 CLI，不再包一层脚本：
           #   `--mode changelog` 的出厂默认值（toc-depth 3 / bookmark 5 / 连续排版 /
-          #   页脚只页码 / tight 间距）就是 output/3.9-3.15 那几本的排版，
-          #   在别处再抄一份默认值只会跟上游悄悄分叉。
-          #   一个 job 只编一个版本（matrix），所以也不需要循环。
+          #   页脚只页码 / tight 间距）就是既有成品册的排版，在别处再抄一份默认值
+          #   只会跟上游悄悄分叉。一个 job 只编一个版本（matrix），不需要循环。
+          # ★ `--mirror 直连`：runner 在 GitHub 内网，raw.githubusercontent.com
+          #   本来就能直连（实测 0.16s），不需要也不该走第三方镜像。
           if ! python ci/changelogs/builder.py \
                  --version "$V" --mode changelog \
                  --outdir changelog-out --workdir changelog-work \
-                 --mirror auto; then
+                 --mirror 直连; then
             echo "::error::Python $V 完整更新日志构建失败（看上面的 @@FAIL@@ 行）"
             exit 1
           fi

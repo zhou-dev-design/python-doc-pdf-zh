@@ -20,13 +20,15 @@
      %%EOF/startxref、索引页码可点击、目录与书签层级独立。不要用文件大小当
      唯一标准（上游 NEWS.d 与镜像状态每天都在变）。
 """
-# ===== 本文件是 whatsnew-studio/builder.py 的**逐字副本**，只改了三处 =====
+# ===== 本文件是 whatsnew-studio/builder.py 的**逐字副本**，只改了这几处 =====
 #   1) PY / TEXBIN 支持环境变量覆盖（WNS_PY / WNS_TEXBIN）—— CI 里没有
 #      D:\软件\Python314 与 F:\texlive\2025\bin\windows；
 #   2) TEXBIN 目录不存在时置空串，run() 不再往 PATH 前面塞空段（空段=当前目录）；
-#   3) 头部这段说明。
+#   3) http_get 对 api.github.com 带上 GITHUB_TOKEN（匿名 60 次/小时，CI 必 403）；
+#   4) `--mirror` 显式指定时不探测，只用那一个（CI 传「直连」＝只用官网）；
+#   5) 头部这段说明。
 # 为什么复制而不 import：CI 只 checkout 本仓库，拿不到同级的 whatsnew-studio。
-# 同步方法：上游 builder.py 更新后重新覆盖本文件，再把上面两处改回来（共 5 行）。
+# 同步方法：上游 builder.py 更新后重新覆盖本文件，再把这 4 处改回来（约 20 行）。
 # 版式/命名一律以上游为准，本文件不做任何“改进”——这里只是搬运。
 from __future__ import annotations
 
@@ -152,7 +154,16 @@ def mirror_url(mirror: str, repo: str, branch: str, path: str) -> str:
 
 
 def http_get(url: str, timeout: int = 60) -> bytes:
-    req = urllib.request.Request(url, headers={"User-Agent": "whatsnew-studio/1.0"})
+    headers = {"User-Agent": "whatsnew-studio/1.0"}
+    # ★ 副本新增：api.github.com 匿名额度只有 60 次/小时，而 GitHub 托管 runner
+    #   的出口 IP 是共享的 —— 五个 job 一起跑必然 403（2026-11-23 实测：
+    #   「GitHub 目录树 API 不可用（HTTPError）」→ 退到 jsDelivr 也被 403）。
+    #   有 GITHUB_TOKEN / GH_TOKEN 就带上（5000 次/小时）；没有则维持匿名，
+    #   本机行为完全不变。只对 api.github.com 带，别的域名不外泄。
+    _tok = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
+    if _tok and url.startswith("https://api.github.com/"):
+        headers["Authorization"] = "Bearer " + _tok
+    req = urllib.request.Request(url, headers=headers)
     with urllib.request.urlopen(req, timeout=timeout) as r:
         return r.read()
 
@@ -1106,10 +1117,14 @@ def build(cfg):
     log("索引页：%s" % ("包含" if cfg["include_index"] else "不包含"))
 
     step("检测加速镜像", 2)
-    order = [cfg["mirror"]] if cfg["mirror"] != "auto" else list(MIRRORS)
-    mirrors = probe_mirrors(order if cfg["mirror"] == "auto"
-                            else [cfg["mirror"]] + [m for m in MIRRORS if m != cfg["mirror"]],
-                            cpy_branch)
+    # ★ 副本新增：显式指定镜像时**不再探测**，就只用那一个。
+    #   CI 里传 `--mirror 直连`，语义就是「只用官网 raw.githubusercontent」，
+    #   不必先花 15 秒去试 ghproxy/jsDelivr（runner 上那两个还常常不可用）。
+    if cfg["mirror"] != "auto":
+        mirrors = [cfg["mirror"]]
+        log("镜像：%s（已显式指定，不探测）" % cfg["mirror"])
+    else:
+        mirrors = probe_mirrors(list(MIRRORS), cpy_branch)
     if not mirrors:
         raise RuntimeError("没有可用的下载镜像")
 
