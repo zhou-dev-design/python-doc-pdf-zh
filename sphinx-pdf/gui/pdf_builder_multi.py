@@ -3218,18 +3218,30 @@ def setup(app):
         out: list[str] = []
         pos = 0
         ntab = ncol = 0
-        marker = "\\begin{longtable}{"
+        # 列声明的写法分两代：Sphinx ≥6 是 `\begin{longtable}{\X{1}{2}...}`，
+        # 老的（3.11 用的 7.x）是 `\begin{longtable}[]{@{}ll@{}}`。两种都要认。
+        marker = "\\begin{longtable}"
         while True:
             i = text.find(marker, pos)
             if i < 0:
                 out.append(text[pos:])
                 break
-            brace = i + len("\\begin{longtable}")
-            end = match_brace(text, brace)
+            j = i + len(marker)
+            if j < len(text) and text[j] == "[":            # 可选位置参数 [t]/[b]
+                k = text.find("]", j)
+                if k < 0:
+                    out.append(text[pos:])
+                    break
+                j = k + 1
+            if j >= len(text) or text[j] != "{":
+                out.append(text[pos:j])
+                pos = j
+                continue
+            end = match_brace(text, j)
             if end < 0:
                 out.append(text[pos:])
                 break
-            spec = text[brace + 1:end]
+            spec = text[j + 1:end]
             if "pypdfw" in spec or ("\\X{" not in spec
                                     and "\\Y{" not in spec
                                     and not self.LWSPEC_RE.search(spec)):
@@ -3273,7 +3285,7 @@ def setup(app):
             ncol += len(seen)
             out.append(text[pos:i])
             out.append("\\makeatletter\n" + "\n".join(edefs) + "\n\\makeatother\n")
-            out.append("\\begin{longtable}{" + newspec + "}")
+            out.append(text[i:j] + "{" + newspec + "}")   # 保留 [] 与 @{} 原样
             pos = end + 1
         new = "".join(out)
         if new != text:
