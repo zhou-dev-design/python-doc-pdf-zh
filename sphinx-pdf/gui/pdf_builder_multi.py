@@ -439,6 +439,16 @@ def read_text_safe(p: Path, limit: int | None = None) -> str:
     return t[:limit] if limit else t
 
 
+def _alpha_name(i: int) -> str:
+    """0 → A、25 → Z、26 → AA ……（给冻结列宽的宏起名用，纯字母才合法）。"""
+    s = ""
+    i += 1
+    while i:
+        i, r = divmod(i - 1, 26)
+        s = chr(ord("A") + r) + s
+    return s
+
+
 def is_root_tex(p: Path) -> bool:
     """是不是 Sphinx 生成的「册子」根文件（带 \\documentclass）。
 
@@ -2834,12 +2844,19 @@ class Pipeline:
                          "（原值不是 LaTeX 纸张选项，会被静默忽略，整册回落成 Letter）",
                          level="ok")
 
-        # ★★ 表格不强制 longtable（2026-11-19 回滚）★★
-        # 曾加过「≥10 行一律 longtable」的 hook：压页脚修好了，但 library / c-api 的
-        # 书签全丢 —— longtable 每遍报 "Table widths have changed"，latexmk 不收敛
-        # 退 12，PDF 停在第一遍（目录空、2270 页 undefined）。补列宽、钉 \textwidth
-        # 都不收敛。所以回到 tabular/tabulary（书签优先）；要跨页的表单独加
-        # :class: longtable。
+        # ★★ 长表跨页 = longtable + 列宽冻结（PYPDF_TABLE_WIDTHS_V3）★★
+        # 压页脚的唯一正解是让表**可跨页**（tabular/tabulary 都不可跨页，表一高过
+        # 一页就只能冲出纸边、压住页码）。但 2026-11-19 加过「≥10 行一律 longtable」
+        # 后 library / c-api 书签全丢：longtable 每遍报 "Table widths have changed"，
+        # latexmk 不收敛退 12。原因是 `\X{a}{b}` 的列宽由
+        # `(\linewidth-\spx@arrayrulewidth)*a/b-2\tabcolsep-\spx@arrayrulewidth`
+        # 现算，longtable 会按实测宽度回写 .aux 并重排，绝对量（\tabcolsep、
+        # \arrayrulewidth）不随比例缩放 ⇒ 每遍都能差出零点几 pt，永不收敛。
+        # 钉 \linewidth、补列宽都试过，无效（见 2026-11-19 日志）。
+        # 现在改成：conf.py 只负责「哪些表加 longtable」，列宽在 .tex 里**提前算成
+        # 字面值**（`\edef` 在表前把 \the\dimexpr 求值，p{} 拿到的就是死数字），
+        # longtable 无论重排几遍都是同一个宽度 ⇒ 收敛。
+        # 见 step7 的 `_freeze_longtable_widths()`。
 
         # ★★ 不可断长串的根治（2026-11-17）★★
         # \emergencystretch 只救正文段落；表格单元格与 code-block 里的长标识符仍断不开。
@@ -2907,22 +2924,35 @@ latex_elements["preamble"] += r"""
                          "硬折行 + 下划线断点 + 字母数字串每 5 位断点"
                          "（根治中文表格与 hex/长数字横向溢出）", level="ok")
 
-        # ★★ 没有 :widths: 的表补列宽（2026-11-21）★★
-        # Sphinx 对无 :widths: 的表生成 {ll}：列宽取内容自然宽度、整行不换行，
-        # 长标识符和中文都直接冲出纸外（\allowbreak 对 l 列无效）。
-        # 修法：doctree 层补 'colwidths-given' + 列宽（CJK 记 2、ASCII 记 1，每列 ≥10%），
-        # Sphinx 便生成可折行的 \X{a}{b}（p{} 列）。
-        # ★ 绝不加 'longtable'：它要把实测列宽写进 .aux 并多遍收敛，表宽一漂
-        #   latexmk 就退 12、PDF 停在第一遍、书签全丢。
+        # ★★ 表格：补列宽 + 长表转 longtable（2026-11-21 / 11-23）★★
+        # ① Sphinx 对无 :widths: 的表生成 {ll}：列宽取内容自然宽度、整行不换行，
+        #    长标识符和中文都直接冲出纸外（\allowbreak 对 l 列无效）。
+        #    修法：doctree 层补 'colwidths-given' + 列宽（CJK 记 2、ASCII 记 1，
+        #    每列 ≥10%），Sphinx 便生成可折行的 \X{a}{b}（p{} 列）。
+        # ② ≥10 行的表再挂 longtable：tabular/tabulary 不可跨页，表高过一页就只能
+        #    冲出纸边压页脚。longtable 的列宽漂移问题由 step7 的
+        #    `_freeze_longtable_widths()` 解决（把 \X 换成算好的 p{} 字面量）。
         conf_txt4 = read_text_safe(conf)
-        if "PYPDF_TABLE_WIDTHS" not in conf_txt4:
+        # 注入过的旧版补丁（V1 只补列宽；V1b 加 longtable 但不认 tabularcolumns）
+        # 整段砍掉重写，否则新逻辑进不去。判据 = 有 PYPDF_TABLE_WIDTHS 段但没 V2。
+        _tbl_key = "由本工具补充（PYPDF_TABLE_WIDTHS"
+        if _tbl_key in conf_txt4 and "PYPDF_TABLE_WIDTHS_V3" not in conf_txt4:
+            cut = conf_txt4.index(_tbl_key)
+            cut = conf_txt4.rfind("# =====", 0, cut)
+            conf_txt4 = conf_txt4[:max(cut, 0)].rstrip() + "\n"
+            conf.write_text(conf_txt4, encoding="utf-8")
+            self.rep.log("conf.py 里是旧版表格补丁，已整段替换为 V3"
+                         "（加 longtable；tabularcolumns 的表转长表时改用 \\X 列宽）", level="warn")
+        if "PYPDF_TABLE_WIDTHS_V3" not in conf_txt4:
             conf_txt4 += r'''
-# ===== 由本工具补充（PYPDF_TABLE_WIDTHS）=====
-# 没有 :widths: 的表会被编成 {ll}：列宽取内容自然宽度、整行不换行。中文长句和长
-# 标识符没有断行点，会直接画到纸外；\allowbreak 断点对 l 列无效。这里补上
-# 'colwidths-given' + 列宽，Sphinx 就会生成 \X{a}{b}（p{} 列，可折行）。
-# 绝不加 'longtable'：它要把实测列宽写进 .aux 并多遍收敛，表宽一漂 latexmk 就退 12，
-# PDF 停在第一遍、书签全丢（2026-11-19 事故）。tabular 不写 LT@ 记录，无此问题。
+# ===== 由本工具补充（PYPDF_TABLE_WIDTHS_V3）=====
+# ① 没有 :widths: 的表会被编成 {ll}：列宽取内容自然宽度、整行不换行。中文长句和长
+#    标识符没有断行点，会直接画到纸外；\allowbreak 断点对 l 列无效。这里补上
+#    'colwidths-given' + 列宽，Sphinx 就会生成 \X{a}{b}（p{} 列，可折行）。
+# ② ≥10 行的表再加 'longtable'：tabular/tabulary 都不能跨页，表一高过一页就只能
+#    冲出纸边、压住页码（实测 3.14 有 9 处）。列宽由主程序在 .tex 里算成死数字
+#    （`_freeze_longtable_widths`），否则 longtable 每遍重排差零点几 pt、永不收敛
+#    （2026-11-19 事故）。
 from docutils import nodes as _pypdf_nodes
 
 
@@ -2948,10 +2978,21 @@ def _pypdf_table_weights(tbl, ncols):
 def _pypdf_fix_table_widths(app, doctree, docname):
     if getattr(app.builder, "format", "") != "latex":
         return
-    for tbl in doctree.findall(_pypdf_nodes.table):
-        classes = tbl["classes"]
-        if "colwidths-given" in classes or "longtable" in classes:
+    from sphinx import addnodes as _pypdf_addnodes
+    # tabularcolumns 指令会在表前留一个 tabular_col_spec 节点，Sphinx 的 latex
+    # writer 拿它当列声明、并**忽略** :widths:。它的列是 L/J/p{..\\linewidth}
+    # 这类「量出来」的宽度 —— 进了 longtable 会自己量自己，永不收敛。
+    # 所以：短表原样不动；要转长表的，把这个节点删掉，改用我们算的 \\X 列宽。
+    pending_spec = None
+    for node in doctree.findall(_pypdf_nodes.Element):
+        if isinstance(node, _pypdf_addnodes.tabular_col_spec):
+            pending_spec = node
             continue
+        if not isinstance(node, _pypdf_nodes.table):
+            continue
+        tbl = node
+        spec_node, pending_spec = pending_spec, None
+        classes = tbl["classes"]
         # 嵌在别的表里就跳过：在 p{} 单元格里再按版心全宽排，只会更糟
         parent = tbl.parent
         while parent is not None:
@@ -2960,16 +3001,30 @@ def _pypdf_fix_table_widths(app, doctree, docname):
             parent = parent.parent
         if parent is not None:
             continue
-        ncols = tbl.get("cols") or 0
-        if not ncols:
-            rows = list(tbl.findall(_pypdf_nodes.row))
-            if not rows:
-                continue
-            ncols = len(list(rows[0].findall(_pypdf_nodes.entry)))
-        if not ncols:
+        rows = list(tbl.findall(_pypdf_nodes.row))
+        if not rows:
             continue
-        classes.append("colwidths-given")
-        tbl["colwidths"] = _pypdf_table_weights(tbl, ncols)
+        # 长表才转 longtable。带标题（caption）的表会被编成浮动体，浮动体里放不了
+        # longtable，故跳过；短表保持原样（tabularcolumns 的紧凑布局更好看）。
+        want_long = ("longtable" not in classes
+                     and len(rows) >= 10
+                     and not any(isinstance(c, _pypdf_nodes.title)
+                                 for c in tbl.children))
+        if spec_node is not None:
+            if not want_long:
+                continue
+            if spec_node.parent is not None:
+                spec_node.parent.remove(spec_node)
+        if "colwidths-given" not in classes:
+            ncols = tbl.get("cols") or 0
+            if not ncols:
+                ncols = len(list(rows[0].findall(_pypdf_nodes.entry)))
+            if not ncols:
+                continue
+            classes.append("colwidths-given")
+            tbl["colwidths"] = _pypdf_table_weights(tbl, ncols)
+        if want_long:
+            classes.append("longtable")
 
 
 try:
@@ -2984,9 +3039,9 @@ def setup(app):
     app.connect("doctree-resolved", _pypdf_fix_table_widths)
 '''
             conf.write_text(conf_txt4, encoding="utf-8")
-            self.rep.log("已在 conf.py 挂上表格列宽补丁（PYPDF_TABLE_WIDTHS）："
-                         "没有 :widths: 的表补列宽 → 生成可折行的 \\X{a}{b} 列"
-                         "（不转 longtable，避免 latexmk 不收敛）", level="ok")
+            self.rep.log("已在 conf.py 挂上表格补丁（PYPDF_TABLE_WIDTHS_V3）："
+                         "没有 :widths: 的表补列宽 → 可折行的 \\X{a}{b} 列；"
+                         "≥10 行的表转 longtable（可跨页，不再压页脚）", level="ok")
 
         # ★★ 开编之前先确认「SVG → PDF」这条路真能走（2026-10-23 加）★★
         #   以前这里是裸跑 sphinx：CairoSVG 缺 cairo 运行库时，
@@ -3127,6 +3182,103 @@ def setup(app):
         if j <= 0:
             j = min(max((os.cpu_count() or 4) - 1, 1), AUTO_JOBS_CAP)
         return max(1, min(j, max(n, 1)))
+
+    #: `\X{a}{b}`（`\Y{a}`）——Sphinx 给 p{} 列按比例现算宽度的写法
+    COLSPEC_RE = re.compile(r"\\([XY])\{(\d+(?:\.\d+)?)\}(?:\{(\d+(?:\.\d+)?)\})?")
+    #: `p{0.3\linewidth}` —— 上游 .. tabularcolumns:: 写死的按比例列宽
+    LWSPEC_RE = re.compile(r"p\{(\d*\.?\d*)\\linewidth\}")
+
+    def _freeze_longtable_widths(self, tex: Path) -> tuple[int, int]:
+        """把 longtable 的列宽从「每次现算」改成「表前算一次、写成死数字」。
+
+        为什么必须这么做（2026-11-19 / 11-22 两次翻车）：Sphinx 的 `\\X{a}{b}`
+        = `p{(\\linewidth-\\spx@arrayrulewidth)*a/b-2\\tabcolsep-\\spx@arrayrulewidth}`。
+        tabular 只排版一遍，无所谓；longtable 要把实测列宽写进 .aux、下一遍再比对，
+        而这式子里的绝对量（\\tabcolsep=\\arrayrulewidth 那几项）不跟着比例缩放，
+        于是每遍都能差出零点几 pt → 永远报 "Table widths have changed" → latexmk
+        跑到上限仍退 12、PDF 停在第一遍（目录空、书签 0）。
+
+        改法：`\\X{a}{b}` → `p{\\pypdfwK}`，表前插一条
+            \\edef\\pypdfwK{\\the\\dimexpr(\\linewidth-\\spx@arrayrulewidth)*a/b
+                              -2\\tabcolsep-\\spx@arrayrulewidth\\relax}
+        - 必须 `\\the\\dimexpr`：`\\edef` 里直接写 \\dimexpr 不会求值（长度寄存器只
+          展开成 \\dimen<号>），加 `\\the` 才得到 `119.98pt` 这种字面量；
+        - 必须 `\\makeatletter`：`\\spx@arrayrulewidth` 带 @，不当字母就拆散了；
+        - 宏名刻意不带 @（`\\pypdfwA`），这样列声明 `p{\\pypdfwA}` 在表里也能直接读；
+        - `\\edef` 是局部的，放在表所在的那个组里，表结束自然失效（不会串表）。
+        取的值就是 Sphinx 本来会算的那个（同一处 `\\linewidth`/`\\tabcolsep`），
+        所以列宽与现在**逐点相同**，只是不再随重排漂移。
+
+        幂等：按**张**判断（列声明里已有 `\\pypdfw` 就跳过这张），所以重复跑
+        只会补上还没冻结的表。返回 (表数, 列数)。
+        """
+        text = read_text_safe(tex)
+        if "\\begin{longtable}" not in text:
+            return 0, 0
+        out: list[str] = []
+        pos = 0
+        ntab = ncol = 0
+        marker = "\\begin{longtable}{"
+        while True:
+            i = text.find(marker, pos)
+            if i < 0:
+                out.append(text[pos:])
+                break
+            brace = i + len("\\begin{longtable}")
+            end = match_brace(text, brace)
+            if end < 0:
+                out.append(text[pos:])
+                break
+            spec = text[brace + 1:end]
+            if "pypdfw" in spec or ("\\X{" not in spec
+                                    and "\\Y{" not in spec
+                                    and not self.LWSPEC_RE.search(spec)):
+                out.append(text[pos:end + 1])
+                pos = end + 1
+                continue
+            edefs: list[str] = []
+            seen: dict[tuple[str, str, str], str] = {}
+
+            def _sub(m: re.Match) -> str:
+                kind, a, b = m.group(1), m.group(2), m.group(3) or ""
+                key = (kind, a, b)
+                nm = seen.get(key)
+                if nm is None:
+                    nm = "\\pypdfw" + _alpha_name(len(seen))
+                    seen[key] = nm
+                    # \Y{a} 的写法是 a\linewidth，\X{a}{b} 是 a/b 的比例
+                    body = (f"(\\linewidth-\\spx@arrayrulewidth)*{a}/{b}" if b
+                            else f"{a}\\dimexpr\\linewidth-"
+                                 f"\\spx@arrayrulewidth\\relax")
+                    edefs.append(f"\\edef{nm}{{\\the\\dimexpr{body}"
+                                 f"-2\\tabcolsep-\\spx@arrayrulewidth\\relax}}")
+                return "p{" + nm + "}"
+
+            newspec = self.COLSPEC_RE.sub(_sub, spec)
+
+            def _sub_lw(m: re.Match) -> str:
+                r"""`p{0.3\linewidth}` 也要冻结：longtable 会把 \linewidth 改成
+                表自己的宽度，这一项就变成「自己量自己」，每遍都不一样。"""
+                a = m.group(1) or "1"
+                key = ("p", a, "")
+                nm = seen.get(key)
+                if nm is None:
+                    nm = "\\pypdfw" + _alpha_name(len(seen))
+                    seen[key] = nm
+                    edefs.append(f"\\edef{nm}{{\\the\\dimexpr{a}\\linewidth\\relax}}")
+                return "p{" + nm + "}"
+
+            newspec = self.LWSPEC_RE.sub(_sub_lw, newspec)
+            ntab += 1
+            ncol += len(seen)
+            out.append(text[pos:i])
+            out.append("\\makeatletter\n" + "\n".join(edefs) + "\n\\makeatother\n")
+            out.append("\\begin{longtable}{" + newspec + "}")
+            pos = end + 1
+        new = "".join(out)
+        if new != text:
+            tex.write_text(new, encoding="utf-8")
+        return ntab, ncol
 
     def _run_book_tex(self, tex: Path, latex: Path, logf: Path,
                       append: bool = False) -> int:
@@ -3295,6 +3447,19 @@ def setup(app):
         roots.sort(key=lambda p: p.stat().st_size, reverse=True)
         self.rep.log(f"待编 {len(roots)} 册（按体积降序：最大那册先开工，"
                      f"其余 slot 同时吃小册）", level="info")
+
+        # ★★ 长表列宽先算成死数字，再交给 latexmk ★★
+        #   longtable 会把实测列宽写进 .aux 并在下一遍比对；如果列宽是 `\X{a}{b}`
+        #   现算的，每遍都能差零点几 pt ⇒ 永远 "Table widths have changed" ⇒
+        #   latexmk 退 12、PDF 停在第一遍（2026-11-19 事故根因）。
+        n_tab = n_col = 0
+        for tex in roots:
+            t, c = self._freeze_longtable_widths(tex)
+            n_tab += t
+            n_col += c
+        if n_tab:
+            self.rep.log(f"长表列宽已冻结：{n_tab} 张表 / {n_col} 列"
+                         "（p{} 拿字面量，长表才能跨页且多遍收敛）", level="ok")
 
         # ★ 分节日志**先留空**：`_run_book_tex()` 会把每册的原始输出发给界面，
         #   而 `_TeeReporter` 会顺手把界面消息也写进「当前分节日志」—— 并发时几册
