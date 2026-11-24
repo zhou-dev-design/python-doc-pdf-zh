@@ -99,12 +99,13 @@ sudo apt-get install -y \
 
 `.github/workflows/build-pdf-linux.yml`（仓库里**唯一**的流水线）：
 
-- **每天 UTC 03:47（北京 11:47）自动跑**，但实测会**晚约 7h50m**、北京 19:4x 才出稿（原因与数据见主 README 的「实际出稿时间」一节）；也可在 Actions 页面手动触发。
-  取 03:47 而不是整点 04:00：整点是 cron 洪峰，GitHub 高负载时 scheduled run
-  会被延迟甚至**丢弃**；
+- **每天 UTC 00:47（北京 08:47）自动跑**，实际由 GitHub 排队决定：近 19 次实测排队
+  5h51–9h40、北京 **14:52–18:51** 出稿（中位 16:03，数据见主 README）；也可在 Actions 页面
+  手动触发（不走队列）。取 :47 而不是整点：整点是 cron 洪峰，高负载时 scheduled run 会被
+  延迟甚至**丢弃**；
 - `versions` 拆成 matrix，**五个版本同时起跑**（`max-parallel: 5`，每版一个独立 runner）；
 - 每步：装依赖 → `--preflight` → `selftest.py` → 构建 → 上传 artifact → 发布到 Releases；
-- 托管 runner 装 TeX Live 约 3~5 分钟，单版本整轮约 25~35 分钟。
+- 托管 runner 装 TeX Live 约 3~5 分钟，单版本整轮约 25~35 分钟（含排队与装包）。
 
 ### 5.1 落点：产物进 Releases，分支只留三根
 

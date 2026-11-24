@@ -1,39 +1,33 @@
 # python-doc-pdf-zh
 
-把 **CPython 官方 reST 文档** 与 **python-docs-zh-cn 中文译文** 编译成**中文分册 PDF**。
+把 **CPython 官方 reST 文档** 与 **python-docs-zh-cn 中文译文** 编译成**中文分册 PDF**，每天自动发布。
 
-> **为什么需要它**：官方 2025-09 起停止发布文档 PDF——使用率低，而 PDF 构建却占掉大部分算力
-> （[官方讨论](https://discuss.python.org/t/101343)）。3.14 的下载页现在明确写着
-> “我们不再提供文档的预构建 PDF”
-> （[docs.python.org/zh-cn/3.14/download.html](https://docs.python.org/zh-cn/3.14/download.html)）。
->
-> 所以中文读者手里只剩一份 2025-10 的旧快照：**3.14.0 正式版之后的所有 3.14.x 修订、
-> 以及整个 3.15，都没有官方中文 PDF**。本项目沿用官方那套 Sphinx + LaTeX 流程
-> （主题、字体、分册结构与官方 3.13 一致），接上最新译文产出**中文分册**，并合成一册，
-> 每天自动发布。
->
-> 官方各版 PDF 的下载链接、大小与冻结日期，见文末「附：官方 PDF 下载」。
+官方 2025-09 起停止发布文档 PDF（[讨论](https://discuss.python.org/t/101343)：用得少、构建吃算力），
+3.14 下载页已写明不再提供预构建 PDF。于是中文读者手里只剩 2025-10 的旧快照 —— **3.14.0 之后的所有
+3.14.x 修订、以及整个 3.15，都没有官方中文 PDF**。本项目沿用官方那套 Sphinx + LaTeX 流程（主题、字体、
+分册结构与官方 3.13 一致），接上最新译文产出中文分册，再合成一册。
 
 | | |
 |-|-|
 | 构建版本 | **3.11 / 3.12 / 3.13 / 3.14 / 3.15**（3.10 已于 2026-10-31 EOL） |
-| 出稿 | **每天北京时间 14:50–17:00**（近 17 次 14:52–16:51，均值 15:49；密集段 15:30–16:30） |
-| 耗时 | **约 17 分钟**（近 17 次 10m18–23m42，不含排队） |
-| 产物 | 每版本 **2 个附件**：合并册 PDF + 全部分册的 RAR |
+| 出稿 | **每天北京时间 14:50–19:00**，中位 16:03（近 19 次；63% 落在 15:30–16:30） |
+| 单版本耗时 | **约 18 分钟**（近 19 次 10m18–23m42，不含排队） |
+| 产物 | 每版本 **2 个附件**：合并册 PDF + 全部分册 RAR |
 | 落点 | **Releases**，tag = `v<完整版本>`（如 `v3.15.2`），同版本重跑原地更新 |
-| 历史 | **`old` 分支**：EOL 版本、被新补丁版顶下来的旧版，按 tag 存目录 |
-| 入口 | CI：`ci/linux/pdf_builder_linux.py`；本机：`sphinx-pdf/gui/pdf_builder_multi.py` |
+| 历史 | **`old` 分支**：EOL 版本与被补丁版顶下来的旧版，按 tag 存目录 |
+| 入口 | CI `ci/linux/pdf_builder_linux.py`；本机 `sphinx-pdf/gui/pdf_builder_multi.py` |
 
-> 纸张统一 **A4（595×842pt）**。3.11 的上游 `Doc/conf.py` 把 `papersize` 写成 `'a4'`——
-> 那不是 LaTeX 的纸张选项，会被静默忽略、整册按默认的 Letter（612×792pt）排；构建时
-> 已自动纠正为 `a4paper`（3.12 起上游自己写对了）。
->
-> 要图形界面、要在本机 Windows 上跑，见 [`sphinx-pdf/gui/README.md`](sphinx-pdf/gui/README.md)。
-> 要逐步操作与排错清单，见 [`构建Python文档PDF-完整步骤.md`](构建Python文档PDF-完整步骤.md)。
+纸张统一 **A4**。3.11 上游把 `papersize` 写成 `'a4'` —— 那不是 LaTeX 纸张选项，会被静默忽略、整册按
+Letter 排；构建时自动纠正为 `a4paper`（3.12 起上游自己写对了）。
+
+> 图形界面 / 本机 Windows → [`sphinx-pdf/gui/README.md`](sphinx-pdf/gui/README.md)
+> · 逐步操作与排错 → [`构建Python文档PDF-完整步骤.md`](构建Python文档PDF-完整步骤.md)
+> · CI 侧细节 → [`ci/linux/README.md`](ci/linux/README.md)
+> · 更新日志实现 → [`ci/changelogs/README.md`](ci/changelogs/README.md)
 
 ---
 
-## 各版本现状（构建时间 / 译文更新时间）
+## 各版本现状
 
 <!-- BUILD-TABLE:BEGIN -->
 | 版本 | 小版本号 | PDF 构建时间（北京时间） | 译文最后更新（北京时间） |
@@ -46,334 +40,164 @@
 | 3.15 | 3.15.2 | 2026-11-24 18:29 | 2026-11-24 14:31 |
 <!-- BUILD-TABLE:END -->
 
-一个版本线一行，小版本号**就地覆盖**：3.15.2 → 3.15.3 那天第二列变成 3.15.3，**不会多出一行**；
-旧补丁版产物在 `old` 分支（`old/v3.15.2/`），历史不在这张表里堆积。
-**3.10 已 EOL**，那一行是它**最后一次构建**的定格数据，不再更新。
-
-口径：**PDF 构建时间** = 拉取 `.po` 的时刻（步骤 3），不是开始构建或上传 Release 的时间；
-**译文最后更新** = `python-docs-zh-cn` 对应分支最后一次提交（`git log -1 --format=%cI`），不是 `.po` 的 mtime。
-两者均已换算北京时间。表格由 CI 自动改写（只替换两个标记之间的内容），手改会被覆盖；
-某版本这轮没构建成功时**保留上一行**，不会变成 `?`。
+一个版本线一行、小版本号**就地覆盖**（3.15.2 → 3.15.3 那天改第二列，不多一行），旧补丁版进 `old`。
+**PDF 构建时间** = 拉取 `.po` 的时刻；**译文最后更新** = 译文分支最后一次提交。表格由 CI 自动改写，
+手改会被覆盖；某版本这轮没构建成功时保留上一行。3.10 已 EOL，那一行是它最后一次构建的定格数据。
 
 ---
 
-## 一、每天做什么
+## 每天怎么跑
 
 ```
-GitHub Actions（每天自动一次）
-        │
-   ┌────▼─────┐  prepare：① 刷 version-titles.json（变了就提交）
-   │ prepare  │           ② 读 versions → 拆 matrix（3.11~3.15，五个 job 并行）
-   └──┬────┬──┘
-      │    └──► archive-eol：把 EOL 版本的 release 挪进 old 分支后删除（幂等）
-      │
-      ├────────► changelogs：3.11~3.15 各一本「完整更新日志」→ release tag=changelogs
-      │                     （3.9/3.10 已冻结，直接用仓库里那两本）
-      │
-   ┌──▼────────────────────────────────────────────────┐
-   │ 1 装 TeX Live / poppler / 中文字体 / cairo         │
-   │ 2 装该版本 Python（actions/setup-python）          │
-   │ 3 --preflight 体检 → selftest.py 自检              │
-   │ 4 构建：pdf_builder_linux.py --versions X          │
-   │ 5 上传 artifact（保留 7 天，排错用）                │
-   │ 6 发布到 Releases（先清后传，核对恰好 2 个附件）      │
-   └───────────────────────────────────────────────────┘
+prepare：刷 version-titles.json（变了就提交）→ 拆 matrix
+  ├─► build 3.11 … 3.15   五版并行、互不影响（fail-fast: false）
+  ├─► changelogs          五本更新日志 → tag=changelogs（见 ci/changelogs/README.md）
+  └─► archive-eol         把 EOL 版本搬进 old 分支后删 release（幂等，每轮都过一遍）
 ```
 
-五个版本**互不影响**（`fail-fast: false`）：3.15 失败不会拦住 3.11 出稿。
+每个 build job：装 TeX Live / 中文字体 / poppler → 装该版本 Python → `--preflight` 体检 + 自检 →
+构建 → 上传 artifact（留 7 天，排错用）→ 发布 Releases（先清后传，核对恰好 2 个附件）。
 
-### 出稿时间：每天下午 14:50–17:00
+**出稿时间**：计划 UTC 00:47（北京 08:47），实际由 GitHub 排队决定，**别按分钟等**。近 19 次
+（2026-11-06 ~ 11-24）：排队 5h51–9h40（均值 6h55、中位 6h43），单版本构建 10m18–23m42（均值 17m48），
+出稿 14:52–18:51、中位 16:03。00:47 已是最早能设的时刻 —— 再早的话，一旦某天延迟变小，构建目录名里的
+UTC 日期就会比北京日期早一天。想立刻拿：Actions → Run workflow（不走队列）。
 
-**只管「每天跑一次」，具体时刻由 GitHub 的排队决定**，别按分钟等。
-
-计划 UTC 00:47（北京 08:47）。**近 17 次（2026-11-06 ~ 11-22，定时触发、全部成功）**：排队平均
-**6h42**（5h51–7h45），构建平均 **17m12s**（10m18–23m42），**平均 15:49 出稿**，实测 14:52–16:51；
-对外给 14:50–17:00，不写单日时刻。
-
-**最密集时段**：15:30–16:30（12/17）。数据取自 Actions 运行记录（`schedule` 触发）。
-
-> 计划时刻不会再往前挪：00:47 已经是最早能设的时刻，再早的话，一旦某天延迟变小，
-> 构建目录名里的日期就会比北京日期早一天。想立刻拿：Actions 页 → Run workflow（不走队列）。
-
----
-
-## 二、产物：Releases 模型
-
-```
-Releases
-├── v3.15.2   合并册 PDF + 全册 RAR      ← 同版本重跑原地更新
-├── v3.14.10 / v3.13.18 / v3.12.16
-└── v3.11.18
-old 分支
-└── v3.10.22/  ← EOL 归档：Python-3.10.22-docs-20261103.pdf + .rar
-```
+## 产物模型
 
 | 情况 | 结果 |
 |-|-|
-| 同一版本连跑两天 | 该 release **原地更新**（同名附件 `--clobber` 覆盖），不会一天一个 |
-| 3.15.2 → 3.15.3 | 旧版附件搬进 `old` 分支、**推成功之后**才删它的 release ⇒ 每条线只有一个 release |
-| 版本 EOL（如 3.10） | `archive-eol` 把它整条 release 搬进 `old/v3.10.22/`，再删 release 和 tag |
-| 跑一年 | Releases 数量 = 版本线条数（5 条），体积不随天数增长 |
+| 同一版本连跑两天 | 该 release **原地更新**（同名附件 `--clobber`），不会一天一个 |
+| 3.15.2 → 3.15.3 | 旧附件先归档到 `old/v3.15.2/`，**推成功之后**才删旧 release ⇒ 每条线只有 1 个 |
+| 版本 EOL | `archive-eol` 整条搬进 `old/`，再删 release 和 tag |
+| 跑一年 | Releases 数量 = 版本线条数，体积不随天数增长 |
 
-- **tag 不带日期**（`v<完整版本>`），日期只写进标题、正文和包名 —— 既带日期，又不一天一个 release。
-- **版本号取官方文档站标题**（`zh-cn/3.15/` 和 `3.15/` 的 h1，**取较新者**），缓存在
-  `sphinx-pdf/version-titles.json`；不用解释器报告（CI 的 `setup-python` 补丁版常落后，会「内容新、
-  文件名旧」）。只认中文站也不行——那边等翻译分支重建，历史上滞后过（3.7 差 4 个补丁版）。
-- **每轮构建都刷新该缓存**并自动 commit，build job 拉新值后再核一次 —— 缓存停在旧值会让新内容
-  被覆盖成旧名字、旧 release 不归档，而且**零报错**。
-- **附件恰好 2 个**：
+- **附件恰好 2 个**：合并册（单本）+ `.rar`（全部分册 + 合并册 + 验收报告，包内中文原名）。
+  单册不逐个挂 —— GitHub 附件名只接受 ASCII，中文会被换成点号，**要单册就解压**。
+- **先清后传**：删掉不在本轮名单里的旧附件 → 上传 → 核对恰好 2 个；压缩包打不出来就报错、不发布。
+- **版本号取官方文档站 h1**（中/英站取较新者），缓存在 `sphinx-pdf/version-titles.json`，每轮刷新并
+  自动 commit。用解释器自报的版本会「内容新、文件名旧」，而且**零报错**。
+- 三根分支：`main`（代码）、`ci-logs`（失败诊断证据）、`old`（历史产物），都不放 PDF。
 
-  ```
-  Python-3.15.2-docs-20261103.pdf   合并册（单本，直接下）
-  Python-3.15.2-docs-20261103.rar   39 个分册 + 合并册 + 验收报告（包内中文原名）
-  ```
+## 更新日志（tag = `changelogs`）
 
-  单册不逐个挂：GitHub 附件名只接受 ASCII，中文会被换成 `.`，还得额外维护映射表。**要单册就解压。**
-- **先清后传**：发布前删掉不在本轮名单里的旧附件，再统一上传，最后核对**恰好 2 个**；
-  压缩包打不出来就不发布（`::error` 让 job 红）——只发单个 PDF 等于丢掉全部分册。
-- **三根分支**：`main`（代码）、`ci-logs`（失败诊断证据，强推、永远 1 个提交）、`old`（历史产物），都不放 PDF。
+每天另出一套「完整更新日志」，一个大版本一本，单独 release、单独 job，与文档册互不影响：
+内容是该版本 `changelog.rst` 的中文译文 + `Misc/NEWS.d` 的补丁记录；3.11–3.15 每天重建，
+**3.9 / 3.10 已冻结**（随仓库带）。某版失败只保留上一版并告警。
 
-### EOL 机制
+实现、依赖、失败语义、回退方法见 **[`ci/changelogs/README.md`](ci/changelogs/README.md)**。
 
-1. `archive-eol` job 的 `EOL_TAGS` 里加一个 tag（目前 `v3.10.22`）；
-2. 该 job 把 release 附件下载 → 推进 `old/<tag>/` → 删 release 和 tag；
-3. 从 `KNOWN_VERSIONS` 和 workflow 默认 `versions` 里删掉该版本。
+## 每版几册（官方的，不是猜的）
 
-它是**幂等**的（release 已不在就跳过），每次运行都无条件过一遍。只想归档、不构建：手跑时
-`archive_only=true`。代码对 3.10 的支持**没有删**，把 `"3.10"` 加回 `KNOWN_VERSIONS` 即可重建。
-
-### 更新日志（tag = `changelogs`）
-
-同一个工作流每天另外出一套「完整更新日志」，一个版本一本，单独一个 release：
-
-```
-changelogs    Python 完整更新日志（3.9–3.15）
-├── Python-3.9-changelog.pdf             3.9 / 3.10 已冻结（EOL），随仓库带
-├── Python-3.10-changelog.pdf
-├── Python-3.11-changelog-20261122.pdf   每天重建，文件名带北京时间日期
-└── … 3.12 / 3.13 / 3.14 / 3.15
-```
-
-- **内容**：该版本 `Doc/whatsnew/changelog.rst` 的中文译文 + `Misc/NEWS.d` 里属于它的补丁记录。
-- **构建**：`ci/changelogs/builder.py` 直接跑 `--mode changelog`（它是 whatsnew-studio
-  构建器的逐字副本，只多了 `WNS_PY`/`WNS_TEXBIN` 两个环境变量）：
-  `python ci/changelogs/builder.py --version 3.11 --mode changelog --outdir changelog-out --workdir changelog-work`
-- **每天重建** → 同名附件原地替换、旧日期的自动清掉；某天某版本失败则保留上一版并告警，
-  一本都没编出来时 release 不动。
-- 附件名是 ASCII（GitHub 会把中文换成点号），中文原名在 PDF 标题里。
-- 与文档册不同 job / tag / 失败域，互不影响。
-
-| 回退/停用 | 做法 |
-|-|-|
-| 这一轮不跑 | 手跑时把 `changelogs` 勾成 `false` |
-| 代码撤掉 | `git revert --no-commit <本功能的几个 commit> && git commit`（主流程一行没动） |
-| 连 release | `gh release delete changelogs --yes --cleanup-tag`（不碰 `v3.x` 那几条线） |
-
----
-
-## 三、每版几册（不是猜的，是官方的）
-
-册数依据是各分支 `Doc/conf.py` 的 `latex_documents` + `Doc/howto/*.rst` 的文件数
-（`--tool volumes --verify` 可联网逐条核对官方）：
+依据是各分支 `Doc/conf.py` 的 `latex_documents` + `Doc/howto/*.rst` 数量，真源
+`sphinx-pdf/volumes.json`（`--tool volumes --verify` 可联网逐条核对）：
 
 | 版本 | 静态册 | howto | 合计 | 差异 |
 |-|-|-|-|-|
 | 3.11 | 9 | 20 | **29** | `distributing` 被上游并进 `installing` |
 | 3.12 | 9 | 23 | **32** | |
-| 3.13 | 10 | 27 | **37** | 拆出《内置参考手册》（builtins） |
+| 3.13 | 10 | 27 | **37** | 拆出《内置参考手册》 |
 | 3.14 | 10 | 28 | **38** | 新增远程调试附加协议 |
 | 3.15 | 10 | 29 | **39** | 新增 abi3t 迁移 |
-| ~~3.10~~ | 10 | 17 | ~~27~~ | **已 EOL**：多 `09分发 Python 模块`，无 builtins；产物在 `old` |
+| ~~3.10~~ | 10 | 17 | ~~27~~ | 已 EOL，产物在 `old` |
 
-真源是 **`sphinx-pdf/volumes.json`**（分册名 / 编号 / 书签标题 / 版本区间 / 合并顺序）。三种改法：
-界面「① 版本与目录」→「分册配置…」可视化编辑（行序 = 合并册一级顺序，带册数预览与自检）；
-`--tool name-map --dump volumes.json` 导出再改；或直接改文件后跑 `--tool name-map --check` 自检。
+版本区间是**闭区间**（`distributing` 填 `max=3.10`、`builtins` 填 `min=3.13`），上游再删哪册只加一个
+`max`，不用改代码。改法：界面「分册配置…」可视化编辑，或改文件后 `--tool name-map --check` 自检。
 
-版本区间是**闭区间**（`distributing` 填 `max=3.10`、`builtins` 填 `min=3.13`），
-上游将来再删哪册，加一个 `max` 就行，不用改代码。
-
----
-
-## 四、本地怎么跑
+## 本地怎么跑
 
 三条路，**同一份实现**（`pdf_builder_multi.py`），不会出现两套逻辑。
 
-### A. 图形界面（推荐，Windows）
-
-```bat
-cd sphinx-pdf\gui
-启动PDF构建器.bat          :: 或 python pdf_builder_multi.py
-```
-
-版本可多选、每版独立日志面板、可只重跑某几步。打包 exe：`python build_exe.py`
-（onefile → `dist/PDF构建器-多版本.exe`）。exe 只省「装 PyQt6 / 带一堆 .py」——
-`git`、TeX Live、Python 解释器、网络一条都省不掉，验收要在「拷进空目录」里做。
-
-### B. 纯 bash 一键（无界面环境）
-
-```bash
-cd sphinx-pdf
-./build-sphinx-pdf.sh            # 跑步骤 0~10
-```
-
-### C. CI 同款脚本（Linux）
-
-```bash
-python3 ci/linux/pdf_builder_linux.py --versions 3.15 --jobs 4      # 单版本全套
-python3 ci/linux/pdf_builder_linux.py --versions 3.11,3.12,3.13,3.14,3.15 --jobs 4 --merge
-python3 ci/linux/pdf_builder_linux.py --versions 3.15 --only 6,6b,7,7b,8,9   # 只跑后半段
-python3 ci/linux/pdf_builder_linux.py --preflight --versions 3.15            # 只体检
-```
-
-它**不复制**构建逻辑，只是把主程序当库导入、覆盖少量平台相关方法（locale、`python` 别名、venv 重建 PATH）。
-
-| 参数 | 说明 |
+| 场景 | 命令 |
 |-|-|
-| `--versions` | 逗号分隔；多版本时内部按版本各起一个子进程 |
-| `--jobs` | 同时是步骤 6 的 sphinx `-j` 与步骤 7 的册级并发 |
-| `--source` | `github`（默认，直连）/ `auto`（镜像回退，国内本地用） |
-| `--python-map 3.13=/path` | 指定版本用哪个解释器 |
-| `--only` / `--from` | 按**步骤号**（不是行号）挑步骤 |
-| `--clean` | 步骤 10 清理范围，CI 默认 `none`（留日志给验收报告） |
+| 图形界面（Windows） | `cd sphinx-pdf\gui` → `启动PDF构建器.bat`（多选版本、每版独立日志、可只重跑某几步） |
+| 纯 bash 一键 | `cd sphinx-pdf && ./build-sphinx-pdf.sh`（步骤 0~10） |
+| 与 CI 同款（Linux） | `python3 ci/linux/pdf_builder_linux.py --versions 3.15 --jobs 4 --merge` |
 
-**产物目录**：`<base>/Python <完整版本> PDF 文档 <YYYYMMDD>/`；
-**合并册**：同目录下 `Python <完整版本> 文档 <YYYYMMDD>.pdf`。
+CI 脚本**不复制**构建逻辑，只把主程序当库导入、覆盖少量平台相关方法（locale、`python` 别名、
+venv 重建 PATH）。常用参数：`--only/--from <步骤号>` 只跑片段、`--preflight` 只体检、
+`--source auto` 镜像回退（国内本地用；CI 门禁只用官网直连）。
 
----
+产物目录 `<base>/Python <完整版本> PDF 文档 <YYYYMMDD>/`，合并册是同目录下的
+`Python <完整版本> 文档 <YYYYMMDD>.pdf`。
 
-## 五、目录结构
+## 目录结构
 
 ```
-.github/workflows/build-pdf-linux.yml   # 唯一流水线（prepare / archive-eol / build）
-ci/linux/
-  pdf_builder_linux.py                  # CI 入口：导入主程序 + 覆盖平台差异
-  selftest.py / update_readme_table.py  # 胶水层自检 / 改写本文表格
-  README.md                             # CI 侧细节与排错
+.github/workflows/build-pdf-linux.yml   # 唯一流水线
+ci/linux/pdf_builder_linux.py           # CI 入口：导入主程序 + 覆盖平台差异
+ci/changelogs/                          # 更新日志（tag=changelogs），见其 README
 sphinx-pdf/
   gui/pdf_builder_multi.py              # ★ 唯一主程序：步骤 0~10 + PyQt6 界面 + 17 个内置工具
-  gui/build_exe.py / *.spec / README.md # 打包脚本（--entry 选入口）/ 界面说明
-  build-sphinx-pdf.sh / rename-pdf.sh   # 纯 bash 一键（步骤 0~10）/ 英文 PDF 改名
+  build-sphinx-pdf.sh                   # 纯 bash 一键（步骤 0~10）
   volumes.json                          # ★ 分册真源（可外置覆盖，读坏退回内置表）
-  version-titles.json                   # 完整版本号缓存（中英文站 h1 取较新）
-ci/changelogs/                          # 更新日志（tag=changelogs），与上面的文档册无关
-  builder.py                            # whatsnew-studio 构建器的逐字副本（+ WNS_PY/WNS_TEXBIN）
-  frozen/Python-3.9-changelog.pdf       # 已冻结（EOL），直接随仓库发布
-  frozen/Python-3.10-changelog.pdf
-构建Python文档PDF-完整步骤.md             # 逐步操作 + 故障排查表
+  version-titles.json                   # 完整版本号缓存
+构建Python文档PDF-完整步骤.md              # 逐步操作 + 故障排查表
 ```
 
-内置 17 个工具，`--tool` 调用（不带参数列出全部）：
+内置工具用 `--tool` 调用（不带参数列出全部），常用的三个：
 
 ```bash
 python sphinx-pdf/gui/pdf_builder_multi.py --tool name-map --check        # 分册表自检
-python sphinx-pdf/gui/pdf_builder_multi.py --tool volumes --verify       # 联网核对官方册数
-python sphinx-pdf/gui/pdf_builder_multi.py --tool check-pdf-gaps <册.pdf> # 查成品缺页
+python sphinx-pdf/gui/pdf_builder_multi.py --tool volumes --verify        # 联网核对官方册数
+python sphinx-pdf/gui/pdf_builder_multi.py --tool check-pdf-gaps <册.pdf>  # 查成品缺页
 ```
 
----
-
-## 六、workflow 怎么配的
-
-`.github/workflows/build-pdf-linux.yml`
-
-| 项 | 值 | 为什么 |
-|-|-|-|
-| 触发 | 每天自动 1 次 + 手动 Run workflow | 具体时刻由 GitHub 排队，实际出稿见上文 |
-| `on.workflow_dispatch` | 6 个输入 | `versions` / `jobs` / `merge` / `clean` / `push_branch` / `archive_only` |
-| `runs-on` | `ubuntu-24.04` | 需要系统 TeX Live；24.04 的 apt TeX 即官方那套（xdvipdfmx 20220710） |
-| `permissions` | `contents: write` | 建 Release、传附件、维护 `old` 分支 |
-| `concurrency` | `build-pdf-linux-<ref>` | 上一轮没跑完时排队，不并行堆叠 |
-| `max-parallel` | 5 | 五个版本同时起跑 |
-
-手动触发（手机也行）：`Actions → 构建 Python 中文文档 PDF（Linux）→ Run workflow`。
-
-> 定时触发时 `github.event.inputs.*` 全是空串，所以每个输入都写了兜底（`|| '4'`、`|| 'none'`、
-> `!= 'false'`）。漏一处就会出现「每天跑完但不发布」。
-
----
-
-## 七、常见问题
-
-<details>
-<summary><b>某个版本红了，其它还绿，正常吗？</b></summary>
-
-正常，这是刻意的（`fail-fast: false`）。每个版本独立 job，失败的产物不会发布 ——
-所以「有没有对应 Release」就是最干净的判据。
-</details>
+## 常见问题
 
 <details>
 <summary><b>到点了却没看到新产物</b></summary>
 
-先看 Actions 里有没有一条 `schedule` 运行：**有**，就是还在排队或还在构建（见过晚一两个小时的）；
-**始终没有**，才是被丢弃。两种情况都可以手动 Run workflow 立刻补一次，产物与自动跑完全一样。
+先看 Actions 里有没有一条 `schedule` 运行：**有** → 还在排队或构建（见过晚 9 小时的）；
+**始终没有** → 被丢弃。两种情况都可以手动 Run workflow 立刻补一次，产物与自动跑完全一样。
 </details>
 
 <details>
-<summary><b>PDF 里正文是英文（封面却是中文）</b></summary>
+<summary><b>某个版本红了，其它还绿，正常吗？</b></summary>
 
-最隐蔽的失败：**0 条 warning、页数书签索引全正常、验收报告全绿**。老版本（3.10/3.11）的 `conf.py`
-缺 `gettext_compact = False`，Sphinx 按「每个顶层目录一份 .mo」找，而译文是每页一份（`library/array.mo`），
-一个都匹配不上。步骤 6 会自动补这行，`step6b` 再兜底（整批汉字 < 2000 且过半册子无中文就 `raise Fail`）。
+正常，这是刻意的（`fail-fast: false`）：每版独立 job，失败的那版不发布。所以「有没有对应
+Release」就是最干净的判据。
 </details>
 
 <details>
-<summary><b>job 跑了不到 1 分钟就红，构建根都没有</b></summary>
+<summary><b>PDF 正文是英文，封面却是中文</b></summary>
 
-死在「构建」之前：装依赖 / 装 Python / 体检 / 自检。workflow 里有「失败诊断」（`if: failure()`），
-会把 `pip.log`、`clone.log`、`latex-build.log` 的末 60 行打到日志里。
+最隐蔽的失败：**0 warning、页数书签全正常**。老版本（3.10/3.11）`conf.py` 缺
+`gettext_compact = False`，Sphinx 按「每目录一份 .mo」找，而译文是每页一份 ⇒ 全不匹配。
+步骤 6 自动补这行，`step6b` 再兜底（整批汉字 < 2000 且过半册无中文就 `raise Fail`）。
+排查同类问题时，判据要拿**上一版同一册**逐条对照，别只看 translation progress。
 </details>
 
 <details>
 <summary><b>Release 里的 PDF 是半成品 / 没有索引</b></summary>
 
-看验收报告的「每步耗时」：步骤 7 异常短多半是 `makeindex` 没跑成。「构建全绿」≠「内容齐全」，用工具复核：
-
-```bash
-python3 sphinx-pdf/gui/pdf_builder_multi.py --tool check-pdf-gaps <合并册.pdf>
-```
-
-判据是**页面内容流字节数**，不能用 `extract_text()`（这套 PDF 是字体子集 + 自定义编码）。
+「构建全绿」≠「内容齐全」。用
+`--tool check-pdf-gaps <合并册.pdf>` 复核（判据是页面内容流字节数，不能用 `extract_text()` ——
+这套 PDF 是字体子集 + 自定义编码）。步骤 7 异常短，多半是 `makeindex` 没跑成。
 </details>
 
-<details>
-<summary><b>Actions 分钟数会不会不够</b></summary>
+## 已知限制
 
-本仓库是**公开**仓库 ⇒ 免费且不限分钟数。改私有才要算：5 版本 × 约 20 分钟 × 30 天 ≈ 3000 分钟/月，会超 2000 的额度。
-</details>
-
-<details>
-<summary><b>为什么不做 doctree 缓存来提速</b></summary>
-
-`environment.pickle` 不会因为 `.po` 更新而失效，复用缓存就会出现「译文更新了、PDF 还是旧中文」的
-静默失败 —— 正是这个项目最忌讳的失败类型，所以每轮从零读入。
-</details>
-
----
-
-## 八、已知限制
-
-1. **按册拆成三四十个独立工程并不会更快**：工作量约 61% 集中在「标准库」那一册，墙钟下限仍是它
-   自己的耗时；按篇并行的 `-j` 才是对的切法。
-2. **跨册 `:ref:` 引用本来就是断的**（`LaTeX Warning: Reference ... undefined`），分册编译的固有限制。
-3. **旧版本要用它自己的工具链**：3.10 需要 `sphinx==3.4.3`、3.11 是 `7.2`、3.12 是 `8.2`；
-   ≤3.12 一律读该分支自己的 `Doc/requirements.txt`，一刀切装最新版必失败。
+1. **按册拆成三四十个独立工程并不会更快**：约 61% 的工作量集中在「标准库」那一册，墙钟下限由它决定；
+   按篇并行的 `-j` 才是对的切法。
+2. **跨册 `:ref:` 引用本来就是断的**（`Reference ... undefined`），分册编译的固有限制；合并册里
+   9~12 处 `??` 属正常，不是回归。
+3. **旧版本要用它自己的工具链**：3.11 是 Sphinx 7.2、3.12 是 8.2，≤3.12 一律读该分支的
+   `Doc/requirements.txt`，一刀切装最新版必失败。
 4. **官方与本项目 CI 用同一套 TeX**：官方 PDF 的 Producer 是 `xdvipdfmx (20220710)`＝TeX Live 2023
-   （戳里是编译日期，不是发行年；TL2022 是 20211117）。官方构建机跑 PSF 规范的 **Ubuntu 24.04**，
-   TeX 取自 apt 的 `texlive-binaries 2023.20230311`，其 xdvipdfmx 实测同为 `20220710`；本项目 CI
-   也跑 24.04，故引擎与字体同源。版式看 xdvipdfmx，不看 `xelatex --version` 自报的发行版标签。
+   （戳里是编译日期，不是发行年），来自 PSF 规范机 Ubuntu 24.04 的 apt 包；本项目 CI 同样跑 24.04，
+   引擎与字体同源。版式看 xdvipdfmx，不看 `xelatex --version` 自报的发行版标签。
+5. **不做 doctree 缓存**：`environment.pickle` 不会因 `.po` 更新而失效，复用就会出现「译文更新了、
+   PDF 还是旧中文」的静默失败 —— 本项目最忌讳的失败类型，所以每轮从零读入。
 
 ---
 
-## 附：官方 PDF 下载（3.6 – 3.14，全部停在 2025-10）
+<details>
+<summary><b>附：官方 PDF 下载（3.6 – 3.14，全部停在 2025-10，仅作版式参照）</b></summary>
 
-官方 2025-09 停发 PDF 后，旧文件仍挂在 CDN 上，可作**版式参照**（官方 3.8 起 276 册引擎全是
-`xdvipdfmx 20220710`＝TL2023；官方与本项目 CI 同为 Ubuntu 24.04；包内也是分册，3.14 共 37 个 PDF）。
-
-**3.15 没有官方 PDF**；3.13 / 3.14 都停在 2025-10-02——3.14 那份是 rc3（2025-09-18）到
-final（2025-10-07）之间的快照（[PEP 745](https://peps.python.org/pep-0745/)）。
-
-**文件名里的版本号别信**：3.6~3.11 带补丁号但多数不是最后一版，3.12/3.13 不带号（固定快照）。
-以表内「包内实际版本」为准。
+3.15 没有官方 PDF；3.13 / 3.14 都停在 2025-10-02，3.14 那份是 rc3 到 final 之间的快照
+（[PEP 745](https://peps.python.org/pep-0745/)）。**文件名里的版本号别信**：3.6~3.11 带补丁号但多数
+不是最后一版，3.12/3.13 不带号。以「包内实际版本」为准。
 
 | 版本 | 中文版 A4 | 大小 | 出包日期 | TeX | 包内实际版本 | 官方最新 | 落后 |
 |-|-|-|-|-|-|-|-|
@@ -387,28 +211,18 @@ final（2025-10-07）之间的快照（[PEP 745](https://peps.python.org/pep-074
 | 3.13 | [3.13](https://docs.python.org/zh-cn/3.13/archives/python-3.13-docs-pdf-a4.zip) | 32.9 MB | 2025-10-02 | 2023 | 3.13.7 | 3.13.18 | 11 版 |
 | 3.14 | [3.14](https://docs.python.org/zh-cn/3.14/archives/python-3.14-docs-pdf-a4.zip) | 34.2 MB | 2025-10-02 | 2023 | 3.14.0rc3 | 3.14.10 | 11 版 |
 
-⇒ **9 份里只有 3.6、3.8 是该版本线的最后一版**，其余看版式可以，看内容不行——要最新内容用本仓库 Releases。
+右侧三列据 **UTC**，表内日期已换算北京时间（取自 CDN 的 `Last-Modified`）；「TeX」列 = PDF 元数据
+`Producer` 的引擎所属发行版：3.6/3.7 是 `XeTeX 0.99998`，3.8 起 276 册全是 `xdvipdfmx (20220710)`
+= TL2023。英文版去掉路径里的 `zh-cn/` 即可（体积小约 1/3）；查补丁版号认英文站或
+[endoflife.date](https://endoflife.date/python)，中文站 3.7 还停在 `3.7.13`。
+</details>
 
-> 「TeX」列 = PDF 元数据 `Producer` 的引擎所属发行版：3.6/3.7 是 `XeTeX 0.99998`（TL2020 代），
-> 3.8 起 276 册**全部**是 `xdvipdfmx (20220710)` —— 该戳属 **TeX Live 2023**（2022-07 编译），
-> 不是字面年份 TL2022（TL2022 是 20211117）。官方构建机由 [psf-salt](https://github.com/python/psf-salt)
-> 管理、按 PSF 规范跑 **Ubuntu 24.04**，TeX 取自发行版 apt 包（`texlive-bin 2023.20230311`，其
-> xdvipdfmx 实测戳同为 20220710）⇒ 整套工具链即 noble 的 TL2023；此结论来自构建机配置，
-> 元数据本身只能证明引擎。出包日期取自 CDN 的 `Last-Modified`；
-> 该列表按 **UTC** 显示，表内已换算成北京时间。
-> 英文版去掉路径里的 `zh-cn/` 即可（体积小约 1/3）；查补丁版号认英文站或 [endoflife.date](https://endoflife.date/python)，中文站 3.7 还停在 `3.7.13`。
-
----
-
-## 九、许可与致谢
+## 许可与致谢
 
 文档内容来自 [CPython](https://github.com/python/cpython) 与
-[python-docs-zh-cn](https://github.com/python/python-docs-zh-cn)（均为 PSF License），
-本仓库只做构建与排版，不改变原文授权。
+[python-docs-zh-cn](https://github.com/python/python-docs-zh-cn)（均为 PSF License），本仓库只做构建与
+排版，不改变原文授权。
 
-**构建**：[Sphinx](https://www.sphinx-doc.org/) +
-[python-docs-theme](https://github.com/python/python-docs-theme) +
-[TeX Live](https://www.tug.org/texlive/)（官方与本项目 CI 同为 Ubuntu 24.04 的 apt TeX，xdvipdfmx 20220710）。
-
-**验收**：[poppler](https://poppler.freedesktop.org/) —— `pdfinfo` 查页数与残片、
-`pdffonts` 查中文字体有没有真嵌进去、`pdftotext` 取封面标题。
+构建：[Sphinx](https://www.sphinx-doc.org/) + [python-docs-theme](https://github.com/python/python-docs-theme)
++ [TeX Live](https://www.tug.org/texlive/)；验收：[poppler](https://poppler.freedesktop.org/)
+（`pdfinfo` 查页数、`pdffonts` 查中文字体嵌入、`pdftotext` 取封面标题）。
