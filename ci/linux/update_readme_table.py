@@ -1,45 +1,58 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""把各版本的「构建时间 / 译文更新时间」写进 README 的表格里。
+"""把各版本的「构建时间 / 译文时间 / 下载直链」写进 README 的表格。
 
 由 CI 的 summary job 调用：每个 build job 会产出 `build-info-<版本>.json`，
 这里把它们合并进 README.md 中 `<!-- BUILD-TABLE:BEGIN -->` 与
-`<!-- BUILD-TABLE:END -->` 之间的表格。
+`<!-- BUILD-TABLE:END -->` 之间的表格，一个版本一行：
+
+    版本 | 小版本号 | 构建时间 | 译文时间 | 合并册 PDF | 全部分册包
 
 设计要点（都是踩过的坑）：
 
 ★ 只替换标记之间的内容，README 其它部分一个字不动 —— 人工编辑与自动更新
   才不会互相打架。
 ★ **合并**而不是重建：某个版本这轮没构建成功（没产出 info）时，保留表格里
-  它原来那一行，不要把它变成 `?`。表格是给人看的历史，不是本轮的快照。
+  它原来那一行（含那条直链），不要把它变成 `?`。表格是给人看的历史，
+  不是本轮的快照。
 ★ 3.10 固定不复写（已 EOL、release 已归档到 old 分支），保留一行占位。
 
-★★ **表格永远只有 `ORDER` 这几行，一行不多一行不少** ★★
+★★ 表格永远只有 `ORDER` 这几行，一行不多一行不少 ★★
   小版本号是**就地覆盖**的：3.15.2 → 3.15.3 那天，`| 3.15 |` 那行的第二列
   变成 3.15.3，**不会额外多出一行 3.15.2**。历史小版本的产物在 `old` 分支
   （`old/v3.15.2/`），README 里不留痕。
-  因此：表格里任何不在 `ORDER` 里的版本行（旧补丁版、试验性的 3.16 …）
-  每次都会被**丢掉**，并在日志里报出丢了哪几行 —— 这是有意为之，不是 bug。
+
+★ 直链的**文件名带日期**，所以每轮都要重新取，不能靠模板拼。取的是发布页上
+  真实存在的附件（GitHub API 读 release），不是本地推出来的名字 —— 某版本
+  这轮失败时它保留上次那一行，链接不会失效。
 
 用法：
     python3 ci/linux/update_readme_table.py <infos 目录> [README.md]
+
+环境变量：`GITHUB_REPOSITORY`（默认本仓库）、`GITHUB_TOKEN` / `GH_TOKEN`
+（CI 必带；本地可不带，走匿名额度 60 次/时）。
 """
 
 from __future__ import annotations
 
 import json
+import os
 import pathlib
 import re
 import sys
+import urllib.error
+import urllib.request
 
 BEGIN = "<!-- BUILD-TABLE:BEGIN -->"
 END = "<!-- BUILD-TABLE:END -->"
+
+REPO = os.environ.get("GITHUB_REPOSITORY") or "zhou-dev-design/python-doc-pdf-zh"
 
 #: 表格里出现的版本与顺序（3.10 是历史行，固定不复写）
 ORDER = ["3.10", "3.11", "3.12", "3.13", "3.14", "3.15"]
 
 #: 3.10 的固定行：它已 EOL，产物在 old 分支。
-#: 这两个时间**是真实值，不是占位**，只是永远不再变：
+#: 前两个时间是**真实值，不是占位**，只是永远不再变：
 #:   · PDF 构建时间 = 2026-11-03 那次构建（run #21）的 .po 时刻。
 #:     取「构建 Python 3.10」步骤开始 19:48:16，加约 6 秒 —— 3.10 的
 #:     步骤 1(4s)+2(1s)+3(1s) 合计 6s，所以 .po 落盘就在同一分钟。
@@ -47,12 +60,14 @@ ORDER = ["3.10", "3.11", "3.12", "3.13", "3.14", "3.15"]
 #:     2026-10-19T06:32:05Z → 北京 2026-10-19 14:32（EOL 后基本冻结）。
 #: 要改这一行只能改这里；README 里同名字符串会被本文件覆盖。
 PINNED = {
-    "3.10": "| 3.10 | 3.10.22 | 2026-11-03 19:48 | 2026-10-19 14:32 |",
+    "3.10": "| 3.10 | 3.10.22 | 2026-11-03 19:48 | 2026-10-19 14:32 "
+            "| 已归档（`old/v3.10.22/`） | — |",
 }
 
 HEAD = [
-    "| 版本 | 小版本号 | PDF 构建时间（北京时间） | 译文最后更新（北京时间） |",
-    "|-|-|-|-|",
+    "| 版本 | 小版本号 | PDF 构建时间（北京时间） | 译文最后更新（北京时间） "
+    "| 合并册 PDF | 全部分册包 |",
+    "|-|-|-|-|-|-|",
 ]
 
 ROW_RE = re.compile(r"^\|\s*(\d+\.\d+)\s*\|")
@@ -61,12 +76,16 @@ ROW_RE = re.compile(r"^\|\s*(\d+\.\d+)\s*\|")
 WIDE_RE = re.compile(r"^\|\s*(\d+(?:\.\d+)+)\s*\|")
 
 
+def cells(line: str) -> list[str]:
+    return [c.strip() for c in line.strip().strip("|").split("|")]
+
+
 def _patch_key(line: str) -> tuple[int, ...]:
     """从表格行里取出第二列的小版本号，作为可比较的元组。"""
-    cells = [c.strip() for c in line.strip().strip("|").split("|")]
-    if len(cells) < 2:
+    cs = cells(line)
+    if len(cs) < 2:
         return (0,)
-    nums = re.findall(r"\d+", cells[1])
+    nums = re.findall(r"\d+", cs[1])
     return tuple(int(x) for x in nums[:3]) or (0,)
 
 
@@ -96,6 +115,40 @@ def parse_existing(block: str) -> tuple[dict[str, str], list[str]]:
             # 看着像数据行，但版本不在名单里（旧补丁版 `3.14.9`、`3.16` …）
             dropped.append(s)
     return rows, dropped
+
+
+def fetch_assets(tag: str, token: str | None) -> list[dict] | None:
+    """读某个 tag 的 release 附件；读不到返回 None（调用方保留旧行）。"""
+    req = urllib.request.Request(
+        f"https://api.github.com/repos/{REPO}/releases/tags/{tag}",
+        headers={
+            "Accept": "application/vnd.github+json",
+            "User-Agent": "python-doc-pdf-zh-readme-updater",
+            **({"Authorization": f"Bearer {token}"} if token else {}),
+        },
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=20) as r:
+            return json.load(r).get("assets") or []
+    except urllib.error.HTTPError as e:
+        print(f"  读 {tag} 失败：HTTP {e.code}", file=sys.stderr)
+    except (urllib.error.URLError, OSError, ValueError) as e:
+        print(f"  读 {tag} 失败：{e}", file=sys.stderr)
+    return None
+
+
+def link_cell(asset: dict | None, label: str) -> str:
+    if not asset:
+        return "—"
+    mb = asset.get("size", 0) / 1048576
+    return f"[{label} · {mb:.1f} MB]({asset['browser_download_url']})"
+
+
+def link_cells(assets: list[dict]) -> tuple[str, str]:
+    pdf = next((a for a in assets if a["name"].lower().endswith(".pdf")), None)
+    arc = next((a for a in assets
+                if a["name"].lower().endswith((".rar", ".zip"))), None)
+    return link_cell(pdf, "PDF"), link_cell(arc, "RAR")
 
 
 def main() -> int:
@@ -133,21 +186,35 @@ def main() -> int:
             print(f"    - {d}")
 
     # ---------- 3. 拼表格（行集合严格等于 ORDER，顺序固定） ----------
+    token = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
     lines = list(HEAD)
     for v in ORDER:
         if v in PINNED:
             lines.append(PINNED[v])
             continue
         d = fresh.get(v)
-        if d:
-            full = str(d.get("full") or "?").strip()
-            po = str(d.get("po") or "—").strip()
-            zh = str(d.get("zh") or "—").strip()
-            lines.append(f"| {v} | {full} | {po} | {zh} |")
-        elif v in old_rows:
-            lines.append(old_rows[v])          # 本轮没构建 → 保留上次的
+        full = str(d.get("full") or "?").strip() if d else ""
+        if not d or not full or full == "?":
+            # 本轮没构建 → 整行（含直链）原样保留
+            lines.append(old_rows.get(v) or f"| {v} | ? | — | — | 待发布 | 待发布 |")
+            continue
+        po = str(d.get("po") or "—").strip()
+        zh = str(d.get("zh") or "—").strip()
+        assets = fetch_assets(f"v{full}", token)
+        if assets is None:
+            # API 读不到：只有「旧行本来就是这一版」才能沿用那两条直链，
+            # 否则会出现「行写着 3.15.3、链接指向 3.15.2 的文件」。
+            old = cells(old_rows.get(v, ""))
+            old_full = old[1] if len(old) >= 2 else ""
+            if len(old) >= 6 and old_full == full:
+                pdf_cell, arc_cell = old[-2], old[-1]
+            else:
+                pdf_cell, arc_cell = "待发布", "待发布"
         else:
-            lines.append(f"| {v} | ? | — | — |")
+            print(f"  {full}：{len(assets)} 个附件")
+            pdf_cell, arc_cell = link_cells(assets)
+        lines.append(f"| {v} | {full} | {po} | {zh} | {pdf_cell} | {arc_cell} |")
+
     # ★ 硬约束：表头 2 行 + 每个版本 1 行。多一行就说明有旧小版本漏进来了。
     expect = len(HEAD) + len(ORDER)
     if len(lines) != expect:

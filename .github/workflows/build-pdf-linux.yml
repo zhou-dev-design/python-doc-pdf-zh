@@ -996,6 +996,10 @@ jobs:
       - name: 更新 README 表格
         env:
           MATRIX: ${{ needs.prepare.outputs.matrix }}
+          # ★ 表格里那两条下载直链是读 release 真实附件得来的（文件名带日期，
+          #   每轮都得重取）。匿名额度只有 60 次/时、runner 出口 IP 共享 ⇒ 必 403；
+          #   带 token 是 5000 次/时。读不到时脚本会保留旧行，不让链接变空。
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -uo pipefail
           echo "拿到的 build-info："
