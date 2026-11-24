@@ -22,7 +22,7 @@ Linux 上跑，步骤 6 才能真的按核数提速。
 | `step8()` / `step9()` | 这两个入口不经过 `need_venv()`，得各自再登记一次 |
 | `_emit_makeindex_fix()` | 它生成的脚本写死 `CREATE_NO_WINDOW = 0x08000000`，而 `subprocess(creationflags=…)` 在 POSIX 上直接抛 `ValueError` → latexmk 在 makeindex 规则处中止，**每册只留第一遍**（目录空白、满屏 `??`、无索引），而 `<册>.log` 里一条错误都没有 |
 
-这三处平台差异的共同点：**按 Windows 的形状写死**。凡是「路径拼成 `Lib/`」
+这些覆盖点的共同点：**按 Windows 的形状写死**。凡是「路径拼成 `Lib/`」
 「常量只在一个平台存在」「可执行文件叫 `python`」，换平台就静默失效。
 
 ## 2. 本目录有什么
@@ -77,15 +77,21 @@ python3 ci/linux/pdf_builder_linux.py --versions 3.15 --print-config
 
 ```bash
 sudo apt-get install -y \
-  git curl ca-certificates \
-  latexmk texlive-xetex texlive-latex-extra texlive-binaries \
-  texlive-lang-chinese fonts-noto-cjk \
-  poppler-utils libcairo2
+  git curl ca-certificates latexmk \
+  texlive-xetex texlive-latex-extra texlive-latex-recommended \
+  texlive-binaries texlive-fonts-recommended texlive-lang-chinese \
+  lmodern fonts-freefont-otf fonts-dejavu fonts-liberation fonts-texgyre \
+  fonts-noto-cjk poppler-utils libcairo2
 ```
 
 - `texlive-lang-chinese` + `fonts-noto-cjk`：中文排版（xelatex 的字体）
+- `texlive-latex-recommended`：Sphinx 的 `.tex` 会 `\usepackage{cmap}`，缺了 xelatex **第一页就挂**，
+  而且要等 latexmk 才报（白等几分钟）
 - `poppler-utils`：`pdfinfo` / `pdffonts`（步骤 7b/8 核对要用）
 - `libcairo2`：3.13 起 Doc 里的 `.svg` 插图（cairosvg）
+- `lmodern` / `fonts-*`：官方版式用的那几套西文字体，缺了会静默换成别的字宽度
+
+这份列表与 workflow 里的 `PKGS` 是同一份（改一处记得改另一处）。
 
 需要 3.11 ~ 3.15 任意一个版本的解释器（Sphinx 用哪个版本编都行）。
 
@@ -104,8 +110,11 @@ sudo apt-get install -y \
   手动触发（不走队列）。取 :47 而不是整点：整点是 cron 洪峰，高负载时 scheduled run 会被
   延迟甚至**丢弃**；
 - `versions` 拆成 matrix，**五个版本同时起跑**（`max-parallel: 5`，每版一个独立 runner）；
-- 每步：装依赖 → `--preflight` → `selftest.py` → 构建 → 上传 artifact → 发布到 Releases；
-- 托管 runner 装 TeX Live 约 3~5 分钟，单版本整轮约 25~35 分钟（含排队与装包）。
+- 另有 `changelogs`（3.11–3.15 各一本完整更新日志 → tag `changelogs`，见
+  [`ci/changelogs/README.md`](../changelogs/README.md)）与 `archive-eol`（把 EOL 版本的 release
+  搬进 `old` 分支后删掉，幂等）；
+- 每个 build job：装依赖 → `--preflight` → `selftest.py` → 构建 → 上传 artifact → 发布到 Releases；
+- 托管 runner 装 TeX Live 约 3~5 分钟；**单版本 job 实测 10m18–23m42**（近 19 次，含装包）。
 
 ### 5.1 落点：产物进 Releases，分支只留三根
 

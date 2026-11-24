@@ -3,8 +3,8 @@
 > 把 **CPython 官方 reST 文档** + **python-docs-zh-cn 中文译文** 编译成**中文分册 PDF**。
 >
 > 本文讲**手工命令**（想自己跑一遍、或排查 CI 时对照）。
-> 日常构建走 GitHub Actions（计划北京 11:47，实测约 19:4x 出稿）或图形界面 ——
-> 见 [`README.md`](README.md) 与 [`sphinx-pdf/gui/README.md`](sphinx-pdf/gui/README.md)。
+> 日常构建走 GitHub Actions（计划 UTC 00:47 = 北京 08:47，实测 **14:52–18:51** 出稿、
+> 中位 16:03）或图形界面 —— 见 [`README.md`](README.md) 与 [`sphinx-pdf/gui/README.md`](sphinx-pdf/gui/README.md)。
 
 ---
 
@@ -31,7 +31,7 @@ CPython 的 Doc/（reST 源）
 |-|-|
 | Python | ≥ 3.11（Sphinx 用哪个版本编都行，但要能建 venv） |
 | git | 要克隆两个仓库 |
-| TeX 发行版 | 需含 `xelatex`、`latexmk`、`makeindex`、`pdfinfo`/`pdffonts`；**TeX Live 2022 以上** |
+| TeX 发行版 | 需含 `xelatex`、`latexmk`、`makeindex`、`pdfinfo`/`pdffonts`；**TeX Live 2023 以上**（官方与本项目 CI 都用 Ubuntu 24.04 的 apt 包，即 TL2023） |
 | 中文字体 | Windows 自带宋体/黑体即可；Linux 需 Noto CJK 或思源 |
 | 网络 | 装 Sphinx、`python-docs-theme`，以及克隆仓库 |
 
@@ -104,7 +104,7 @@ python -m venv venv
 
 | 版本 | 依赖来源 | 说明 |
 |-|-|-|
-| **3.10 / 3.11 / 3.12** | 用该分支自己的 `Doc/requirements.txt`（含 `-c constraints.txt`） | 官方 pin 得很死：3.10 = `sphinx==3.4.3`、3.11 = `~=7.2`、3.12 = `~=8.2` |
+| **3.10 / 3.11 / 3.12** | 用该分支自己的 `Doc/requirements.txt`（含 `-c constraints.txt`） | 官方 pin 得很死：3.10 = `sphinx==3.4.3`、3.11 = `~=7.2`、3.12 = `~=8.2`（3.10 已 EOL，仅作对照） |
 | 3.13 及以上 | 内置清单 `sphinx<9` + `python-docs-theme` + `pypdf` + `sphinxcontrib-svg2pdfconverter[CairoSVG]` | |
 
 **不要对所有版本一刀切装最新 Sphinx**：拿 Sphinx 8 去编 3.10 的 `Doc/tools/extensions/*.py`
