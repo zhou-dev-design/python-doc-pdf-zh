@@ -59,14 +59,17 @@ ORDER = ["3.10", "3.11", "3.12", "3.13", "3.14", "3.15"]
 #:   · 译文最后更新 = python-docs-zh-cn `3.10` 分支最后提交
 #:     2026-10-19T06:32:05Z → 北京 2026-10-19 14:32（EOL 后基本冻结）。
 #: 要改这一行只能改这里；README 里同名字符串会被本文件覆盖。
+#: 直链指向 `old` 分支（release 已删），`?raw=true` 让浏览器直接下载。
 PINNED = {
     "3.10": "| 3.10 | 3.10.22 | 2026-11-03 19:48 | 2026-10-19 14:32 "
-            "| 已归档（`old/v3.10.22/`） | — |",
+            "| [PDF · 36.9 MB](https://github.com/zhou-dev-design/python-doc-pdf-zh"
+            "/blob/old/v3.10.22/Python-3.10.22-docs-20261103.pdf?raw=true) "
+            "| [RAR · 49.8 MB](https://github.com/zhou-dev-design/python-doc-pdf-zh"
+            "/blob/old/v3.10.22/Python-3.10.22-docs-20261103.rar?raw=true) |",
 }
 
 HEAD = [
-    "| 版本 | 小版本号 | PDF 构建时间（北京时间） | 译文最后更新（北京时间） "
-    "| 合并册 PDF | 全部分册包 |",
+    "| 版本 | 小版本号 | PDF 构建时间 | 译文最后更新 | 合并册 PDF | 全部分册包 |",
     "|-|-|-|-|-|-|",
 ]
 

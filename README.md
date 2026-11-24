@@ -27,9 +27,9 @@ Sphinx + LaTeX 流程（主题、字体、分册结构与官方 3.13 一致）�
 ## 各版本现状与下载
 
 <!-- BUILD-TABLE:BEGIN -->
-| 版本 | 小版本号 | PDF 构建时间（北京时间） | 译文最后更新（北京时间） | 合并册 PDF | 全部分册包 |
+| 版本 | 小版本号 | PDF 构建时间 | 译文最后更新 | 合并册 PDF | 全部分册包 |
 |-|-|-|-|-|-|
-| 3.10 | 3.10.22 | 2026-11-03 19:48 | 2026-10-19 14:32 | 已归档（`old/v3.10.22/`） | — |
+| 3.10 | 3.10.22 | 2026-11-03 19:48 | 2026-10-19 14:32 | [PDF · 36.9 MB](https://github.com/zhou-dev-design/python-doc-pdf-zh/blob/old/v3.10.22/Python-3.10.22-docs-20261103.pdf?raw=true) | [RAR · 49.8 MB](https://github.com/zhou-dev-design/python-doc-pdf-zh/blob/old/v3.10.22/Python-3.10.22-docs-20261103.rar?raw=true) |
 | 3.11 | 3.11.18 | 2026-11-24 18:29 | 2026-11-08 20:37 | [PDF · 38.6 MB](https://github.com/zhou-dev-design/python-doc-pdf-zh/releases/download/v3.11.18/Python-3.11.18-docs-20261124.pdf) | [RAR · 51.3 MB](https://github.com/zhou-dev-design/python-doc-pdf-zh/releases/download/v3.11.18/Python-3.11.18-docs-20261124.rar) |
 | 3.12 | 3.12.16 | 2026-11-24 18:29 | 2026-11-08 12:45 | [PDF · 41.6 MB](https://github.com/zhou-dev-design/python-doc-pdf-zh/releases/download/v3.12.16/Python-3.12.16-docs-20261124.pdf) | [RAR · 56.4 MB](https://github.com/zhou-dev-design/python-doc-pdf-zh/releases/download/v3.12.16/Python-3.12.16-docs-20261124.rar) |
 | 3.13 | 3.13.18 | 2026-11-24 18:29 | 2026-11-08 12:57 | [PDF · 47.2 MB](https://github.com/zhou-dev-design/python-doc-pdf-zh/releases/download/v3.13.18/Python-3.13.18-docs-20261124.pdf) | [RAR · 65.7 MB](https://github.com/zhou-dev-design/python-doc-pdf-zh/releases/download/v3.13.18/Python-3.13.18-docs-20261124.rar) |
@@ -37,9 +37,9 @@ Sphinx + LaTeX 流程（主题、字体、分册结构与官方 3.13 一致）�
 | 3.15 | 3.15.2 | 2026-11-24 18:29 | 2026-11-24 14:31 | [PDF · 52.2 MB](https://github.com/zhou-dev-design/python-doc-pdf-zh/releases/download/v3.15.2/Python-3.15.2-docs-20261124.pdf) | [RAR · 72.5 MB](https://github.com/zhou-dev-design/python-doc-pdf-zh/releases/download/v3.15.2/Python-3.15.2-docs-20261124.rar) |
 <!-- BUILD-TABLE:END -->
 
-一个版本线一行、小版本号**就地覆盖**（3.15.2 → 3.15.3 改第二列，不多一行），旧补丁版进 `old`。
-**构建时间** = 拉取 `.po` 的时刻；**译文时间** = 译文分支最后一次提交。整张表由 CI 每天改写（手改会被
-覆盖）：本轮没构建成功的版本保留上一行，直链继续指向上次那份。
+表中时间均为**北京时间**。一个版本线一行、小版本号**就地覆盖**（3.15.2 → 3.15.3 改第二列，不多一行），
+旧补丁版进 `old`（3.10 已 EOL，附件也在那里、链接直接下）。**构建时间** = 拉取 `.po` 的时刻，
+**译文时间** = 译文分支最后一次提交。整张表由 CI 每天改写（手改会被覆盖）：本轮没构建成功的版本保留上一行（含直链）。
 
 ---
 
