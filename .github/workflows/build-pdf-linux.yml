@@ -1237,6 +1237,15 @@ jobs:
           path: in
           merge-multiple: true
 
+      # ★ 发布说明里的「页数」是 pdfinfo 读出来的。这个 job 只有 checkout + download，
+      #   没装 TeX 那一大串包 ⇒ ubuntu-24.04 上没有 pdfinfo，脚本会在生成说明时就抛
+      #   FileNotFoundError（2026-11-24 首次真正跑到发布分支时踩的）。
+      - name: 装 pdfinfo（发布说明要读每本的页数）
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq poppler-utils
+          pdfinfo -v 2>&1 | head -1
+
       - name: 建/改 release 并上传（先传后清，清的是「过期日期」而非本轮附件）
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -1245,7 +1254,7 @@ jobs:
           set -euo pipefail
           ls -l in 2>/dev/null || echo "（没有取到任何构建产物）"
           python3 - <<'PY'
-          import os, re, shutil, subprocess, sys, pathlib, datetime
+          import os, re, shutil, subprocess, sys, pathlib, datetime, types
 
           TAG = "changelogs"
           TITLE = "Python 完整更新日志（3.9–3.15）"
@@ -1257,8 +1266,15 @@ jobs:
           def sh(*cmd, check=True):
               # 显式 utf-8 + errors=replace：pdfinfo 在非 UTF-8 locale 下会输出本地编码，
               # 默认解码会在 reader 线程里抛 UnicodeDecodeError，把整个发布步骤带崩。
-              r = subprocess.run(cmd, capture_output=True, text=True,
-                                 encoding="utf-8", errors="replace")
+              # ★ 还要兜 FileNotFoundError：`check=False` 只放行非零返回码，工具压根
+              #   没装时 subprocess 直接抛异常 —— 发布绝不能因为「读不到页数」而失败。
+              try:
+                  r = subprocess.run(cmd, capture_output=True, text=True,
+                                     encoding="utf-8", errors="replace")
+              except FileNotFoundError:
+                  print("::warning::找不到命令 %s，按「取不到」处理" % cmd[0])
+                  return types.SimpleNamespace(returncode=127, stdout="",
+                                               stderr="%s: not found" % cmd[0])
               if check and r.returncode != 0:
                   sys.exit("命令失败：%s\n%s\n%s" % (" ".join(cmd), r.stdout[-2000:], r.stderr[-2000:]))
               return r
@@ -1274,9 +1290,12 @@ jobs:
                           if (m := re.match(r"^Python-(3\.\d+)-changelog-\d{8}\.pdf$", n))})
           print("本轮附件 %d 个；今天构建成功：%s" % (len(expected), ", ".join(built) or "无"))
           if not built:
-              # 一个都没编出来：不建 release、也不动已有附件（保住上一版）
-              print("::warning::本轮没有任何版本构建成功，release 保持原样")
-              sys.exit(0)
+              # 一个都没编出来：不建 release、也不动已有附件（保住上一版）。
+              # 但「release 压根不存在」时不能报绿 —— 那就是「绿着啥也没有」。
+              if sh("gh", "release", "view", TAG, check=False).returncode == 0:
+                  print("::warning::本轮没有任何版本构建成功，release 保持原样")
+                  sys.exit(0)
+              sys.exit("::error::本轮没有任何版本构建成功，且 release %s 还不存在" % TAG)
 
           # ---------- 2) 说明文字（页数用 pdfinfo 读，不手写）----------
           def pages(p):
