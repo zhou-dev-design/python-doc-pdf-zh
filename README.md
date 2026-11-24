@@ -13,7 +13,7 @@
 | 出稿 | **每天北京时间 14:50–19:00**，中位 16:03（近 19 次；63% 落在 15:30–16:30） |
 | 单版本耗时 | **约 18 分钟**（近 19 次 10m18–23m42，不含排队） |
 | 产物 | 每版本 **2 个附件**：合并册 PDF + 全部分册 RAR |
-| 落点 | **Releases**，tag = `v<完整版本>`（如 `v3.15.2`），同版本重跑原地更新 |
+| 落点 | **[Releases](https://github.com/zhou-dev-design/python-doc-pdf-zh/releases)**，tag = `v<完整版本>`（如 `v3.15.2`），同版本重跑原地更新 |
 | 历史 | **`old` 分支**：EOL 版本与被补丁版顶下来的旧版，按 tag 存目录 |
 | 入口 | CI `ci/linux/pdf_builder_linux.py`；本机 `sphinx-pdf/gui/pdf_builder_multi.py` |
 
