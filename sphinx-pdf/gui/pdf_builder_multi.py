@@ -3292,6 +3292,57 @@ def setup(app):
             tex.write_text(new, encoding="utf-8")
         return ntab, ncol
 
+    def _fix_horizontal_overflow(self, tex: Path) -> int:
+        """给「TeX 不会主动折断」的几类长内容补显式断点（PYPDF_HFIX_V1）。
+
+        2026-11-25 那批 PDF 里剩下的越界没有一张是表格，全是三类固定来源：
+
+        ① productionlist（语法产生式）里的裸文本行。Sphinx 给它套了
+           `\\obeylines` + `\\@vobeyspaces`，词间空格是 active character、**不是**
+           断行点；行超出版心几十 pt 时 TeX 只会报 Overfull \\hbox 照样画出去
+           （`xid_continue`、`Nd>` 都是这么越的）。给长行的词间空格后插
+           `\\allowbreak`，TeX 就有得选了。实测 builtins 从 2 处越界降到 0。
+           注意**不能**靠 `\\tolerance=1`：实测全局设了也完全无效。
+        ② 长表的「续下页」标记：`\\multicolumn{N}{r}{...\\makebox[0pt][r]{...}}`
+           是 Sphinx 故意让标记顶到表格右边界外（零宽盒子），会压进右边距
+           5.8pt。改成 l 对齐即可，表体位置一点不动。
+        ③ inline code 的超长 token：`\\sphinxupquote` 已经由
+           PYPDF_LINEBREAK_V2 按 5 位插 `\\allowbreak`，本机实测能折；这里不
+           重复插，免得和宏里的替换叠成密集断点。
+
+        幂等：改写后在文件头加 `% PYPDF_HFIX_V1`，重复跑直接跳过。返回 1 表示改过。
+        """
+        text = read_text_safe(tex)
+        if not text or "% PYPDF_HFIX_V1" in text[:200]:
+            return 0
+        orig = text
+
+        def _prod(m: re.Match) -> str:
+            lines = []
+            for line in m.group(1).split("\n"):
+                if len(line) > 75:
+                    line = re.sub(r"(?<=\S) (?=\S)", r" \\allowbreak ", line)
+                lines.append(line)
+            return "\\begin{productionlist}" + "\n".join(lines) + "\\end{productionlist}"
+
+        text = re.sub(r"\\begin\{productionlist\}(.*?)\\end\{productionlist\}",
+                      _prod, text, flags=re.S)
+
+        lines = text.split("\n")
+        for i, line in enumerate(lines):
+            if "\\sphinxtablecontinued{续下页}" not in line:
+                continue
+            for j in range(i - 1, max(i - 4, 0), -1):
+                if "\\multicolumn" in lines[j]:
+                    lines[j] = lines[j].replace("}{r}{", "}{l}{")
+                    break
+        text = "\n".join(lines)
+
+        if text != orig:
+            tex.write_text("% PYPDF_HFIX_V1\n" + text, encoding="utf-8")
+            return 1
+        return 0
+
     def _run_book_tex(self, tex: Path, latex: Path, logf: Path,
                       append: bool = False) -> int:
         """在工作线程里跑一册的 latexmk；整份输出写进 `logf`，返回退出码。
@@ -3464,14 +3515,18 @@ def setup(app):
         #   longtable 会把实测列宽写进 .aux 并在下一遍比对；如果列宽是 `\X{a}{b}`
         #   现算的，每遍都能差零点几 pt ⇒ 永远 "Table widths have changed" ⇒
         #   latexmk 退 12、PDF 停在第一遍（2026-11-19 事故根因）。
-        n_tab = n_col = 0
+        n_tab = n_col = n_hfix = 0
         for tex in roots:
             t, c = self._freeze_longtable_widths(tex)
             n_tab += t
             n_col += c
+            n_hfix += self._fix_horizontal_overflow(tex)
         if n_tab:
             self.rep.log(f"长表列宽已冻结：{n_tab} 张表 / {n_col} 列"
                          "（p{} 拿字面量，长表才能跨页且多遍收敛）", level="ok")
+        if n_hfix:
+            self.rep.log(f"横向溢出补丁：{n_hfix} 册（productionlist 加断点 + "
+                         "续下页改左对齐）", level="ok")
 
         # ★ 分节日志**先留空**：`_run_book_tex()` 会把每册的原始输出发给界面，
         #   而 `_TeeReporter` 会顺手把界面消息也写进「当前分节日志」—— 并发时几册

@@ -446,6 +446,32 @@ latex_elements['preamble'] = latex_elements.get('preamble', '') + r'''
 \\setCJKmonofont{FandolFang-Regular.otf}
 \\setcounter{tocdepth}{%d}
 '''
+# 更新日志里有 40+ 字母的 C 函数名（PyErr_SetExcFrom...Filename()）。Sphinx 默认
+# 只在 . , ; ? ! / \\ 处给 inline code 断点，下划线不在其中 ⇒ longtable / 正文里
+# 都断不开、直接出纸（3.11 p118 实测超纸边 4.52pt）。这里和主构建器用同一套
+# 断行补丁：下划线后给断点，连续字母数字每 5 位再给一个。
+latex_elements['preamble'] += r'''
+\\ExplSyntaxOn
+\\cs_new_protected:Npn \\pypdf_breaklong:n #1
+  {
+    \\tl_set:Nn \\l_tmpa_tl {#1}
+    \\regex_replace_all:nnN { ([A-Za-z0-9]{5}) }
+      { \\1 \\c{allowbreak} } \\l_tmpa_tl
+    \\tl_use:N \\l_tmpa_tl
+  }
+\\cs_set_eq:NN \\pypdfbreaklong \\pypdf_breaklong:n
+\\ExplSyntaxOff
+\\makeatletter
+\\let\\spx@pypdf@sphinxcode\\sphinxcode
+\\protected\\def\\sphinxcode#1{{%%
+  \\def\\_{\\char95\\allowbreak}%%
+  \\spx@pypdf@sphinxcode{\\pypdfbreaklong{#1}}}}%%
+\\let\\spx@pypdf@sphinxupquote\\sphinxupquote
+\\protected\\def\\sphinxupquote#1{{%%
+  \\def\\_{\\char95\\allowbreak}%%
+  \\spx@pypdf@sphinxupquote{\\pypdfbreaklong{#1}}}}%%
+\\makeatother
+'''
 """ % (version, unused, title, TOC_DEPTH - 1)
     p.write_text(s.rstrip() + "\n" + override, encoding="utf-8")
     log("conf.py 副本已覆盖（来源 cpython@%s，排除 %d 个未使用 whatsnew 文档）"
