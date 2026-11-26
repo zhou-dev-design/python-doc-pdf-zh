@@ -3343,48 +3343,64 @@ def setup(app):
             return 1
         return 0
 
-    #: ★ 精确白名单：只认这一个值（float 0.1 的精确十进制展开）。
-    #: 之前用的是 `\\d{20,}`，在完整 tex 里会匹配 41 种、67 处 —— 2^64、阶乘、
-    #: 其他 Decimal 示例的大整数全被插了断点。它们虽然不会改变可见字符，
-    #: 但没有任何越界证据，属于「改了不该改的」。现在只认这一串。
-    #: 数字部分 55 位（`0.` 之后），前面允许有没有 `0.` 两种写法（inline code
-    #: 与 verbatim 里都可能）；`(?!\\d)` 防止把一个更长数字从中间切开。
-    LONGNUM_RE = re.compile(r"(?<!\d)(1000000000000000055511151231257827021181583404541015625)(?!\d)")
+    #: ★ 目标：float 0.1 的精确十进制展开。完整 tex 里共 9 处（inline code、
+    #: 4 段 verbatim 输出、教程 15.1 的正文），**只有正文那一处**越出版心 ——
+    #: 前面的中文占 266pt 把起点推到 302.8pt，数字自己 291.4pt，494.6+ 就到
+    #: 594.2，而版心右界只有 559.3。
+    LONGNUM = "0.1000000000000000055511151231257827021181583404541015625"
+
+    #: 只认「十进制数值 … 这一串 … 。」这一个上下文（教程 15.1：
+    #: "这意味着存储在计算机中的确切数字等于十进制数值 0.1000…。 许多语言…"）。
+    #: `\\s*` 容错数字前是普通空格 / 全角空格 / 换行；`(?=[。.])` 认中文句号。
+    #: 不单认数字本身 —— 那样会命中另外 8 处，那些都在 literal 环境里自己换行。
+    LONGNUM_PARA_RE = re.compile(r"(十进制数值)\s*(" + re.escape(LONGNUM) + r")(?=[。.])")
+
+    #: 撤旧补丁用：V1/V2 曾往这串数字内部塞 `\\allowbreak`，把 55 位劈成
+    #: 每 6 位一段。这里把断点全剥掉，还原成一整串。
+    _NUMBRK_RE = re.compile(r"0\.(?:\d|\\allowbreak){50,}")
 
     def _fix_long_numbers(self, tex: Path) -> int:
-        """只给 float 0.1 那串精确值插断点（PYPDF_NUMBRK_V2）。
+        """让 0.1 的精确值在正文里**独占一行**（PYPDF_NUMLINE_V1）。
 
-        为什么单独做一层：conf.py 的 `PYPDF_LINEBREAK_V2` 用 `\\pypdfbreaklong`
-        （l3regex）给 `\\sphinxupquote` 的参数按 5 位插 `\\allowbreak`。本机 TL2025
-        上有效，但 CI 的 TL2023 上这串数字照样画到 xMax 594.21（版心 559.29）
-        —— 宏那层在旧引擎上没兜住。这里在 .tex 层面直接写死断点，不依赖任何
-        LaTeX 宏，任何 TeX 版本都生效。
+        换行落在「十进制数值」之后、数字之前：前半句中文 266pt、数字 291.4pt，
+        各自都在 488pt 的版心里；原先两者挤在同一行才是 594pt 的成因。
 
-        实测（190pt 窄版心）：无断点时整段冲出版心；每 6 位插 `\\allowbreak`
-        后折成两行，`\\sphinxupquote` 与 `\\PYG` 两种包裹都能折。
+        ★ 为什么不再往数字内部插断点（V1 宽正则、V2 精确白名单，两版都已撤回）：
+        ① 55 位被劈成 `100000\\allowbreak000000…` 后读起来是一个数被切成两截，
+        比整行换行难看；② CI 的 TL2023 上那些断点并没兜住，xMax 仍是 594.21；
+        ③ 断点落进 `\\sphinxcode` / `\\detokenize` 一类参数里还有被吃掉的风险。
+        整行换行只用 TeX 原语 `\\\\`，不依赖宏包与引擎版本，也不改动数字本身
+        任何一个字符 —— 复制出来仍是完整的一串。
 
-        ★ 范围严格收窄到这一串精确值：完整 tex 里出现 9 次，全部是可见文本
-        （inline code / verbatim / 正文），没有一次在 `\\detokenize` label、
-        anchor 或文件名里。其他长数字（2^64、阶乘、别的 Decimal 示例）一律不动。
+        ★ 精确匹配：只认上面那**一个上下文**，其余 8 处（inline code 与 verbatim
+        输出）一律不碰。失配时会 warn：这条补丁一旦静默失效，PDF 上就会重新
+        出现 594pt 那行，不能让它无声失败。
+
         按文件头标记幂等。返回 1 表示改过。
         """
         text = read_text_safe(tex)
-        if not text or "% PYPDF_NUMBRK_V2" in text[:300]:
+        if not text or "% PYPDF_NUMLINE_V1" in text[:300]:
             return 0
-        # 旧版（V1 宽正则）注入过就先剥掉标记：断点已经在文件里、不再重插。
-        # 重新生成 .tex 的 CI 不会遇到这种情况，这里只是让本机重跑幂等。
-        if "% PYPDF_NUMBRK_V1" in text[:300]:
-            text = text.replace("% PYPDF_NUMBRK_V1\n", "", 1)
 
-        def _brk(m: re.Match) -> str:
-            d = m.group(1)
-            return r"\allowbreak".join(d[i:i + 6] for i in range(0, len(d), 6))
+        # 撤前两版补丁留下的痕迹（只有本机重跑旧 .tex 才会遇到，CI 每次新生成）。
+        for tag in ("% PYPDF_NUMBRK_V1\n", "% PYPDF_NUMBRK_V2\n"):
+            if tag in text[:300]:
+                text = text.replace(tag, "", 1)
+        text = self._NUMBRK_RE.sub(
+            lambda m: m.group(0).replace("\\allowbreak", ""), text)
 
-        new = self.LONGNUM_RE.sub(_brk, text)
-        if new != text:
-            tex.write_text("% PYPDF_NUMBRK_V2\n" + new, encoding="utf-8")
-            return 1
-        return 0
+        new, n = self.LONGNUM_PARA_RE.subn(
+            lambda m: m.group(1) + "\\\\" + "\n" + m.group(2), text)
+        if not n:
+            # 只有「这句话在、但格式对不上」才值得报警；其他册只引用了
+            # literal 版的同一串数字（教程 15.1 之外的 8 处），本来就不该动。
+            if "十进制数值" in text and self.LONGNUM in text:
+                self.rep.log(f"{tex.name}：找到「十进制数值 …」这句，但没匹配到"
+                             "那一串精确值，独占一行的补丁没打上",
+                             level="warn")
+            return 0
+        tex.write_text("% PYPDF_NUMLINE_V1\n" + new, encoding="utf-8")
+        return 1
 
     def _run_book_tex(self, tex: Path, latex: Path, logf: Path,
                       append: bool = False) -> int:
@@ -3572,8 +3588,8 @@ def setup(app):
             self.rep.log(f"横向溢出补丁：{n_hfix} 册（productionlist 加断点 + "
                          "续下页改左对齐）", level="ok")
         if n_num:
-            self.rep.log(f"长数字断点：{n_num} 册（≥20 位数字每 6 位插 \\allowbreak，"
-                         "兜住 CI 上 l3regex 不生效的 46 位小数）", level="ok")
+            self.rep.log(f"长数字独占一行：{n_num} 册（0.1 的精确值前强制换行，"
+                         "数字内部不再打断）", level="ok")
 
         # ★ 分节日志**先留空**：`_run_book_tex()` 会把每册的原始输出发给界面，
         #   而 `_TeeReporter` 会顺手把界面消息也写进「当前分节日志」—— 并发时几册
