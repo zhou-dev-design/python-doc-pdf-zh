@@ -3343,6 +3343,39 @@ def setup(app):
             return 1
         return 0
 
+    #: 20 位以上的纯数字串：46 位浮点精确值等。前面不能是 `\`（跳过 \PYGZ 之类
+    #: 控制序列），前后也不能再接数字（避免把一个更长的串从中间切开）。
+    LONGNUM_RE = re.compile(r"(?<!\\)(?<!\d)(\d{20,})(?!\d)")
+
+    def _fix_long_numbers(self, tex: Path) -> int:
+        """给超长数字串在 .tex 文本层插断点（PYPDF_NUMBRK_V1）。
+
+        为什么单独做一层：conf.py 的 `PYPDF_LINEBREAK_V2` 用 `\\pypdfbreaklong`
+        （l3regex）给 `\\sphinxupquote` 的参数按 5 位插 `\\allowbreak`。本机 TL2025
+        上有效，但 CI 的 TL2023 上那 46 位小数照样画到 xMax 594.21（版心 559.29）
+        —— 宏那层在旧引擎上没兜住。这里在 .tex 层面直接写死断点，不依赖任何
+        LaTeX 宏，任何 TeX 版本都生效。
+
+        实测（190pt 窄版心）：无断点时 55 位小数整段冲出版心；每 6 位插
+        `\\allowbreak` 后折成两行，书签与页码不受影响。
+
+        只动 ≥20 位的纯数字串：普通页码、版本号、hash 都不够长；anchor label
+        是短 hash，也不会被碰到。按文件头标记幂等。返回 1 表示改过。
+        """
+        text = read_text_safe(tex)
+        if not text or "% PYPDF_NUMBRK_V1" in text[:300]:
+            return 0
+
+        def _brk(m: re.Match) -> str:
+            d = m.group(1)
+            return r"\allowbreak".join(d[i:i + 6] for i in range(0, len(d), 6))
+
+        new = self.LONGNUM_RE.sub(_brk, text)
+        if new != text:
+            tex.write_text("% PYPDF_NUMBRK_V1\n" + new, encoding="utf-8")
+            return 1
+        return 0
+
     def _run_book_tex(self, tex: Path, latex: Path, logf: Path,
                       append: bool = False) -> int:
         """在工作线程里跑一册的 latexmk；整份输出写进 `logf`，返回退出码。
@@ -3515,18 +3548,22 @@ def setup(app):
         #   longtable 会把实测列宽写进 .aux 并在下一遍比对；如果列宽是 `\X{a}{b}`
         #   现算的，每遍都能差零点几 pt ⇒ 永远 "Table widths have changed" ⇒
         #   latexmk 退 12、PDF 停在第一遍（2026-11-19 事故根因）。
-        n_tab = n_col = n_hfix = 0
+        n_tab = n_col = n_hfix = n_num = 0
         for tex in roots:
             t, c = self._freeze_longtable_widths(tex)
             n_tab += t
             n_col += c
             n_hfix += self._fix_horizontal_overflow(tex)
+            n_num += self._fix_long_numbers(tex)
         if n_tab:
             self.rep.log(f"长表列宽已冻结：{n_tab} 张表 / {n_col} 列"
                          "（p{} 拿字面量，长表才能跨页且多遍收敛）", level="ok")
         if n_hfix:
             self.rep.log(f"横向溢出补丁：{n_hfix} 册（productionlist 加断点 + "
                          "续下页改左对齐）", level="ok")
+        if n_num:
+            self.rep.log(f"长数字断点：{n_num} 册（≥20 位数字每 6 位插 \\allowbreak，"
+                         "兜住 CI 上 l3regex 不生效的 46 位小数）", level="ok")
 
         # ★ 分节日志**先留空**：`_run_book_tex()` 会把每册的原始输出发给界面，
         #   而 `_TeeReporter` 会顺手把界面消息也写进「当前分节日志」—— 并发时几册
