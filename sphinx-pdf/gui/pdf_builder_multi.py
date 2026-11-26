@@ -3343,28 +3343,38 @@ def setup(app):
             return 1
         return 0
 
-    #: 20 位以上的纯数字串：46 位浮点精确值等。前面不能是 `\`（跳过 \PYGZ 之类
-    #: 控制序列），前后也不能再接数字（避免把一个更长的串从中间切开）。
-    LONGNUM_RE = re.compile(r"(?<!\\)(?<!\d)(\d{20,})(?!\d)")
+    #: ★ 精确白名单：只认这一个值（float 0.1 的精确十进制展开）。
+    #: 之前用的是 `\\d{20,}`，在完整 tex 里会匹配 41 种、67 处 —— 2^64、阶乘、
+    #: 其他 Decimal 示例的大整数全被插了断点。它们虽然不会改变可见字符，
+    #: 但没有任何越界证据，属于「改了不该改的」。现在只认这一串。
+    #: 数字部分 55 位（`0.` 之后），前面允许有没有 `0.` 两种写法（inline code
+    #: 与 verbatim 里都可能）；`(?!\\d)` 防止把一个更长数字从中间切开。
+    LONGNUM_RE = re.compile(r"(?<!\d)(1000000000000000055511151231257827021181583404541015625)(?!\d)")
 
     def _fix_long_numbers(self, tex: Path) -> int:
-        """给超长数字串在 .tex 文本层插断点（PYPDF_NUMBRK_V1）。
+        """只给 float 0.1 那串精确值插断点（PYPDF_NUMBRK_V2）。
 
         为什么单独做一层：conf.py 的 `PYPDF_LINEBREAK_V2` 用 `\\pypdfbreaklong`
         （l3regex）给 `\\sphinxupquote` 的参数按 5 位插 `\\allowbreak`。本机 TL2025
-        上有效，但 CI 的 TL2023 上那 46 位小数照样画到 xMax 594.21（版心 559.29）
+        上有效，但 CI 的 TL2023 上这串数字照样画到 xMax 594.21（版心 559.29）
         —— 宏那层在旧引擎上没兜住。这里在 .tex 层面直接写死断点，不依赖任何
         LaTeX 宏，任何 TeX 版本都生效。
 
-        实测（190pt 窄版心）：无断点时 55 位小数整段冲出版心；每 6 位插
-        `\\allowbreak` 后折成两行，书签与页码不受影响。
+        实测（190pt 窄版心）：无断点时整段冲出版心；每 6 位插 `\\allowbreak`
+        后折成两行，`\\sphinxupquote` 与 `\\PYG` 两种包裹都能折。
 
-        只动 ≥20 位的纯数字串：普通页码、版本号、hash 都不够长；anchor label
-        是短 hash，也不会被碰到。按文件头标记幂等。返回 1 表示改过。
+        ★ 范围严格收窄到这一串精确值：完整 tex 里出现 9 次，全部是可见文本
+        （inline code / verbatim / 正文），没有一次在 `\\detokenize` label、
+        anchor 或文件名里。其他长数字（2^64、阶乘、别的 Decimal 示例）一律不动。
+        按文件头标记幂等。返回 1 表示改过。
         """
         text = read_text_safe(tex)
-        if not text or "% PYPDF_NUMBRK_V1" in text[:300]:
+        if not text or "% PYPDF_NUMBRK_V2" in text[:300]:
             return 0
+        # 旧版（V1 宽正则）注入过就先剥掉标记：断点已经在文件里、不再重插。
+        # 重新生成 .tex 的 CI 不会遇到这种情况，这里只是让本机重跑幂等。
+        if "% PYPDF_NUMBRK_V1" in text[:300]:
+            text = text.replace("% PYPDF_NUMBRK_V1\n", "", 1)
 
         def _brk(m: re.Match) -> str:
             d = m.group(1)
@@ -3372,7 +3382,7 @@ def setup(app):
 
         new = self.LONGNUM_RE.sub(_brk, text)
         if new != text:
-            tex.write_text("% PYPDF_NUMBRK_V1\n" + new, encoding="utf-8")
+            tex.write_text("% PYPDF_NUMBRK_V2\n" + new, encoding="utf-8")
             return 1
         return 0
 
